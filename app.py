@@ -140,14 +140,21 @@ model.V_S = Var(S_MATERIALS, S_TIME, domain=NonNegativeReals)
 # Q[j,n] is the inventory of unit j in time n.
 model.V_Q = Var(S_UNITS, S_TIME, domain=NonNegativeReals)
 
-
-
-
 ######################################
 #               Constraint           #
 ######################################
 
 model.cons = ConstraintList()
+
+def task_unit_assignment(model, j, n):
+    #return sum(model.V_X[i,j,tprime] for i in S_I[j] for tprime in S_TIME if (tprime >= (n-p[i]+1) and tprime <= n)) <= 1    
+    return sum(model.V_X[i,j,n] for i in S_I[j]) <= 1 
+
+def track_start_end_batch_task(model, i, j, n):
+    if n >= 1:
+        return model.V_Y_Start[i,j,n] == model.V_X[i,j,n] - model.V_X[i,j,n-1] + model.V_Y_End[i,j,n]
+    else:
+        return Constraint.Skip
 
 def unit_capacity_lb(model, i, j, n):
     if (j,i) in UNIT_TASKS.keys():
@@ -161,10 +168,6 @@ def unit_capacity_ub(model, i, j, n):
     else:
         return Constraint.Skip
 
-def task_unit_assignment(model, j, n):
-    #return sum(model.V_X[i,j,tprime] for i in S_I[j] for tprime in S_TIME if (tprime >= (n-p[i]+1) and tprime <= n)) <= 1    
-    return sum(model.V_X[i,j,n] for i in S_I[j]) <= 1    
-
 def material_capacity(model, s, n):
     return model.V_S[s,n] <= P_Chi[s]
 
@@ -175,11 +178,17 @@ def unit_mass_balance(model, j, n):
         return Constraint.Skip
 
 def material_mass_balance(model, k, n):
-    if n == 0:
-        return model.V_S[k,n] == STATES[k]['initial'] + sum(P_rho_PLUS[i,k]*model.V_B[i,j,max(S_TIME[S_TIME <= n-P_P[i,k]])] for i in S_I_PLUS[k] for j in S_J[i] if n >= P_P[i,k]) - sum(P_rho_MINUS[i,k]*model.V_B[i,j,n] for i in S_I_MINUS[k] for j in S_J[i])
+    #if n == 0:
+    #    return model.V_S[k,n] == STATES[k]['initial'] + sum(P_rho_PLUS[i,k]*model.V_B[i,j,max(S_TIME[S_TIME <= n-P_P[i,k]])] for i in S_I_PLUS[k] for j in S_J[i] if n >= P_P[i,k]) - sum(P_rho_MINUS[i,k]*model.V_B[i,j,n] for i in S_I_MINUS[k] for j in S_J[i])
+    #else:
+    #    return model.V_S[k,n] == model.V_S[k,n-1] + sum(P_rho_PLUS[i,k]*model.V_B[i,j,max(S_TIME[S_TIME <= n-P_P[i,k]])] for i in S_I_PLUS[k] for j in S_J[i] if n >= P_P[i,k]) - sum(P_rho_MINUS[i,k]*model.V_B[i,j,n] for i in S_I_MINUS[k] for j in S_J[i])
+    if n == 1:
+        return model.V_S[k,n+1] == STATES[k]['initial'] + sum(P_rho_PLUS[i,k]*model.V_B[i,j,n-1] for i in S_I_PLUS[k] for j in S_J[i]) - sum(P_rho_MINUS[i,k]*model.V_B[i,j,n] for i in S_I_MINUS[k] for j in S_J[i])
+    elif (n > 1 and n < H):
+        return model.V_S[k,n+1] == model.V_S[k,n] + sum(P_rho_PLUS[i,k]*model.V_B[i,j,n-1] for i in S_I_PLUS[k] for j in S_J[i]) - sum(P_rho_MINUS[i,k]*model.V_B[i,j,n] for i in S_I_MINUS[k] for j in S_J[i])
     else:
-        return model.V_S[k,n] == model.V_S[k,n-1] + sum(P_rho_PLUS[i,k]*model.V_B[i,j,max(S_TIME[S_TIME <= n-P_P[i,k]])] for i in S_I_PLUS[k] for j in S_J[i] if n >= P_P[i,k]) - sum(P_rho_MINUS[i,k]*model.V_B[i,j,n] for i in S_I_MINUS[k] for j in S_J[i])
-    
+        return Constraint.Skip
+         
 def unit_end_horizon(model, j):
     return model.V_Q[j,H] == 0
 
@@ -187,9 +196,10 @@ def objective(model):
     return (sum(STATES[s]['price']*model.V_S[s,H] for s in STATES) 
             - sum(UNIT_TASKS[(j,i)]['Cost']*model.V_X[i,j,n] + UNIT_TASKS[(j,i)]['vCost']*model.V_B[i,j,n] for i in S_TASKS for j in S_J[i] for n in S_TIME))
 
+model.C_Task_Unit_Assignment = Constraint(S_UNITS, S_TIME, rule = task_unit_assignment)
+model.C_Track_Start_End_Batch_Task = Constraint(S_TASKS, S_UNITS, S_TIME, rule = track_start_end_batch_task)
 model.C_Unit_Capacity_LB = Constraint(S_TASKS, S_UNITS, S_TIME, rule = unit_capacity_lb)
 model.C_Unit_Capacity_UB = Constraint(S_TASKS, S_UNITS, S_TIME, rule = unit_capacity_ub)
-model.C_Task_Unit_Assignment = Constraint(S_UNITS, S_TIME, rule = task_unit_assignment)
 model.C_Material_Storage_Limit = Constraint(S_MATERIALS, S_TIME, rule = material_capacity)
 model.C_Unit_Mass_Balance = Constraint(S_UNITS, S_TIME, rule = unit_mass_balance)
 model.C_Material_Mass_Balance = Constraint(S_MATERIALS, S_TIME, rule = material_mass_balance)
@@ -201,6 +211,8 @@ SolverFactory('appsi_highs').solve(model).write()
 
 # show all of V_X
 model.V_X.display()
+model.V_Y_Start.display()
+model.V_Y_End.display()
 
 # iterate through and show values
 #print()
