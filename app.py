@@ -10,7 +10,7 @@ import os.path
 from pyomo.environ import *
 
 
-H = 16
+H = 5
 
 Network = {
     # time grid
@@ -123,7 +123,13 @@ S_MATERIALS = set([k for k in STATES.keys()])
 model = ConcreteModel()
 
 # V_X[i,j,n] = 1 if unit j processes (sub)task i at time point n.
-model.V_X = Var(S_TASKS, S_UNITS, S_TIME, domain=Boolean)
+model.V_X = Var(S_TASKS, S_UNITS, S_TIME, domain = Boolean)
+
+# V_Y_End[i,j,n] = 1 if a run of a continuous task in unit j ends at time point n.
+model.V_Y_End = Var(S_TASKS, S_UNITS, S_TIME, domain = Boolean)
+
+# V_Y_Start[i,j,n] = 1 if a run of a continuous task in unit j starts at time point n.
+model.V_Y_Start = Var(S_TASKS, S_UNITS, S_TIME, domain = Boolean)
 
 # V_B[i,j,n] is the batch size assigned to task i in unit j at time n.
 model.V_B = Var(S_TASKS, S_UNITS, S_TIME, domain=NonNegativeReals)
@@ -133,6 +139,9 @@ model.V_S = Var(S_MATERIALS, S_TIME, domain=NonNegativeReals)
 
 # Q[j,n] is the inventory of unit j in time n.
 model.V_Q = Var(S_UNITS, S_TIME, domain=NonNegativeReals)
+
+
+
 
 ######################################
 #               Constraint           #
@@ -153,7 +162,8 @@ def unit_capacity_ub(model, i, j, n):
         return Constraint.Skip
 
 def task_unit_assignment(model, j, n):
-    return sum(model.V_X[i,j,tprime] for i in S_I[j] for tprime in S_TIME if (tprime >= (n-p[i]+1) and tprime <= n)) <= 1    
+    #return sum(model.V_X[i,j,tprime] for i in S_I[j] for tprime in S_TIME if (tprime >= (n-p[i]+1) and tprime <= n)) <= 1    
+    return sum(model.V_X[i,j,n] for i in S_I[j]) <= 1    
 
 def material_capacity(model, s, n):
     return model.V_S[s,n] <= P_Chi[s]
