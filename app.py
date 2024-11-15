@@ -1,3 +1,9 @@
+##########################################################
+#
+#
+#
+#
+##########################################################
 import matplotlib.pyplot as plt 
 import numpy as np 
 import pandas as pd 
@@ -36,6 +42,8 @@ Network = {
     'UNIT_TASKS': {
         ('U1', 'T1') : {'tau_min': 3, 'tau_max': 5, 'Bmin': 10, 'Bmax': 10, 'Cost': 0, 'vCost': 0},
     },
+
+    
 }
 
 STN = Network
@@ -79,10 +87,28 @@ p = {i: max([ P_P[i,k] for k in S_K_PLUS[i]]) for i in S_TASKS}
 P_Tau_Min = {(i,j): UNIT_TASKS[(j,i)]['tau_min'] for (j,i) in UNIT_TASKS}
 P_Tau_Max = {(i,j): UNIT_TASKS[(j,i)]['tau_max'] for (j,i) in UNIT_TASKS}
 
+# Number of periods for startup and shutdown
+#P_Tau_SU = {(i,j): UNIT_TASKS[(j,i)]['tau_SU'] for (j,i) in UNIT_TASKS if (UNIT_TASKS[(j,i)]['isContinuos'] == True and UNIT_TASKS[(j,i)]['hasStartupsShutdowns'] == True and UNIT_TASKS[(j,i)]['isDirect'] == False)}
+#P_Tau_SB = {(i,j): UNIT_TASKS[(j,i)]['tau_SD'] for (j,i) in UNIT_TASKS if (UNIT_TASKS[(j,i)]['isContinuos'] == True and UNIT_TASKS[(j,i)]['hasStartupsShutdowns'] == True and UNIT_TASKS[(j,i)]['isDirect'] == False)}
+
 # S_J[i] is the set of units j able to execute task i.
 S_J = {i: set() for i in S_TASKS}
 for (j,i) in UNIT_TASKS:
     S_J[i].add(j)
+
+# S_I_C is the set of continuos tasks.
+#S_I_C = set([i for (j,i) in UNIT_TASKS if UNIT_TASKS[(j,i)]['isContinuos'] == True])
+
+#S_I_CSS_I is the set of continuos tasks involving startups, shutdowns and idle.
+#S_I_CSS_I = set([i for (j,i) in UNIT_TASKS if (UNIT_TASKS[(j,i)]['isContinuos'] == True and UNIT_TASKS[(j,i)]['hasStartupsShutdowns'] == True)])
+
+#S_I_SU = {i: set() for i in S_I_CSS_I}
+#for i_SU in S_I_CSS_I:
+#    S_I_SU[i].add('startUp')
+
+#S_I_SD = {i: set() for i in S_I_CSS_I}
+#for i_SD in S_I_CSS_I:
+#    S_I_SD[i].add('shutDown')
 
 ##############################################################################################
 #                                       STATES                                               #
@@ -119,7 +145,8 @@ P_Bmin = {(i,j): UNIT_TASKS[(j,i)]['Bmin'] for (j,i) in UNIT_TASKS}
 S_TIME = np.array(TIME)
 S_MATERIALS = set([k for k in STATES.keys()])
 
-
+#S_J_CSS is the set of units that can process continuos tasks involving startups and shutdowns.
+#S_J_SS = set([j for (j,i) in UNIT_TASKS if (UNIT_TASKS[(j,i)]['isContinuos'] == True and UNIT_TASKS[(j,i)]['hasStartupsShutdowns'] == True)])
 ##############################################################################################
 #                                       UNITS                                                #
 ##############################################################################################
@@ -136,13 +163,19 @@ model.V_Y_End = Var(S_TASKS, S_UNITS, S_TIME, domain = Boolean)
 model.V_Y_Start = Var(S_TASKS, S_UNITS, S_TIME, domain = Boolean)
 
 # V_B[i,j,n] is the batch size assigned to task i in unit j at time n.
-model.V_B = Var(S_TASKS, S_UNITS, S_TIME, domain=NonNegativeReals)
+model.V_B = Var(S_TASKS, S_UNITS, S_TIME, domain = NonNegativeReals)
 
 # V_S[s,n] is the inventory of material s in time n.
-model.V_S = Var(S_MATERIALS, S_TIME, domain=NonNegativeReals)
+model.V_S = Var(S_MATERIALS, S_TIME, domain = NonNegativeReals)
 
-# Q[j,n] is the inventory of unit j in time n.
-model.V_Q = Var(S_UNITS, S_TIME, domain=NonNegativeReals)
+# V_Q[j,n] is the inventory of unit j in time n.
+model.V_Q = Var(S_UNITS, S_TIME, domain = NonNegativeReals)
+
+# V_X_Hat[i,j,n] is 1 if unit j is in task mode i (ready to execute batch subtaks i_SB(i)) at time point n.
+#model.V_X_Hat = Var(S_TASKS, S_UNITS, S_TIME, domain = Boolean)
+
+# V_X_Hat_Idle[j,n] is 1 if unit j is in idle mode at time point n.
+#model.V_X_Hat_Idle = Var(S_UNITS, S_TIME, domain = Boolean)
 
 ######################################
 #               Constraint           #
@@ -186,6 +219,17 @@ def material_mass_balance(model, k, n):
     else:
         return Constraint.Skip
          
+#def track_startup_shutdown(model, i, j, n):
+#    if n >= 1 and n >= P_Tau_SU[i,j]:
+#        return model.V_X_Hat[i,j,n] == (model.V_X_Hat[i,j,n-1] 
+#                                    + model.V_X[i,j,n - 1] 
+#                                    + sum(model.V_X[i_SU,j,n - P_Tau_SU[i,j]] for i_SU in S_I_SU[i])
+#                                    - model.V_X[i,j,n] 
+#                                    - sum(model.V_X[i_SD,j,n] for i_SD in S_I_SD[i]))
+#    else:
+#        return Constraint.Skip
+
+
 def objective(model):
     return (sum(STATES[s]['price']*model.V_S[s,H] for s in STATES) 
             - sum(UNIT_TASKS[(j,i)]['Cost']*model.V_X[i,j,n] + UNIT_TASKS[(j,i)]['vCost']*model.V_B[i,j,n] for i in S_TASKS for j in S_J[i] for n in S_TIME))
@@ -199,6 +243,7 @@ model.C_Min_Lenght_Run = Constraint(S_TASKS, S_UNITS, S_TIME, rule = min_lenght_
 model.C_Max_Lenght_Run = Constraint(S_TASKS, S_UNITS, S_TIME, rule = max_lenght_run)
 model.C_Material_Mass_Balance = Constraint(S_MATERIALS, S_TIME, rule = material_mass_balance)
 model.C_Objective = Objective(expr = objective, sense = maximize)
+#model.C_Track_Startup_Shutdown = Constraint(S_I_CSS_I, S_UNITS, S_TIME, rule = track_startup_shutdown)
 
 
 SolverFactory('appsi_highs').solve(model).write() 
@@ -212,22 +257,6 @@ model.V_X.display()
 model.V_Y_Start.display()
 model.V_Y_End.display()
 model.V_B.display()
-
-# iterate through and show values
-#print()
-#for s in model.V_X:
-#    if model.X[s].value == 1:
-#        print(f'for index {s} X[{s}] is: {model.X[s].value}')
-
-# dump into a dictionary.... an entry point for pandas!
-#print()
-#print(model.X.extract_values())
-
-# make a pd.Series indexed by the index set(s)
-#print()
-#w_vals = pd.Series(model.X.extract_values(), name=model.X.name)
-#print(w_vals)
-#print(p)
 
 UnitAssignment = pd.DataFrame({j:[None for n in S_TIME] for j in S_UNITS}, index=S_TIME)
 
@@ -243,3 +272,9 @@ for n in S_TIME:
                 UnitAssignment.loc[n,j] = (i,model.V_B[i,j,n]())
 
 print(UnitAssignment)
+
+#print(S_I_C)
+#print(S_I_CSS_I)
+#print(S_J_SS)
+#print(S_I_SD)
+#print(S_I_SU)
