@@ -1,18 +1,17 @@
 ##########################################################
-#
-#
-#
-#
+#The current model has no utility constraints.           # 
+#It assumes no storage restrictions.                     #
+#It assumes unlimited amount of raw materials            #
+#It assume no delays: idis, idly, rmi_dly, rmi_n         #
+#It assumes no batch units: j_b                          #
+#There is no pre-defined tasks for n=0: i_ini            #
+#It assumes a simplified objectie function               #
 ##########################################################
+
 import matplotlib.pyplot as plt 
 import numpy as np 
 import pandas as pd 
 from IPython.display import display, HTML
-
-import shutil
-import sys
-import os.path
-
 from pyomo.environ import *
 
 
@@ -24,188 +23,232 @@ Network = {
     
     # states
     'STATES': {
-        'RM'   : {'capacity': 500, 'initial': 200, 'price':  0},
-        'P'    : {'capacity': 500, 'initial':   0, 'price': 10},
+        'RM'     : {'capacity': 10000, 'initial': 200, 'price':  0, 'isRM': True, 'isIntermed': False, 'isProd': False},
+        'IA1'    : {'capacity': 500, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True},
+        'IA2'    : {'capacity': 500, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True},
+        'IA3'    : {'capacity': 500, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True},
     },
 
     'STATES_SHIPMENT': {
-        ('P', 15) : {'shipment': 15.0},
+        ('IA1', 10) : {'demand': 15.0},
     },
     
     # state-to-task arcs indexed by (state, task)
     'ST_ARCS': {
-        ('RM', 'T1') : {'rho': 1.0},
+        ('RM', 'TA1') : {'rho': -1.0},
+        ('RM', 'TA2') : {'rho': -1.0},
+        ('RM', 'TA3') : {'rho': -1.0},
+        ('RM', 'TA3I') : {'rho': -1.0},
+        ('RM', 'ITA3') : {'rho': -1.0},
     },
     
     # task-to-state arcs indexed by (task, state)
     'TS_ARCS': {
-        ('T1', 'P') : {'dur': 1, 'rho': 1.0},
+        ('TA1', 'IA1') : {'dur': 1, 'rho': 1.0, 'prod_consump': 1},
+        ('TA2', 'IA2') : {'dur': 1, 'rho': 1.0, 'prod_consump': 1},
+        ('TA3', 'IA3') : {'dur': 1, 'rho': 1.0, 'prod_consump': 1},
+        ('ITA3', 'IA3') : {'dur': 2, 'rho': 0.25, 'prod_consump': 1},
+        ('TA3I', 'IA3') : {'dur': 1, 'rho': 0.5, 'prod_consump': 1},
     },
     
-    # state-to-task arcs indexed by (state, task)
-    'ST_ARCS_EXTENDED': {
-        ('RM', 'T1', 'T1-SD') : {'rho': 0},
-        ('RM', 'T1', 'T1-SU') : {'rho': 0.2},
-        ('RM', 'T1', 'T1-SB') : {'rho': 1.0},
-    },
-    
-    # task-to-state arcs indexed by (task, state)
-    'TS_ARCS_EXTENDED': {
-        ('T1', 'P', 'T1-SD') : {'dur': 1, 'rho': 0},
-        ('T1', 'P', 'T1-SU') : {'dur': 1, 'rho': 0.2},
-        ('T1', 'P', 'T1-SB') : {'dur': 1, 'rho': 1.0},
+    # Tasks and their corresponding transition. 
+    # Transition-To-Task = 1. Task-To-Transition = -1.
+    # Equivalent to parameter ipits(i, ii) in the GAMS code.
+    'TASKS_TRANSITION_TASKS': {
+        ('TA3', 'ITA3') : {'isSU': True, 'isSD': False, 'isDirect': False, 'direction': 1},
+        ('TA3', 'TA3I') : {'isSU': False, 'isSD': True, 'isDirect': False, 'direction': -1},
     },
     
     # unit data indexed by (unit, task)
     'UNIT_TASKS': {
-        ('U1', 'T1') : {'tau_min': 2, 'tau_max': 7, 'Bmin': 10, 'Bmax': 10, 'Cost': 0, 'vCost': 0, 'isContinuos': True, 'hasSS': True, 'isDirect': False},
+        ('UA1', 'TA1') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 3.5, 'Bmax': 3.5, 'Cost': 4, 'vCost': 1, 'direction': 1,},
+        ('UA2', 'TA2') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 2.1, 'Bmax': 2.1, 'Cost': 4, 'vCost': 1, 'direction': 1,},
+        ('UA2', 'TA3') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 2.1, 'Bmax': 2.1, 'Cost': 4, 'vCost': 1, 'direction': 1,},
+        ('UA2', 'ITA3') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 2.8, 'Bmax': 2.8, 'Cost': 6, 'vCost': 1, 'direction': 1,},
+        ('UA2', 'TA3I') : {'tau_min': 0, 'tau_max': 0, 'tau': 1, 'Bmin': 1.4, 'Bmax': 1.4, 'Cost': 3, 'vCost': 1, 'direction': -1,},
     },
-
-    'UNIT_TASK_SUBTASKS': {
-        #('U1', 'T1', 'T1-ST') : {'tau': 2, 'Bmin': 1, 'Bmax': 2, 'Cost': 0, 'vCost': 3.5, 'subtask': "direct_transition"},
-        ('U1', 'T1', 'T1-SD') : {'tau': 2, 'Bmin': 2, 'Bmax': 2, 'Cost': 0, 'vCost': 3.5, 'subtask': "shutdown"},
-        ('U1', 'T1', 'T1-SU') : {'tau': 2, 'Bmin': 2, 'Bmax': 2, 'Cost': 0, 'vCost': 3.5, 'subtask': "startup"},
-        ('U1', 'T1', 'T1-SB') : {'tau': 1, 'Bmin': 1, 'Bmax': 3, 'Cost': 0, 'vCost': 5, 'subtask': "steady-state"},
-    }
 }
 
 STN = Network
 
 STATES = STN['STATES']
+STATES_SHIPMENT = STN['STATES_SHIPMENT']
 ST_ARCS = STN['ST_ARCS']
 TS_ARCS = STN['TS_ARCS']
 UNIT_TASKS = STN['UNIT_TASKS']
-UNIT_TASK_SUBTASKS = STN['UNIT_TASK_SUBTASKS']
 TIME = STN['TIME']
-ST_ARCS_EXTENDED = STN['ST_ARCS_EXTENDED']
-TS_ARCS_EXTENDED = STN['TS_ARCS_EXTENDED']
+TASKS_TRANSITION_TASKS = STN['TASKS_TRANSITION_TASKS']
 
 ##############################################################################################
-#                                       TASKS                                                #
+#                                       MAIN SETS                                            #
 ##############################################################################################
 
-# Set of tasks.
+#Set of tasks.
 S_TASKS = set([i for (j,i) in UNIT_TASKS])
 
-# Set of all tasks and subtasks.
-S_SUBTASKS = set([iprime for (j,i,iprime) in UNIT_TASK_SUBTASKS]) 
+#Set of units.
+S_UNITS = set([j for (j,i) in UNIT_TASKS])
 
-# S_K_MINUS[i] set of materials consumed by task i.
-S_K_MINUS = {i: set() for i in S_TASKS} 
+#Set of periods.
+S_TIME = np.array(TIME)
+
+#Set of materials.
+S_MATERIALS = set([k for k in STATES.keys()])
+
+#Equivalent to ij.
+P_TASK_UNIT = {(i,j): UNIT_TASKS[(j,i)]['direction'] for (j,i) in UNIT_TASKS} 
+
+#Equivalent ipits.
+P_TASKS_TRANSITIONS = {(i,ii): TASKS_TRANSITION_TASKS[(i,ii)]['direction'] for (i,ii) in TASKS_TRANSITION_TASKS} 
+
+#Equivalent ik.
+P_TASKS_PROD_CONSUMP = {(i,k): TS_ARCS[(i,k)]['prod_consump'] for (i,k) in TS_ARCS} 
+
+#Equivalent to jii.
+P_TASK_TRANSITIONS_UNIT = {(j,i,ii): P_TASKS_TRANSITIONS[i,ii] for (j,i) in UNIT_TASKS for (j,ii) in UNIT_TASKS if (i,j) in P_TASK_UNIT if (ii,j) in P_TASK_UNIT if (i,ii) in P_TASKS_TRANSITIONS}
+
+
+#Equivalent to icts.
+S_I_Continuos_Tasks = set([i for (j,i) in UNIT_TASKS]) 
+
+#Equivalent to ip.
+S_I_Production_Tasks = set([i for (j,i) in UNIT_TASKS if all ((ii,i) not in TASKS_TRANSITION_TASKS for ii in S_TASKS)]) 
+
+
+S_I_Production_Tasks_With_Transition = set([i for (i,ii) in TASKS_TRANSITION_TASKS]) 
+
+
+S_I_All_Transition_Tasks = set([ii for (i,ii) in TASKS_TRANSITION_TASKS]) 
+
+#Equivalent to ictsnt.
+S_I_Production_Tasks_Without_Transition = S_TASKS - S_I_Production_Tasks_With_Transition - S_I_All_Transition_Tasks 
+
+#Equivalent to i_ts_d.
+S_I_Direct_Transition_Tasks = set([i for (ii,i) in TASKS_TRANSITION_TASKS if (TASKS_TRANSITION_TASKS[(ii,i)]['isDirect'] == True)]) 
+
+#Equivalent to i_ts_i.
+S_I_Indirect_Transition_Tasks = set([i for (ii,i) in TASKS_TRANSITION_TASKS if (TASKS_TRANSITION_TASKS[(ii,i)]['isDirect'] == False)]) 
+
+#Equivalent to i_ts_su.
+S_I_Indirect_Startup_Tasks = set([i for (ii,i) in TASKS_TRANSITION_TASKS if (TASKS_TRANSITION_TASKS[(ii,i)]['isDirect'] == False and TASKS_TRANSITION_TASKS[(ii,i)]['isSU'] == True) ]) 
+
+#Equivalent to ip_d.
+S_I_Production_Tasks_With_Direct_Transition = set([i for (i,ii) in TASKS_TRANSITION_TASKS if (TASKS_TRANSITION_TASKS[(i,ii)]['isDirect'] == True)]) 
+
+#Equivalent to ip_i.
+S_I_Production_Tasks_With_Indirect_Transition = set([i for (i,ii) in TASKS_TRANSITION_TASKS if (TASKS_TRANSITION_TASKS[(i,ii)]['isDirect'] == False)]) 
+
+# S_K_CONSUMED_BY_I[i] set of materials consumed by task i. Equivalent to i_minus.
+S_K_CONSUMED_BY_I = {i: set() for i in S_TASKS} 
 for (k,i) in ST_ARCS:
-    S_K_MINUS[i].add(k)
+    S_K_CONSUMED_BY_I[i].add(k)
 
-# S_K_PLUS[i] set of materials consumed by task i.
-S_K_PLUS = {i: set() for i in S_TASKS} 
+# S_K_PRODUCED_BY_I[i] set of materials produced by task i. Equivalent to i_plus.
+S_K_PRODUCED_BY_I = {i: set() for i in S_TASKS} 
 for (i,k) in TS_ARCS:
-    S_K_PLUS[i].add(k)
+    S_K_PRODUCED_BY_I[i].add(k)
 
-# S_J[i] is the set of units j able to execute task i.
-S_J = {i: set() for i in S_TASKS}
+# S_I_CONSUMING_K[k] is the set of tasks consuming material k. Equivalent to ijk_plus.
+S_I_CONSUMING_K = {k: set() for k in STATES}
+for (k,i) in ST_ARCS:
+    S_I_CONSUMING_K[k].add(i)
+
+# S_I_PRODUCING_K[k] is the set of tasks producing material k. Equivalent to ijk_plus.
+S_I_PRODUCING_K = {k: set() for k in STATES}
+for (i,k) in TS_ARCS:
+    S_I_PRODUCING_K[k].add(i)
+
+# S_J_Executing_I[i] is the set of units j able to execute task i. Equivalent to ij_set.
+S_J_Executing_I = {i: set() for i in S_TASKS}
 for (j,i) in UNIT_TASKS:
-    S_J[i].add(j)
+    S_J_Executing_I[i].add(j)
 
-# Set of al continuous tasks.
-S_I_C = set([i for (j,i) in UNIT_TASKS if (UNIT_TASKS[(j,i)]['isContinuos'] == True)])
+# S_I_In_J[j] is the set of tasks executed in each unit j. Equivalent to ij_set.
+S_I_In_J = {j: set() for j in S_UNITS}
+for (j,i) in UNIT_TASKS:
+    S_I_In_J[j].add(i)
 
-# S_I_CSS is the set of continuos tasks with startups and shutdowns.
-S_I_CSS = set([i for (j,i) in UNIT_TASKS if (UNIT_TASKS[(j,i)]['isContinuos'] == True and UNIT_TASKS[(j,i)]['hasSS'] == True)])
+#Equivalent to j_d.
+S_J_Units_With_Direct_Transition_Tasks = set([j for (j,i) in UNIT_TASKS if i in S_I_Production_Tasks_With_Direct_Transition]) 
 
-# Set of all continuous tasks with direct transition.
-S_I_CT = set([i for (j,i) in UNIT_TASKS if (UNIT_TASKS[(j,i)]['isContinuos'] == True and UNIT_TASKS[(j,i)]['hasSS'] == True and UNIT_TASKS[(j,i)]['isDirect'] == True)])
+#Equivalent to j_i.
+S_J_Units_With_Shutdown_Tasks = set([j for (j,i) in UNIT_TASKS if i in S_I_Indirect_Transition_Tasks]) 
 
-# Individual of all subtasks SU, SB, SD and ST for each continuos task.
-S_I_SU = {i: set() for i in S_I_CSS}
-for (j,i,i_SU) in UNIT_TASK_SUBTASKS:
-    if UNIT_TASK_SUBTASKS[(j,i,i_SU)]['subtask'] == "startup":
-        S_I_SU[i].add(i_SU)
+#Equivalent to j_c.
+S_J_Units_Without_Transition_Tasks = S_UNITS - S_J_Units_With_Direct_Transition_Tasks - S_J_Units_With_Shutdown_Tasks 
 
-S_I_SD = {i: set() for i in S_I_CSS}
-for (j,i,i_SD) in UNIT_TASK_SUBTASKS:
-    if UNIT_TASK_SUBTASKS[(j,i,i_SD)]['subtask'] == "shutdown":
-        S_I_SD[i].add(i_SD)
+#Equivalent rmp.
+S_K_Final_Products = set([k for k in STATES if STATES[k]['isProd'] == True])
 
-S_I_ST = {i: set() for i in S_I_CSS}
-for (j,i,i_ST) in UNIT_TASK_SUBTASKS:
-    if UNIT_TASK_SUBTASKS[(j,i,i_ST)]['subtask'] == "direct_transition":
-        S_I_ST[i].add(i_ST)
+#Equivalent rmi.
+S_K_Intermediates = set([k for k in STATES if STATES[k]['isIntermed'] == True])
 
-S_I_SB = {i: set() for i in S_I_CSS}
-for (j,i,i_SB) in UNIT_TASK_SUBTASKS:
-    if UNIT_TASK_SUBTASKS[(j,i,i_SB)]['subtask'] == "steady-state":
-        S_I_SB[i].add(i_SB)
+print("Set of tasks S_TASKS: ", S_TASKS)
+print("Set of units S_UNITS: ", S_UNITS)
+print("Set of material S_MATERIALS: ", S_MATERIALS)
+print("Set of time points S_TIME: ", S_TIME)
+print("Parameter TASK_UNIT assignment P_TASK_UNIT: ", P_TASK_UNIT)
+print("Parameter with transitions related to each task P_TASKS_TRANSITIONS: ", P_TASKS_TRANSITIONS)
+print("Parameter related to the consumption and production of each task P_TASKS_PROD_CONSUMP: ", P_TASKS_PROD_CONSUMP)
+print("Parameter that connects transitions with production tasks and units P_TASK_TRANSITIONS_UNIT: ", P_TASK_TRANSITIONS_UNIT)
+print("Set of all continuos tasks S_I_Continuos_Tasks: ", S_I_Continuos_Tasks)
+print("Set of production tasks S_I_Production_Tasks: ", S_I_Production_Tasks)
+print("Set of production tasks without S_I_Production_Tasks_Without_Transition: ", S_I_Production_Tasks_Without_Transition)
+print("Set of production tasks with transition S_I_Production_Tasks_With_Transition: ", S_I_Production_Tasks_With_Transition)
+print("Set of production tasks with direct transitions S_I_Production_Tasks_With_Direct_Transition: ", S_I_Production_Tasks_With_Direct_Transition)
+print("Set of production tasks with indirect transitions S_I_Production_Tasks_With_Indirect_Transition: ", S_I_Production_Tasks_With_Indirect_Transition) 
+print("Set of all transition tasks S_I_All_Transition_Tasks: ", S_I_All_Transition_Tasks)
+print("Set of direct transition tasks S_I_Direct_Transition_Tasks: ", S_I_Direct_Transition_Tasks)
+print("Set of indirect transition tasks S_I_Indirect_Transition_Tasks: ", S_I_Indirect_Transition_Tasks)
+print("Set of indirect transition to production tasks (startup) S_I_Indirect_Startup_Tasks: ", S_I_Indirect_Startup_Tasks)
+print("Set of materials consumed by task i S_K_CONSUMED_BY_I: ", S_K_CONSUMED_BY_I)
+print("Set of materials produced by task i S_K_PRODUCED_BY_I: ", S_K_PRODUCED_BY_I)
+print("Set of tasks consuming material k S_I_CONSUMING_K: ", S_I_CONSUMING_K)
+print("Set of tasks producing material k S_I_PRODUCING_K: ", S_I_PRODUCING_K) 
+print("Set of units j able to execute task i S_J_Executing_I: ", S_J_Executing_I)
+print("Set of tasks executed in each unit j S_I_In_J: ", S_I_In_J)
+print("Set of units without transitions S_J_Units_Without_Transition_Tasks: ", S_J_Units_Without_Transition_Tasks)
+print("Set of units with direct transitions S_J_Units_With_Direct_Transition_Tasks: ", S_J_Units_With_Direct_Transition_Tasks) 
+print("Set of units with idle (with shutdowns) S_J_Units_With_Shutdown_Tasks: ", S_J_Units_With_Shutdown_Tasks) 
+print("Set of final products S_K_Final_Products: ", S_K_Final_Products) 
+print("Set of intermediates S_K_Intermediates: ", S_K_Intermediates) 
 
-# Set of all subtasks SU, SB, SD and ST for each continuos task.
-S_I_S = {i: set() for i in S_I_C}
-for (j,i,i_SUB) in UNIT_TASK_SUBTASKS:
-    S_I_S[i].add(i_SUB)
-
-# Set of all transient subtasks SU, SD and ST for each continuos task.
-S_I_TS = {i: set() for i in S_I_C}
-for (j,i,i_TS) in UNIT_TASK_SUBTASKS:
-    if ((UNIT_TASK_SUBTASKS[(j,i,i_TS)]['subtask'] == "startup") or
-       (UNIT_TASK_SUBTASKS[(j,i,i_TS)]['subtask'] == "shutdown") or
-       (UNIT_TASK_SUBTASKS[(j,i,i_TS)]['subtask'] == "direct_transition")):
-        S_I_TS[i].add(i_TS)
+# Lower and upper bounds for batch size of tasks.
+P_Bmax = {(i,j): UNIT_TASKS[(j,i)]['Bmax'] for (j,i) in UNIT_TASKS}
+P_Bmin = {(i,j): UNIT_TASKS[(j,i)]['Bmin'] for (j,i) in UNIT_TASKS}
 
 # P_rho_MINUS[i,k] is the input fraction of material k consumed by task i.
-#P_rho_MINUS = {(i,k): ST_ARCS[(k,i)]['rho'] for (k,i) in ST_ARCS}
-P_rho_MINUS = {(i_SUB,k): ST_ARCS_EXTENDED[(k,i,i_SUB)]['rho'] for (k,i,i_SUB) in ST_ARCS_EXTENDED}
+P_rho_MINUS = {(i,k): ST_ARCS[(k,i)]['rho'] for (k,i) in ST_ARCS}
 
 # P_rho_PLUS[i,k] is the output fraction of material k produced by task i.
-P_rho_PLUS = {(i_SUB,k): TS_ARCS_EXTENDED[(i,k,i_SUB)]['rho'] for (i,k,i_SUB) in TS_ARCS_EXTENDED}
-
-# P_P[i,k] is the processing time for task i to produce material k.
-P_P = {(i,k): TS_ARCS[(i,k)]['dur'] for (i,k) in TS_ARCS}
-
-# p[i] is the maximum completion time for task i.
-p = {i: max([ P_P[i,k] for k in S_K_PLUS[i]]) for i in S_TASKS}
+P_rho_PLUS = {(i,k): TS_ARCS[(i,k)]['rho'] for (i,k) in TS_ARCS}
 
 # Min and max lenghts of a run.
-P_Tau_Min = {(i,j): UNIT_TASKS[(j,i)]['tau_min'] for (j,i) in UNIT_TASKS}
-P_Tau_Max = {(i,j): UNIT_TASKS[(j,i)]['tau_max'] for (j,i) in UNIT_TASKS}
-
-# Number of periods for transition, startup and shutdown
-P_Tau = {(i_SUB,j): UNIT_TASK_SUBTASKS[(j,i,i_SUB)]['tau'] for (j,i,i_SUB) in UNIT_TASK_SUBTASKS}
-#P_Tau_SB = {(i,j): UNIT_TASKS[(j,i)]['tau_SD'] for (j,i) in UNIT_TASKS if (UNIT_TASKS[(j,i)]['isContinuos'] == True and UNIT_TASKS[(j,i)]['hasStartupsShutdowns'] == True and UNIT_TASKS[(j,i)]['isDirect'] == False)}
-
-##############################################################################################
-#                                       STATES                                               #
-##############################################################################################
-
-# S_I_MINUS[k] is the set of tasks that consume material k.
-S_I_MINUS = {k: set() for k in STATES}
-for (k,i) in ST_ARCS:
-    S_I_MINUS[k].add(i)
-
-# S_I_PLUS[k] is the set of tasks that produce material k.
-S_I_PLUS = {k: set() for k in STATES}
-for (i,k) in TS_ARCS:
-    S_I_PLUS[k].add(i)
+P_Tau_Min = {(i,j): UNIT_TASKS[(j,i)]['tau_min'] for (j,i) in UNIT_TASKS if i in S_I_Production_Tasks}
+P_Tau_Max = {(i,j): UNIT_TASKS[(j,i)]['tau_max'] for (j,i) in UNIT_TASKS if i in S_I_Production_Tasks}
 
 # P_Chi[k] is the storage capacity of each material.
 P_Chi = {k: STATES[k]['capacity'] for k in STATES}
 
-##############################################################################################
-#                                       UNITS                                                #
-##############################################################################################
+# Demand. Equivalent to xi.
+P_K_Demand = {(k,n): STATES_SHIPMENT[(k,n)]['demand'] for (k,n) in STATES_SHIPMENT}
 
-S_UNITS = set([j for (j,i) in UNIT_TASKS])
+# Number of periods for transition, startup and shutdown.
+P_Tau = {(i,j): UNIT_TASKS[(j,i)]['tau'] for (j,i) in UNIT_TASKS}
 
-# S_I[j] is the set of tasks executed in each unit j.
-S_I = {j: set() for j in S_UNITS}
-for (j,i) in UNIT_TASKS:
-    S_I[j].add(i)
+print("Min batch size of task in unit P_Bmin: ", P_Bmin)
+print("Max batch size of task in unit P_Bmax: ", P_Bmax) 
 
-# Min and max batch sizes of unit j for task i.
-P_Bmax = {(i_SUB,j): UNIT_TASK_SUBTASKS[(j,i,i_SUB)]['Bmax'] for (j,i,i_SUB) in UNIT_TASK_SUBTASKS}
-P_Bmin = {(i_SUB,j): UNIT_TASK_SUBTASKS[(j,i,i_SUB)]['Bmin'] for (j,i,i_SUB) in UNIT_TASK_SUBTASKS}
+print("Conversion coefficient of consumed materials P_rho_MINUS: ", P_rho_MINUS)
+print("Conversion coefficient of produced materials P_rho_PLUS: ", P_rho_PLUS)
 
-S_TIME = np.array(TIME)
-S_MATERIALS = set([k for k in STATES.keys()])
+print("Minimum lengh of a run P_Tau_Min: ", P_Tau_Min)
+print("Maximum lengh of a run P_Tau_Max: ",P_Tau_Max)
 
-#S_J_CSS is the set of units that can process continuos tasks involving startups and shutdowns.
-S_J_SS = set([j for (j,i) in UNIT_TASKS if (UNIT_TASKS[(j,i)]['isContinuos'] == True and UNIT_TASKS[(j,i)]['hasSS'] == True)])
+print("Storage capacity of each material: ", P_Chi)
+print('Demand for material: ', P_K_Demand)
+print("Time for executing a task: ", P_Tau)
+
 ##############################################################################################
 #                                       VARIABLES                                            #
 ##############################################################################################
@@ -213,7 +256,7 @@ S_J_SS = set([j for (j,i) in UNIT_TASKS if (UNIT_TASKS[(j,i)]['isContinuos'] == 
 model = ConcreteModel()
 
 # V_X[i,j,n] = 1 if unit j processes (sub)task i at time point n.
-model.V_X = Var(S_SUBTASKS, S_UNITS, S_TIME, domain = Boolean)
+model.V_X = Var(S_TASKS, S_UNITS, S_TIME, domain = Boolean)
 
 # V_Y_End[i,j,n] = 1 if a run of a continuous task in unit j ends at time point n.
 model.V_Y_End = Var(S_TASKS, S_UNITS, S_TIME, domain = Boolean)
@@ -222,13 +265,13 @@ model.V_Y_End = Var(S_TASKS, S_UNITS, S_TIME, domain = Boolean)
 model.V_Y_Start = Var(S_TASKS, S_UNITS, S_TIME, domain = Boolean)
 
 # V_B[i,j,n] is the batch size assigned to task i in unit j at time n.
-model.V_B = Var(S_SUBTASKS, S_UNITS, S_TIME, domain = NonNegativeReals)
+model.V_B = Var(S_TASKS, S_UNITS, S_TIME, domain = NonNegativeReals)
 
-# V_S[s,n] is the inventory of material s in time n.
+# V_S[k,n] is the inventory of material k in time n.
 model.V_S = Var(S_MATERIALS, S_TIME, domain = NonNegativeReals)
 
-# V_Q[j,n] is the inventory of unit j in time n.
-model.V_Q = Var(S_UNITS, S_TIME, domain = NonNegativeReals)
+# V_D[k,n] is the amount of material k shipped in time n.
+model.V_D = Var(S_MATERIALS, S_TIME, domain = NonNegativeReals)
 
 # V_X_Hat[i,j,n] is 1 if unit j is in task mode i (ready to execute batch subtaks i_SB(i)) at time point n.
 model.V_X_Hat = Var(S_TASKS, S_UNITS, S_TIME, domain = Boolean)
@@ -240,134 +283,213 @@ model.V_X_Hat_Idle = Var(S_UNITS, S_TIME, domain = Boolean)
 #               Constraint           #
 ######################################
 
-def task_unit_assignment(model, j, n):
-    return sum(model.V_X[i_SUB,j,n] for i in S_I[j] for i_SUB in S_I_S[i]) <= 1 
-    
-def track_start_end_batch_task(model, i, j, n):
-    if n >= 1:
-        return model.V_Y_Start[i,j,n] == model.V_X[i,j,n] - model.V_X[i,j,n-1] + model.V_Y_End[i,j,n]
-    else:
-        return Constraint.Skip
-
-def unit_capacity_lb(model, i, j, n):
-    if (j,i) in UNIT_TASKS.keys():
+# Lower bound on the batch size of all tasks.
+def unit_capacity_lb_eq2(model, i, j, n):
+    if (i,j) in P_TASK_UNIT:
         return model.V_B[i,j,n] >= model.V_X[i,j,n]*P_Bmin[i,j]
     else:
         return Constraint.Skip    
 
-def unit_capacity_ub(model, i, j, n):
-    if (j,i) in UNIT_TASKS.keys():
+# Upper bound on the batch size of all tasks.
+def unit_capacity_ub_eq2(model, i, j, n):
+    if (i,j) in P_TASK_UNIT:
         return model.V_B[i,j,n] <= model.V_X[i,j,n]*P_Bmax[i,j]
     else:
         return Constraint.Skip
 
-def material_capacity(model, k, n):
-    return model.V_S[k,n] <= P_Chi[k]
+def material_mass_balance_eq3(model, k, n):
+    if n < H:    
+        return model.V_S[k,n+1] == ((model.V_S[k,n] if (n >= 1 and n < H) else STATES[k]['initial']) 
+                                        + sum(
+                                            P_rho_MINUS[i,k]*model.V_B[i,j,nprime] 
+                                            for i in S_TASKS 
+                                            for j in S_UNITS 
+                                            for nprime in S_TIME 
+                                            if i in S_I_CONSUMING_K[k]
+                                            if (i,j) in P_TASK_UNIT 
+                                            if ((nprime >= n - P_Tau[i,j]-1) and (nprime <= n))
+                                        )    
+                                        + sum(
+                                            P_rho_PLUS[i,k]*model.V_B[i,j,nprime] 
+                                            for i in S_TASKS 
+                                            for j in S_UNITS 
+                                            for nprime in S_TIME 
+                                            if i in S_I_PRODUCING_K[k] 
+                                            if (i,j) in P_TASK_UNIT 
+                                            if ((nprime >= n - P_Tau[i,j]-1) and (nprime <= n))
+                                        )
+                                        + sum(
+                                            P_rho_MINUS[i,k]*model.V_B[i,j,nprime] 
+                                            for i in S_TASKS 
+                                            for j in S_UNITS 
+                                            for nprime in S_TIME 
+                                            if i in S_I_CONSUMING_K[k]
+                                            if (i,j) in P_TASK_UNIT 
+                                            if ((nprime >= n - P_Tau[i,j]-1) and (nprime <= n))
+                                        )    
+                                        + sum(
+                                            P_rho_PLUS[i,k]*model.V_B[i,j,nprime] 
+                                            for i in S_TASKS 
+                                            for j in S_UNITS 
+                                            for nprime in S_TIME 
+                                            if i in S_I_PRODUCING_K[k] 
+                                            if (i,j) in P_TASK_UNIT 
+                                            if ((nprime >= n - P_Tau[i,j]) and (nprime <= n))
+                                        )
+                                        - (P_K_Demand[k,n] if (k,n) in STATES_SHIPMENT else 0)
+                                        - model.V_D[k,n]
+        )
+    else:
+        return Constraint.Skip  
 
-def min_lenght_run(model, i, j, n):
-    return model.V_X[i,j,n] >= sum(model.V_Y_Start[i,j,nprime] for nprime in S_TIME if (nprime >= n - P_Tau_Min[i,j] + 1 and nprime <= n))    
+def utility_balance_eq4():
+    return
 
-def max_lenght_run(model, i, j, n):
-    return sum(model.V_X[i,j,nprime] for nprime in S_TIME if (nprime >= n - P_Tau_Max[i,j] and nprime <= n)) <= P_Tau_Max[i,j] 
-    
-def material_mass_balance(model, k, n):
-    if n == 0:
-        return model.V_S[k,n+1] == STATES[k]['initial'] - sum(P_rho_MINUS[i_SUB,k]*model.V_B[i_SUB,j,n] for i in (S_I_MINUS[k] & S_I_C) for j in S_J[i] for i_SUB in S_I_S[i])
-    elif (n >= 1 and n < H):
-        return model.V_S[k,n+1] == (model.V_S[k,n] 
-                                  + sum(P_rho_PLUS[i_SUB,k]*model.V_B[i_SUB,j,n-1] for i in (S_I_PLUS[k] & S_I_C) for j in S_J[i] for i_SUB in S_I_S[i]) 
-                                  - sum(P_rho_MINUS[i_SUB,k]*model.V_B[i_SUB,j,n] for i in (S_I_MINUS[k] & S_I_C) for j in S_J[i] for i_SUB in S_I_S[i]))
+def track_idle_unit_eq13(model, j, n):
+    if j in S_J_Units_With_Shutdown_Tasks and n >= 1:
+        return model.V_X_Hat_Idle[j,n] == (model.V_X_Hat_Idle[j,n-1]
+                                         + sum(
+                                            model.V_X[i,j,nprime] 
+                                            for i in S_I_Indirect_Transition_Tasks
+                                            if P_TASK_UNIT[i,j] < 0
+                                            for nprime in S_TIME
+                                            if nprime >= n-P_Tau[i,j] and nprime <= n
+                                         ) 
+                                         - sum(
+                                            model.V_X[i,j,nprime] 
+                                            for i in S_I_Indirect_Transition_Tasks
+                                            if P_TASK_UNIT[i,j] > 0
+                                            for nprime in S_TIME
+                                            if nprime >= n-P_Tau[i,j] and nprime <= n
+                                         )
+        )                                         
     else:
         return Constraint.Skip
 
-def track_startup_shutdown(model, i, j, n):
-    if n >= 1 and j in S_J[i]:
-        return model.V_X_Hat[i,j,n] == (model.V_X_Hat[i,j,n-1] 
-                                      + sum(model.V_X[i_SB,j,n-1] for i_SB in S_I_SB[i])
-                                      + sum(model.V_X[i_SU,j,n-1] for i_SU in S_I_SU[i])
-                                      - sum(model.V_X[i_SB,j,n] for i_SU in S_I_SB[i]) 
-                                      - sum(model.V_X[i_SD,j,n] for i_SD in S_I_SD[i]))
+def track_transitions_unit_eq15(model, i, j, n):
+    if j in (S_J_Units_With_Direct_Transition_Tasks and S_J_Units_With_Shutdown_Tasks) and (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and n >= 1:
+        return model.V_X_Hat[i,j,n] == (model.V_X_Hat[i,j,n-1]
+                                         + model.V_X[i,j,n-1] - model.V_X[i,j,n]
+                                         + sum(
+                                            model.V_X[ii,j,n-P_Tau[ii,j]] 
+                                            for ii in S_I_All_Transition_Tasks
+                                            if P_TASK_TRANSITIONS_UNIT[j,i,ii] > 0
+                                            if ii in S_I_Direct_Transition_Tasks
+                                            if n >= P_Tau[ii,j]
+                                         ) 
+                                         - sum(
+                                            model.V_X[ii,j,n] 
+                                            for ii in S_I_All_Transition_Tasks
+                                            if P_TASK_TRANSITIONS_UNIT[j,i,ii] < 0
+                                            if ii in S_I_Direct_Transition_Tasks
+                                         )
+                                         + sum(
+                                            model.V_X[ii,j,n-P_Tau[ii,j]] 
+                                            for ii in S_I_All_Transition_Tasks
+                                            if P_TASK_TRANSITIONS_UNIT[j,i,ii] > 0
+                                            if ii in S_I_Indirect_Startup_Tasks
+                                            if n >= P_Tau[ii,j]
+                                         )
+                                         - sum(
+                                            model.V_X[ii,j,n] 
+                                            for ii in S_I_All_Transition_Tasks
+                                            if P_TASK_TRANSITIONS_UNIT[j,i,ii] < 0
+                                            if ii in S_I_Indirect_Transition_Tasks    
+                                            if ii not in S_I_Indirect_Startup_Tasks
+                                         )
+        )                                         
     else:
         return Constraint.Skip
 
-def track_idle_unit(model, j, n):
-    if j in S_J_SS and n >= 1:
-        return model.V_X_Hat_Idle[j,n] == (model.V_X_Hat_Idle[j,n-1] 
-                                         + sum(model.V_X[i_SD,j,n-1] for i in (S_I_CSS & S_I[j]) for i_SD in S_I_SD[i]) 
-                                         - sum(model.V_X[i_SU,j,n] for i in (S_I_CSS & S_I[j]) for i_SU in S_I_SU[i])) 
-                                         
+# Tracks the start and end of all production tasks.    
+def track_start_end_batch_task_eq16(model, i, j, n):
+    if n >= 1 and (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks:
+        return model.V_Y_Start[i,j,n] == model.V_X[i,j,n] - model.V_X[i,j,n-1] + model.V_Y_End[i,j,n]
     else:
         return Constraint.Skip
 
-def track_start_end_batch_task_continuos_1(model, i, j, n):
-    if n >= 1 and i in S_I_CSS and j in S_J[i]:
-        return model.V_Y_Start[i,j,n] == (sum(model.V_X[i_SB,j,n] for i_SB in S_I_SB[i]) 
-                                       - sum(model.V_X[i_SB,j,n-1] for i_SB in S_I_SB[i])
-                                       + model.V_Y_End[i,j,n])
-    else:
-        return Constraint.Skip
-
-def track_start_end_batch_task_continuos_2(model, i, j, n):
-    if i in S_I_CSS and j in S_J[i]:
+def track_start_end_batch_task_eq17(model, i, j, n):
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks:
         return model.V_Y_Start[i,j,n] + model.V_Y_End[i,j,n] <= 1
     else:
         return Constraint.Skip
 
-def min_lenght_run_continuos(model, i, j, n):
-    if i in S_I_CSS and j in S_J[i]:
-        return sum(model.V_X[i_SB,j,n] for i_SB in S_I_SB[i]) >= sum(model.V_Y_Start[i,j,nprime] for nprime in S_TIME if (nprime >= (n - P_Tau_Min[i,j] + 1) and nprime <= (n))) 
+def min_lenght_run_eq18(model, i, j, n):
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks:
+        return model.V_X[i,j,n] >= sum(model.V_Y_Start[i,j,nprime] for nprime in S_TIME if (nprime >= n - P_Tau_Min[i,j] + 1 and nprime <= n))    
     else:
         return Constraint.Skip
 
-def max_lenght_run_continuos(model, i, j, n):
-    if i in S_I_CSS and j in S_J[i]:
-        return sum(model.V_X[i_SB,j,nprime] for i_SB in S_I_SB[i] for nprime in S_TIME if (nprime >= (n - P_Tau_Max[i,j]) and nprime <= (n))) <= P_Tau_Max[i,j] 
+def max_lenght_run_eq19(model, i, j, n):
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks:
+        return sum(model.V_X[i,j,nprime] for nprime in S_TIME if (nprime >= n - P_Tau_Max[i,j] and nprime <= n)) <= P_Tau_Max[i,j] 
     else:
         return Constraint.Skip
 
-def unit_availability_with_startup_shutdown(model, j, n):
-    if j in S_J_SS:
-        return sum(model.V_X[iprime,j,nprime] for i in (S_I[j] & S_I_C) for iprime in S_I_S[i] for nprime in S_TIME if ( (nprime >= n - P_Tau[iprime,j] + 1) and (nprime <= n))) + sum(model.V_X_Hat[i,j,n] for i in (S_I[j] & S_I_CSS)) + model.V_X_Hat_Idle[j,n] == 1 
+def track_start_production_task_after_transition_eq20(model, i, j, n):
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and i not in S_I_Production_Tasks_Without_Transition:
+        return (
+            model.V_X[i,j,n] 
+            >= 
+            sum(
+                model.V_X[iprime,j,nprime] 
+                for iprime in (S_I_Direct_Transition_Tasks + S_I_Indirect_Transition_Tasks)
+                if P_TASKS_TRANSITIONS[i,iprime] > 0
+                for nprime in S_TIME
+                if ((nprime >= n - P_Tau[i,j] + 1) and (nprime <= n))                
+            )
+        )
     else:
-        return      
+        return Constraint.Skip
 
-def unit_capacity_lb_continuos(model, i, j, n):
-    return model.V_B[i_SUB,j,n] >= model.V_X[i_SUB,j,n]*P_Bmin[i_SUB,j]
-    
-def unit_capacity_ub_continuos(model, i, j, n):
-    return model.V_B[i_SUB,j,n] <= model.V_X[i_SUB,j,n]*P_Bmax[i_SUB,j]
-    
+def unit_availability_eq21(model, j, n):
+    return (
+        sum(
+            model.V_X[i,j,nprime] 
+            for (i,j) in P_TASK_UNIT 
+            for nprime in S_TIME 
+            if ((nprime >= n - P_Tau[i,j] + 1) and (nprime <= n))
+      ) 
+      + sum(
+            model.V_X_Hat[i,j,n] 
+            for i in (S_I_Production_Tasks - S_I_Production_Tasks_Without_Transition)
+            if i in S_I_In_J[j]
+      )
+      + (model.V_X_Hat_Idle[j,n] if j in S_J_Units_With_Shutdown_Tasks else 0)
+
+    ) <= 1
+
+def material_capacity(model, k, n):
+    return model.V_S[k,n] <= P_Chi[k]
+
+def material_demand(model, k, n):
+    return model.V_D[k,n] <= P_Chi[k]
+
 def objective(model):
-    return (sum(STATES[s]['price']*model.V_S[s,H] for s in STATES) 
-            - sum(UNIT_TASKS[(j,i)]['Cost']*model.V_X[i_SUB,j,n] + UNIT_TASK_SUBTASKS[(j,i,i_SUB)]['vCost']*model.V_B[i_SUB,j,n] for i in S_TASKS for i_SUB in S_I_S[i] for j in S_J[i] for n in S_TIME))
+   return (
+            sum((STATES[k]['price']*model.V_D[k,n]) for n in S_TIME for k in S_MATERIALS) 
+           -sum((UNIT_TASKS[(j,i)]['Cost']*model.V_X[i,j,n] + UNIT_TASKS[(j,i)]['vCost']*model.V_B[i,j,n]) for (i,j) in P_TASK_UNIT for n in S_TIME) 
+          )
 
  
-
-model.C_Task_Unit_Assignment = Constraint(S_UNITS, S_TIME, rule = task_unit_assignment)
-#model.C_Track_Start_End_Batch_Task = Constraint(S_TASKS, S_UNITS, S_TIME, rule = track_start_end_batch_task)
-#model.C_Unit_Capacity_LB = Constraint(S_TASKS, S_UNITS, S_TIME, rule = unit_capacity_lb)
-#model.C_Unit_Capacity_UB = Constraint(S_TASKS, S_UNITS, S_TIME, rule = unit_capacity_ub)
-model.C_Material_Storage_Limit = Constraint(S_MATERIALS, S_TIME, rule = material_capacity)
-#model.C_Min_Lenght_Run = Constraint(S_TASKS, S_UNITS, S_TIME, rule = min_lenght_run)
-#model.C_Max_Lenght_Run = Constraint(S_TASKS, S_UNITS, S_TIME, rule = max_lenght_run)
-model.C_Material_Mass_Balance = Constraint(S_MATERIALS, S_TIME, rule = material_mass_balance)
+model.C_Unit_Capacity_LB_Eq2 = Constraint(S_TASKS, S_UNITS, S_TIME, rule = unit_capacity_lb_eq2)
+model.C_Unit_Capacity_UB_Eq2 = Constraint(S_TASKS, S_UNITS, S_TIME, rule = unit_capacity_ub_eq2)
+model.C_Material_Mass_Balance_Eq3 = Constraint(S_MATERIALS, S_TIME, rule = material_mass_balance_eq3)
+model.C_Track_Idle_Unit_Eq13 = Constraint(S_UNITS, S_TIME, rule = track_idle_unit_eq13)
+model.C_Track_Transitions_units_Eq15 = Constraint(S_TASKS, S_UNITS, S_TIME, rule = track_transitions_unit_eq15)
+model.C_Track_Start_End_Batch_Task_Eq16 = Constraint(S_TASKS, S_UNITS, S_TIME, rule = track_start_end_batch_task_eq16)
+model.C_Track_Start_End_Batch_Task_Eq17 = Constraint(S_TASKS, S_UNITS, S_TIME, rule = track_start_end_batch_task_eq17)
+model.C_Min_Lenght_Run_Eq18 = Constraint(S_TASKS, S_UNITS, S_TIME, rule = min_lenght_run_eq18)
+model.C_Max_Lenght_Run_Eq19 = Constraint(S_TASKS, S_UNITS, S_TIME, rule = max_lenght_run_eq19)
+model.C_Track_Start_Production_Task_After_Transition_Eq20 = Constraint(S_UNITS, S_UNITS, S_TIME, rule = track_start_production_task_after_transition_eq20)
+model.C_Unit_Availability_Eq21 = Constraint(S_UNITS, S_TIME, rule = unit_availability_eq21)
+model.C_Material_Availability = Constraint(S_MATERIALS, S_TIME, rule = material_capacity)
+model.C_Material_Demand = Constraint(S_MATERIALS, S_TIME, rule = material_demand)
 model.C_Objective = Objective(expr = objective, sense = maximize)
-model.C_Track_Startup_Shutdown = Constraint(S_I_CSS, S_UNITS, S_TIME, rule = track_startup_shutdown)
-model.C_Track_Idle_Unit = Constraint(S_UNITS, S_TIME, rule = track_idle_unit)
-model.C_Track_Start_End_Batch_Task_Continuos_1 = Constraint(S_I_CSS, S_UNITS, S_TIME, rule = track_start_end_batch_task_continuos_1)
-model.C_Track_Start_End_Batch_Task_Continuos_2 = Constraint(S_I_CSS, S_UNITS, S_TIME, rule = track_start_end_batch_task_continuos_2)
-model.C_Mix_Lenght_Run_Continuos = Constraint(S_I_CSS, S_UNITS, S_TIME, rule = min_lenght_run_continuos)
-model.C_Max_Lenght_Run_Continuos = Constraint(S_I_CSS, S_UNITS, S_TIME, rule = max_lenght_run_continuos)
-model.C_Unit_Availability_With_StartUp_ShutDown = Constraint(S_UNITS, S_TIME, rule = unit_availability_with_startup_shutdown)
-model.C_Unit_Capacity_LB = Constraint(S_SUBTASKS, S_UNITS, S_TIME, rule = unit_capacity_lb_continuos)
-model.C_Unit_Capacity_UB = Constraint(S_SUBTASKS, S_UNITS, S_TIME, rule = unit_capacity_ub_continuos)
-
 
 SolverFactory('appsi_highs').solve(model).write() 
-for con in model.component_map(Constraint).itervalues():
-    con.pprint()
-
-print(S_I)
+#for con in model.component_map(Constraint).itervalues():
+#    con.pprint()
 
 # show all of V_X
 model.V_X.display()
@@ -375,36 +497,7 @@ model.V_Y_Start.display()
 model.V_Y_End.display()
 model.V_B.display()
 model.V_X_Hat.display()
-
-
-print("Set of taks: ", S_TASKS)
-print("Set of all subtasks:", S_SUBTASKS)
-print("Set of units: ", S_UNITS)
-print("Set of material: ", S_MATERIALS)
-print("Set of time points: ", S_TIME)
-print("------------------------------------")
-print("Set of tasks in each unit: ", S_I)
-print("Set of tasks productin raw materials: ", S_I_PLUS)
-print("Set of tasks consuming raw material: ", S_I_MINUS)
-print("Set of continuous tasks: ", S_I_C)
-print("Set of continuos tasks with startup and shutdown: ", S_I_CSS)
-print("Set of continuos tasks with direct transition: ", S_I_CT)
-print("set of shutdown subtask of a continuos task: ", S_I_SD)
-print("Set of startup subtask of continuos task: ", S_I_SU)
-print("Set of transition subtask of a continuos task: ", S_I_ST)
-print("Set of one period steady state subtask related to a continuos taks: ", S_I_SB)
-print("Set of transition subtasks: ", S_I_TS)
-print("Set of of all subasks related to a continuos task: ", S_I_S)
-print("------------------------------------")
-print("Set of units executing tasks: ", S_J)
-print("Set of units executing each continuos task: ", S_J_SS)
-print("------------------------------------")
-print("Input fraction of material k consumed by task i: ", P_rho_MINUS) 
-print("Output fraction of material k produced by task i:", P_rho_PLUS) 
-print("Min lenght of a run: ", P_Tau_Min) 
-print("Max lenght of a run", P_Tau_Max) 
-print("Number of periods for direct_transition, startup and shutdown:", P_Tau)
-print("Min batch size of task in unit:", P_Bmin)
-print("Max batch size of task in unit:", P_Bmax)
-
+model.V_X_Hat_Idle.display()
+model.V_S.display()
+model.V_D.display()
 
