@@ -6,6 +6,7 @@
 #It assumes no batch units: j_b                          #
 #There is no pre-defined tasks for n=0: i_ini            #
 #It assumes a simplified objectie function               #
+#Verify mass balance (should ir be cumulative) and Eq20  #
 ##########################################################
 
 import matplotlib.pyplot as plt
