@@ -14,10 +14,10 @@ import numpy as np
 import pandas as pd 
 from IPython.display import display, HTML
 from pyomo.environ import *
-from data import Network_0, H_Network_0
+from data import Network_1, H_Network_1
 
-H = H_Network_0
-STN = Network_0
+H = H_Network_1
+STN = Network_1
 
 STATES = STN['STATES']
 STATES_SHIPMENT = STN['STATES_SHIPMENT']
@@ -189,20 +189,21 @@ P_Tau = {(i,j): UNIT_TASKS[(j,i)]['tau'] for (j,i) in UNIT_TASKS}
 # Unit initialization.
 P_Unit_Init = {(j): 1 for j in S_UNITS}
 
+# Startup Cost
+P_StarUp_Cost = {(j,i): UNIT_TASKS[(j,i)]['sCost'] for (j,i) in UNIT_TASKS}
+
 
 print("Min batch size of task in unit P_Bmin: ", P_Bmin)
 print("Max batch size of task in unit P_Bmax: ", P_Bmax) 
-
 print("Conversion coefficient of consumed materials P_rho_MINUS: ", P_rho_MINUS)
 print("Conversion coefficient of produced materials P_rho_PLUS: ", P_rho_PLUS)
-
 print("Minimum lengh of a run P_Tau_Min: ", P_Tau_Min)
 print("Maximum lengh of a run P_Tau_Max: ",P_Tau_Max)
-
 print("Storage capacity of each material P_Chi: ", P_Chi)
 print('Demand for material P_K_Demand: ', P_K_Demand)
 print("Time for executing a task P_Tau: ", P_Tau)
 print("Unit initialization P_Unit_Init: ", P_Unit_Init)
+print("Startup Cost P_StarUp_Cost: ", P_StarUp_Cost)
 
 
 ##############################################################################################
@@ -250,45 +251,24 @@ def unit_capacity_ub_eq2(model, i, j, n):
     else:
         return Constraint.Skip
 
-#def material_mass_balance_eq3(model, k, n):
-#    if k != 'RM':
-#        return model.V_S[k,n] == ((model.V_S[k,n-1] if n >= 1 else 0) 
-#                                        + sum(
-#                                            P_rho_MINUS[i,k]*model.V_B[i,j,nprime] 
-#                                            for (i,j) in P_TASK_UNIT 
-#                                            for nprime in S_TIME 
-#                                            if i in S_I_CONSUMING_K[k]
-#                                            if ((nprime >= n - P_Tau[i,j]) and (nprime <= n))
-#                                        )    
-#                                        + sum(
-#                                            P_rho_PLUS[i,k]*model.V_B[i,j,nprime] 
-#                                            for (i,j) in P_TASK_UNIT
-#                                            for nprime in S_TIME 
-#                                            if i in S_I_PRODUCING_K[k] 
-#                                            if ((nprime >= n - P_Tau[i,j]+1) and (nprime <= n))
-#                                        )
-#                                        - (P_K_Demand[k,n] if (k,n) in STATES_SHIPMENT else 0)
-#        )
-#    else:
-#        return Constraint.Skip
-
 def material_mass_balance_eq3(model, k, n):
-    return model.V_S[k,n] == (
-                            (model.V_S[k,n-1] if n >= 1 else 0)
-                          + (STATES[k]['initial'] if n == 0 else 0)
-                          + sum(
-                                P_rho_MINUS[i,k]*model.V_B[i,j,n] 
-                                for (i,j) in P_TASK_UNIT 
-                                if i in S_I_CONSUMING_K[k]
-                                )    
-                          + sum(
-                                P_rho_PLUS[i,k]*model.V_B[i,j,n-P_Tau[i,j]] 
-                                for (i,j) in P_TASK_UNIT
-                                if i in S_I_PRODUCING_K[k]
-                                if n - P_Tau[i,j] >= 0                                            
-                                )
-                          - (P_K_Demand[k,n] if (k,n) in STATES_SHIPMENT else 0)
-    )    
+    if k != 'RM':
+        return model.V_S[k,n] == ((model.V_S[k,n-1] if n >= 1 else 0) + (STATES[k]['initial'] if n == 0 else 0)
+                                        + sum(
+                                            P_rho_MINUS[i,k]*model.V_B[i,j,n] 
+                                            for (i,j) in P_TASK_UNIT 
+                                            if i in S_I_CONSUMING_K[k]
+                                        )    
+                                        + sum(
+                                            P_rho_PLUS[i,k]*model.V_B[i,j,n - P_Tau[i,j]] 
+                                            for (i,j) in P_TASK_UNIT
+                                            if i in S_I_PRODUCING_K[k] 
+                                            if n - P_Tau[i,j] >= 0
+                                        )
+                                        - (P_K_Demand[k,n] if (k,n) in STATES_SHIPMENT else 0)
+        )
+    else:
+        return Constraint.Skip
 
 def track_idle_unit_eq13(model, j, n):
     if j in S_J_Units_With_Shutdown_Tasks:
@@ -425,7 +405,13 @@ def material_capacity(model, k, n):
 
 def objective(model):
    return (
-            -sum((UNIT_TASKS[(j,i)]['Cost']*model.V_X[i,j,n] + UNIT_TASKS[(j,i)]['vCost']*model.V_B[i,j,n]) for (i,j) in P_TASK_UNIT for n in S_TIME) 
+            sum(
+                (UNIT_TASKS[(j,i)]['Cost']*model.V_X[i,j,n] 
+               + UNIT_TASKS[(j,i)]['vCost']*model.V_B[i,j,n]) for (i,j) in P_TASK_UNIT for n in S_TIME
+          )
+          + sum(
+                (model.V_Y_Start[i,j,n] + model.V_Y_End[i,j,n])*P_StarUp_Cost[j,i] for (i,j) in P_TASK_UNIT for n in S_TIME   
+          )
           )
 
  
@@ -441,11 +427,14 @@ model.C_Max_Lenght_Run_Eq19 = Constraint(S_TASKS, S_UNITS, S_TIME, rule = max_le
 model.C_Track_Start_Production_Task_After_Transition_Eq20 = Constraint(S_TASKS, S_UNITS, S_TIME, rule = track_start_production_task_after_transition_eq20)
 model.C_Unit_Availability_Eq21 = Constraint(S_UNITS, S_TIME, rule = unit_availability_eq21)
 model.C_Material_Availability = Constraint(S_MATERIALS, S_TIME, rule = material_capacity)
-model.C_Objective = Objective(expr = objective, sense = maximize)
+model.C_Objective = Objective(expr = objective, sense = minimize)
+
+#solver=po.SolverFactory('gams')
+#result = solver.solve(m, solver='conopt',tee=True)
 
 SolverFactory('appsi_highs').solve(model).write() 
-for con in model.component_map(Constraint).itervalues():
-    con.pprint()
+#for con in model.component_map(Constraint).itervalues():
+#    con.pprint()
 
 # show all of V_X
 #model.V_X.display()
@@ -458,7 +447,7 @@ for con in model.component_map(Constraint).itervalues():
 
 plt.figure(figsize=(12,6))
 
-gap = H/500
+gap = (H+1)/500
 idx = 1
 lbls = []
 ticks = []
@@ -468,7 +457,7 @@ for j in sorted(S_UNITS):
         idx -= 1
         ticks.append(idx)
         lbls.append("{0:s} -> {1:s}".format(j,i))
-        plt.plot([0,H],[idx,idx],lw=20,alpha=.3,color='y')
+        plt.plot([0,H+5],[idx,idx],lw=20,alpha=.3,color='y')
         for t in S_TIME:
             if model.V_X[i,j,t]() > 0.0001:
                 plt.plot([t+gap,t+P_Tau[i,j]-gap], [idx,idx],'b', lw=20, solid_capstyle='butt')
@@ -494,4 +483,4 @@ for (k,idx) in zip(STATES.keys(),range(0,len(STATES.keys()))):
     plt.plot([0,H],[P_Chi[k],P_Chi[k]],'r--')
     plt.title(k)
 plt.tight_layout()
-plt.show()
+plt.show(block=True)
