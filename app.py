@@ -14,10 +14,12 @@ import numpy as np
 import pandas as pd 
 from IPython.display import display, HTML
 from pyomo.environ import *
-from data import Network_1, H_Network_1
+from pyomo.opt import SolverFactory
+from data import *
+import time
 
-H = H_Network_1
-STN = Network_1
+H = H_Network_2
+STN = Network_2
 
 STATES = STN['STATES']
 STATES_SHIPMENT = STN['STATES_SHIPMENT']
@@ -213,13 +215,13 @@ print("Startup Cost P_StarUp_Cost: ", P_StarUp_Cost)
 model = ConcreteModel()
 
 # V_X[i,j,n] = 1 if unit j processes (sub)task i at time point n.
-model.V_X = Var(S_TASKS, S_UNITS, S_TIME, domain = Boolean)
+model.V_X = Var(S_TASKS, S_UNITS, S_TIME, bounds = (0, 1), domain = Boolean)
 
 # V_Y_End[i,j,n] = 1 if a run of a continuous task in unit j ends at time point n.
-model.V_Y_End = Var(S_TASKS, S_UNITS, S_TIME, domain = Boolean)
+model.V_Y_End = Var(S_TASKS, S_UNITS, S_TIME, bounds = (0, 1), domain = Boolean)
 
 # V_Y_Start[i,j,n] = 1 if a run of a continuous task in unit j starts at time point n.
-model.V_Y_Start = Var(S_TASKS, S_UNITS, S_TIME, domain = Boolean)
+model.V_Y_Start = Var(S_TASKS, S_UNITS, S_TIME, bounds = (0, 1), domain = Boolean)
 
 # V_B[i,j,n] is the batch size assigned to task i in unit j at time n.
 model.V_B = Var(S_TASKS, S_UNITS, S_TIME, domain = NonNegativeReals)
@@ -228,10 +230,12 @@ model.V_B = Var(S_TASKS, S_UNITS, S_TIME, domain = NonNegativeReals)
 model.V_S = Var(S_MATERIALS, S_TIME, domain = NonNegativeReals)
 
 # V_X_Hat[i,j,n] is 1 if unit j is in task mode i (ready to execute batch subtaks i_SB(i)) at time point n.
-model.V_X_Hat = Var(S_TASKS, S_UNITS, S_TIME, domain = Boolean)
+model.V_X_Hat = Var(S_TASKS, S_UNITS, S_TIME, bounds = (0, 1), domain = Boolean)
 
 # V_X_Hat_Idle[j,n] is 1 if unit j is in idle mode at time point n.
-model.V_X_Hat_Idle = Var(S_UNITS, S_TIME, domain = Boolean)
+model.V_X_Hat_Idle = Var(S_UNITS, S_TIME, bounds = (0, 1), domain = Boolean)
+
+model.V_N_Unit = Var(S_UNITS, domain = Integers)
 
 ######################################
 #               Constraint           #
@@ -391,11 +395,11 @@ def unit_availability_eq21(model, j, n):
             for nprime in S_TIME 
             if ((nprime >= n - P_Tau[i,j] + 1) and (nprime <= n))
       ) 
-      + sum(
-            model.V_X_Hat[i,j,n] 
-            for i in (S_I_Production_Tasks_With_Transition)
-            if i in S_I_In_J[j]
-      )
+      #+ sum(
+      #      model.V_X_Hat[i,j,n] 
+      #      for i in (S_I_Production_Tasks_With_Transition)
+      #      if i in S_I_In_J[j]
+      #)
       + (model.V_X_Hat_Idle[j,n] if j in S_J_Units_With_Shutdown_Tasks else 0)
 
     ) <= 1
@@ -403,17 +407,149 @@ def unit_availability_eq21(model, j, n):
 def material_capacity(model, k, n):
     return model.V_S[k,n] <= P_Chi[k]
 
-def objective(model):
-   return (
-            sum(
-                (UNIT_TASKS[(j,i)]['Cost']*model.V_X[i,j,n] 
-               + UNIT_TASKS[(j,i)]['vCost']*model.V_B[i,j,n]) for (i,j) in P_TASK_UNIT for n in S_TIME
-          )
-          + sum(
-                (model.V_Y_Start[i,j,n] + model.V_Y_End[i,j,n])*P_StarUp_Cost[j,i] for (i,j) in P_TASK_UNIT for n in S_TIME   
-          )
-          )
+def unit_activity(model, j):
+    
+    return model.V_N_Unit[j] == sum(model.V_X[i,j,n] for i in S_I_Production_Tasks if (i,j) in P_TASK_UNIT for n in S_TIME)
+    
+def earliest_starting_time_2(model, j):
+    if j == 'UC5':
+        return sum(model.V_Y_Start[i,j,n] for i in S_TASKS if (i,j) in P_TASK_UNIT for n in S_TIME if n <= 5) <= 0
+    else:
+        return Constraint.Skip
+    
+def earliest_starting_time_3(model, j):
+    if j == 'UC5':
+        return sum(model.V_Y_End[i,j,n] for i in S_TASKS if (i,j) in P_TASK_UNIT for n in S_TIME if n <= 5) <= 0
+    else:
+        return Constraint.Skip
 
+def y_start_bound(model, i, j):
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UA1':
+        return sum(model.V_Y_Start[i,j,n] for n in S_TIME) <= ceil(112/P_Tau_Min[i,j])
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UA2' and i == 'TA3':
+        return sum(model.V_Y_Start[i,j,n] for n in S_TIME) <= ceil(62/P_Tau_Min[i,j])
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UA2' and i == 'TA2':
+        return sum(model.V_Y_Start[i,j,n] for n in S_TIME) <= ceil(0/P_Tau_Min[i,j])
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UC5':
+        return sum(model.V_Y_Start[i,j,n] for n in S_TIME) <= ceil(170/P_Tau_Min[i,j])
+    else:
+        return Constraint.Skip
+
+def y_end_bound(model, i, j):
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UA1':
+        return sum(model.V_Y_End[i,j,n] for n in S_TIME) <= ceil(112/P_Tau_Min[i,j])
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UA2' and i == 'TA3':
+        return sum(model.V_Y_End[i,j,n] for n in S_TIME) <= ceil(62/P_Tau_Min[i,j])
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UA2' and i == 'TA2':
+        return sum(model.V_Y_End[i,j,n] for n in S_TIME) <= ceil(0/P_Tau_Min[i,j])
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UC5':
+        return sum(model.V_Y_End[i,j,n] for n in S_TIME) <= ceil(170/P_Tau_Min[i,j])
+    else:
+        return Constraint.Skip
+
+def y_start_bound(model, i, j):
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UA1':
+        return sum(model.V_Y_Start[i,j,n] for n in S_TIME) <= ceil(112/P_Tau_Min[i,j])
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UA2' and i == 'TA3':
+        return sum(model.V_Y_Start[i,j,n] for n in S_TIME) <= ceil(62/P_Tau_Min[i,j])
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UA2' and i == 'TA2':
+        return sum(model.V_Y_Start[i,j,n] for n in S_TIME) <= ceil(0/P_Tau_Min[i,j])
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UC5':
+        return sum(model.V_Y_Start[i,j,n] for n in S_TIME) <= ceil(170/P_Tau_Min[i,j])
+    else:
+        return Constraint.Skip
+
+def x_prod_bound(model, i, j):
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UA1':
+        return sum(model.V_X[i,j,n] for n in S_TIME) <= ceil(95)
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UA2' and i == 'TA3':
+        return sum(model.V_X[i,j,n] for n in S_TIME) <= ceil(50)
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UA2' and i == 'TA2':
+        return sum(model.V_X[i,j,n] for n in S_TIME) <= ceil(0)
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UC5':
+        return sum(model.V_X[i,j,n] for n in S_TIME) <= ceil(150)
+    else:
+        return Constraint.Skip
+
+def startup_bound_improved(model, i, j):
+    if (i,j) in P_TASK_UNIT and i in S_I_Production_Tasks and j == 'UC5':
+        return model.V_N_SU[i,j] <= floor((H - 5)/(8))*5
+    else:
+        return Constraint.Skip
+
+def if_start_end(model, i, j, n):
+    if (i in S_I_Production_Tasks) and (i,j) in P_TASK_UNIT and (n <= H - P_Tau_Max[i,j]):
+        return model.V_Y_End[i,j,n+P_Tau_Min[i,j]] + model.V_Y_End[i,j,n+P_Tau_Max[i,j]] >= model.V_Y_Start[i,j,n]
+    else:
+        return Constraint.Skip
+
+def if_start_end_ub(model, i, j, n):
+    if (i in S_I_Production_Tasks) and (i,j) in P_TASK_UNIT and (n <= H - P_Tau_Max[i,j]):
+        return - model.V_Y_Start[i,j,n] + model.V_Y_End[i,j,n+P_Tau_Min[i,j]] + model.V_Y_End[i,j,n+P_Tau_Max[i,j]] <= 1
+    else:
+        return Constraint.Skip
+
+def consecutive_end_limits(model, i, j, n):
+    if (i in S_I_Production_Tasks) and (i,j) in P_TASK_UNIT and (n <= H - (P_Tau_Max[i,j] - P_Tau_Min[i,j])):
+        return model.V_Y_End[i,j,n] + model.V_Y_End[i,j,n+(P_Tau_Max[i,j] - P_Tau_Min[i,j])] <= 1
+    else:
+        return Constraint.Skip
+
+def defining_bounds(model):
+
+    for i in S_I_Production_Tasks:
+        for j in S_UNITS:
+            if j == 'UC5' and (i,j) in P_TASK_UNIT: 
+                model.V_N_SU[i,j].setub(floor((H - 5)/(8))*5)
+            if j == 'UA2' and (i,j) in P_TASK_UNIT: 
+                    model.V_N_SU[i,j].setub(42)        
+            if j == 'UA1' and (i,j) in P_TASK_UNIT: 
+                    model.V_N_SU[i,j].setub(42)        
+
+def braching_priorities(model, solver):
+    
+    
+    #solver.set_var_attr(model.V_X, "BranchPriority", 2)
+    #solver.set_var_attr(model.V_N_Unit, "BranchPriority", 1)
+    #model.BranchPriority = Suffix(direction=Suffix.EXPORT)
+    
+    #model.BranchPriority[model.V_X] = 2
+    #model.BranchPriority[model.V_Y_End] = 3
+    #model.BranchPriority[model.V_Y_Start] = 4
+    #model.BranchPriority[model.V_N_Unit] = 1
+    
+    
+    model.V_X.BranchPriority = 2
+    model.V_Y_End.BranchPriority = 2
+    model.V_Y_Start.BranchPriority = 2
+    model.V_B.BranchPriority = 2
+    model.V_S.BranchPriority = 2
+    model.V_X_Hat.BranchPriority = 2
+    model.V_X_Hat_Idle.BranchPriority = 2
+    model.V_N_Unit.BranchPriority = 1
+
+   
+    #model.x.set_suffix(model.BranchPriority)
+    #model.y.set_suffix(model.BranchPriority)
+    #model.z.set_suffix(model.BranchPriority)
+    #model.z.set_suffix(model.BranchPriority)
+
+def objective(model):
+   
+   fix_operational_cost = sum(UNIT_TASKS[(j,i)]['Cost']*model.V_X[i,j,n] for (i,j) in P_TASK_UNIT for n in S_TIME)
+   variable_operational_cost = sum(UNIT_TASKS[(j,i)]['vCost']*model.V_B[i,j,n] for (i,j) in P_TASK_UNIT for n in S_TIME)
+   startup_cost = sum(model.V_Y_Start[i,j,n]*P_StarUp_Cost[j,i] for (i,j) in P_TASK_UNIT for n in S_TIME)
+   shutdown_cost = sum(model.V_Y_End[i,j,n]*P_StarUp_Cost[j,i] for (i,j) in P_TASK_UNIT for n in S_TIME)
+   #production_revenue = sum(STATES['P1']['price']*model.V_S['P1',n] for n in S_TIME)
+   makespan = sum(n*model.V_X[i,j,n] for (i,j) in P_TASK_UNIT for n in S_TIME)
+   
+   return ( fix_operational_cost 
+           + variable_operational_cost 
+           + startup_cost 
+           + shutdown_cost 
+           #- production_revenue 
+           + makespan)
+   
  
 model.C_Unit_Capacity_LB_Eq2 = Constraint(S_TASKS, S_UNITS, S_TIME, rule = unit_capacity_lb_eq2)
 model.C_Unit_Capacity_UB_Eq2 = Constraint(S_TASKS, S_UNITS, S_TIME, rule = unit_capacity_ub_eq2)
@@ -427,12 +563,43 @@ model.C_Max_Lenght_Run_Eq19 = Constraint(S_TASKS, S_UNITS, S_TIME, rule = max_le
 model.C_Track_Start_Production_Task_After_Transition_Eq20 = Constraint(S_TASKS, S_UNITS, S_TIME, rule = track_start_production_task_after_transition_eq20)
 model.C_Unit_Availability_Eq21 = Constraint(S_UNITS, S_TIME, rule = unit_availability_eq21)
 model.C_Material_Availability = Constraint(S_MATERIALS, S_TIME, rule = material_capacity)
+
+model.Unit_Activity = Constraint(S_UNITS, rule = unit_activity)
+
+#model.Earliest_Starting_Time_2 = Constraint(S_UNITS, rule = earliest_starting_time_2)
+#model.Earliest_Starting_Time_3 = Constraint(S_UNITS, rule = earliest_starting_time_3)
+
+#model.Y_Start_Bound = Constraint(S_TASKS, S_UNITS, rule = y_start_bound)
+#model.Y_End_Bound = Constraint(S_TASKS, S_UNITS, rule = y_end_bound)
+#model.X_Prod_Bound = Constraint(S_TASKS, S_UNITS, rule = x_prod_bound)
+
+#model.Startup_Bound_Improved = Constraint(S_TASKS, S_UNITS, rule = startup_bound_improved)
+
+model.If_Start_End = Constraint(S_TASKS, S_UNITS, S_TIME, rule = if_start_end)
+#model.If_Start_End_UB = Constraint(S_TASKS, S_UNITS, S_TIME, rule = if_start_end_ub)
+#model.Consecutive_End_Limits = Constraint(S_TASKS, S_UNITS, S_TIME, rule = consecutive_end_limits)
+
 model.C_Objective = Objective(expr = objective, sense = minimize)
 
-#solver=po.SolverFactory('gams')
-#result = solver.solve(m, solver='conopt',tee=True)
+#defining_bounds(model)
 
-SolverFactory('appsi_highs').solve(model).write() 
+
+#for var in model.component_objects(Var, active=True):
+#    for idx in var:
+#        if var[idx].domain in [Integers, Boolean]:
+#            var[idx].domain = NonNegativeReals
+
+solver = SolverFactory('gurobi')
+#braching_priorities(model, solver)
+
+try:
+   
+    results = solver.solve(model, tee = True)
+    results.write()
+
+except:
+
+#solver_log = results.solver.termination_message
 #for con in model.component_map(Constraint).itervalues():
 #    con.pprint()
 
@@ -444,6 +611,17 @@ SolverFactory('appsi_highs').solve(model).write()
 #model.V_X_Hat.display()
 #model.V_X_Hat_Idle.display()
 #model.V_S.display()
+#model.V_N_SU.display()
+    print(f"Error")
+   
+
+model.P_Avg_Time_Unit = Param(S_UNITS, mutable = True)
+
+for j in S_UNITS:
+    model.P_Avg_Time_Unit[j] = sum(ceil(model.V_X[i,j,n].value) for i in S_I_Production_Tasks for n in S_TIME if model.V_X[i,j,n].value != None)
+
+model.P_Avg_Time_Unit.display() 
+    
 
 plt.figure(figsize=(12,6))
 
