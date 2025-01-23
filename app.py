@@ -1,12 +1,10 @@
 
 ##########################################################
 #The current model has no utility constraints.           # 
-#It assumes no storage restrictions.                     #
 #It assumes unlimited amount of raw materials            #
 #It assume no delays: idis, idly, rmi_dly, rmi_n         #
 #It assumes no batch units: j_b                          #
 #There is no pre-defined tasks for n=0: i_ini            #
-#It assumes a simplified objective function              #
 ##########################################################
 
 from pyomo.environ import *
@@ -21,12 +19,12 @@ from constraints import create_constraints
 
 #from network_0_v1 import *
 #from network_0_v2 import *
-#from network_1_v1 import *
+from network_1_v1 import *
 #from network_1_v2 import *
-from network_2 import *
+#from network_2 import *
 #from network_3 import *
 
-H = 100
+H = 15
 STN = STN
 model = ConcreteModel()
 create_main_sets_parameters(model, STN, H)
@@ -44,20 +42,20 @@ try:
     set_solver_options(solver, model, model_nature = 'original_model')
     solve_model(solver, model)
     
-    total_production = sum(model.V_B[i,j,n].value for n in model.S_Time for i in model.S_Tasks for j in model.S_J_Executing_I[i] if (i,j) in model.P_Task_Unit_Network)
+    total_production = sum(model.V_B[i,j,n].value for n in model.S_Time for k in model.S_Materials for i in model.S_I_Producing_K[k] for j in model.S_J_Executing_I[i] if (i,j) in model.P_Task_Unit_Network if k in model.S_Final_Products)
     
     #print_model_constraints(model)
     
     set_solver_options(solver, model, model_nature = 'relaxed_model')
-    #solve_model(solver, model)
+    solve_model(solver, model)
     
-    total_production_relaxed = sum(model.V_B[i,j,n].value for n in model.S_Time for i in model.S_Tasks for j in model.S_J_Executing_I[i] if (i,j) in model.P_Task_Unit_Network)
+    total_production_relaxed = sum(model.V_B[i,j,n].value for n in model.S_Time for k in model.S_Materials for i in model.S_I_Producing_K[k] for j in model.S_J_Executing_I[i] if (i,j) in model.P_Task_Unit_Network if k in model.S_Final_Products)
     
     print(f'Total production is = {total_production}')
     print(f'Total relaxed production is = {total_production_relaxed}')    
 
-    plot_gantt_chart(H, model)
-    plot_inventory_chart(H, model)
+    #plot_gantt_chart(H, model)
+    #plot_inventory_chart(H, model)
  
 except:
 

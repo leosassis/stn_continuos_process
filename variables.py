@@ -24,6 +24,6 @@ def create_variables(model):
 
 
 def init_variables(model, H):
-    [model.V_X_Hat[i,j,n].fix(0) for i in model.S_Tasks for j in model.S_Units for n in model.S_Time if n < H]   # model.V_X_Hat seams to have effect on the model.
-    [model.V_X[i,j,n].fix(0) for i in model.S_Tasks for j in model.S_Units for n in model.S_Time if n >= H-1] # On the last period it can be maximum Y_End = 0.
-    [model.V_X['TA1',j,n].fix(1) for j in model.S_Units for n in model.S_Time if n == 0] # Initialization. TA1 is the first task to reveice feed.
+    [model.V_X_Hat[i,j,n].fix(0) for i in model.S_Tasks for j in model.S_Units for n in model.S_Time if n < H] #Variable model.V_X_Hat seams to have effect on the model.
+    [model.V_X[i,j,n].fix(0) for i in model.S_Tasks for j in model.S_Units for n in model.S_Time if n >= H-1] #On the last period it can be maximum Y_End = 0.
+    [model.V_X['TA1',j,n].fix(1) for j in model.S_Units for n in model.S_Time if n == 0] #Initialization. TA1 is the first task to reveice feed.
