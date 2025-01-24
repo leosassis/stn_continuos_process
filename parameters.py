@@ -4,8 +4,8 @@ def init_parameter_tau(UNIT_TASKS):
     P_TAU = {(i,j): UNIT_TASKS[(j,i)]['tau'] for (j,i) in UNIT_TASKS}
     return P_TAU
 
-def init_material_demand(STATES_SHIPMENT):
-    P_DEMAND = {(k,n): STATES_SHIPMENT[(k,n)]['demand'] for (k,n) in STATES_SHIPMENT}
+def init_material_demand(STATES_SHIPMENT, H):
+    P_DEMAND = {(k,n): STATES_SHIPMENT[(k,n)]['demand'] for (k,n) in STATES_SHIPMENT if n <= H}
     return P_DEMAND
     
 def init_initial_inventory(STATES):        
@@ -57,11 +57,12 @@ def create_parameters(model, STN, H):
     UNIT_TASKS = STN['UNIT_TASKS']
     #TIME = STN['TIME']
     TASKS_TRANSITION_TASKS = STN['TASKS_TRANSITION_TASKS']
+    H = H
     
     model.P_Tau = Param(model.S_Tasks, model.S_Units, initialize = init_parameter_tau(UNIT_TASKS))
     model.P_Init_Inventory_Material = Param(model.S_Materials, initialize = init_initial_inventory(STATES))
     model.P_Chi = Param(model.S_Materials, initialize = init_storage_limits(STATES))
-    model.P_Material_Demand = Param(model.S_Materials, model.S_Time, initialize = init_material_demand(STATES_SHIPMENT), default = 0)
+    model.P_Material_Demand = Param(model.S_Materials, model.S_Time, initialize = init_material_demand(STATES_SHIPMENT, H), default = 0)
     model.P_Beta_Max = Param(model.S_Tasks, model.S_Units, initialize = init_beta_max(UNIT_TASKS))
     model.P_Beta_Min = Param(model.S_Tasks, model.S_Units, initialize = init_beta_min(UNIT_TASKS))
     model.P_Rho_Minus = Param(model.S_Tasks, model.S_Materials, initialize = init_conversion_rate_consuming(ST_ARCS))

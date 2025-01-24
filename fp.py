@@ -33,7 +33,6 @@ def forward_propagation(model, H):
     print(f"K_Exp = {model.K_Exp.data()}.") 
         
     print("----------------------------------------------------------------------------------------------------------\n")
-
     
     while model.K_Exp != model.S_Materials:
         for k in model.S_Materials: 
@@ -79,8 +78,7 @@ def forward_propagation(model, H):
                             'min_capacity': sum(model.P_Tau_Min[i,j] * model.P_Beta_Min[i,j] * combo[c] for (c,j) in enumerate(model.S_J_Executing_I[i])),
                             'max_capacity': sum(model.P_Tau_Max[i,j] * model.P_Beta_Max[i,j] * combo[c] for (c,j) in enumerate(model.S_J_Executing_I[i]))
                         }
-                        for combo in combinations
-                    }  
+                        for combo in combinations}  
                     
                     for combo, capacities in combined_capacities[i].items():
                         min_capacity = capacities['min_capacity']

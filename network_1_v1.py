@@ -32,7 +32,7 @@ STN = {
     # unit data indexed by (unit, task)
     'UNIT_TASKS': {
         ('UA1', 'TA1') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 0.5, 'Bmax': 3, 'Cost': 4, 'vCost': 1, 'sCost': 40.5, 'direction': 1,},
-        ('UA2', 'TA1') : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 0.5, 'Bmax': 4, 'Cost': 4, 'vCost': 1, 'sCost': 40.5, 'direction': 1,},              
+        ('UA2', 'TA1') : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 0.5, 'Bmax': 0.5, 'Cost': 4, 'vCost': 1, 'sCost': 40.5, 'direction': 1,},              
         ('UC5', 'TC1')  : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 5, 'Bmax': 7, 'Cost': 4, 'vCost': 1, 'sCost': 31.5, 'direction': 1,},       
     },
 }

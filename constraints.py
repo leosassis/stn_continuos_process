@@ -239,6 +239,12 @@ def create_constraints(model, STN, H):
    model.C_Material_Availability = Constraint(model.S_Materials, model.S_Time, rule = material_capacity)
 
 def add_fp_constraint(model):    
-   #model.C_Max_Lenght_Run_Eq19_Reformulation = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19_reformulation)
-   #model.If_Start_End = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = if_start_end)
    model.Forward_Propagation_Inequality = Constraint(model.S_Tasks, rule = forward_propagation_inequality)
+
+def add_if_start_end(model):
+   model.If_Start_End = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = if_start_end)
+
+def add_tau_max_reformulation(model):
+   model.C_Max_Lenght_Run_Eq19.clear()
+   model.C_Max_Lenght_Run_Eq19_Reformulation = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19_reformulation)
+   

@@ -33,8 +33,17 @@ def solve_model(solver, model):
     
     results = solver.solve(model, tee = True)
     results.write()
+    return results
 
 def print_model_constraints(model):
     
     for con in model.component_map(Constraint).itervalues():
         con.pprint()
+        
+def compute_num_variables_constraints(model):
+    
+        num_constraints = sum(len(constraint) for constraint in model.component_objects(Constraint, active=True))
+        num_total_vars = sum(len(var) for var in model.component_objects(Var, active=True))
+        num_binary_vars = sum(1 for v in model.component_objects(Var, active=True) for index in v if v[index].domain == Binary)
+        
+        return num_total_vars, num_binary_vars, num_constraints

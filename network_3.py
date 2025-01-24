@@ -8,7 +8,7 @@ STN = {
     },
 
     'STATES_SHIPMENT': {
-        #('P1', 8) : {'demand':10},        
+        ('P1', 15) : {'demand':10},        
         ('P1', 25) : {'demand':25},        
     },
     
@@ -55,14 +55,14 @@ STN = {
     
     # unit data indexed by (unit, task)
     'UNIT_TASKS': {
-        ('UA1', 'TA1') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 3.5, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 40.5, 'direction': 1,},
-        ('UA6', 'TA1') : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 4, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 40.5, 'direction': 1,},
+        ('UA1', 'TA1') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 3.5, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 40.5, 'direction': 1,},
+        ('UA6', 'TA1') : {'tau_min': 4, 'tau_max': 5, 'tau': 1, 'Bmin': 4, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 40.5, 'direction': 1,},
         
-        ('UA2', 'TA3')  : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 2.1, 'Bmax': 3, 'Cost': 4, 'vCost': 1, 'sCost': 31.5, 'direction': 1,},
+        ('UA2', 'TA3')  : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 2.1, 'Bmax': 3, 'Cost': 4, 'vCost': 1, 'sCost': 31.5, 'direction': 1,},
         ('UA2', 'ITA3') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 2.8, 'Bmax': 4, 'Cost': 6, 'vCost': 1, 'sCost': 0, 'direction': 1,},
         ('UA2', 'TA3I') : {'tau_min': 0, 'tau_max': 0, 'tau': 1, 'Bmin': 1.4, 'Bmax': 2, 'Cost': 3, 'vCost': 1, 'sCost': 0, 'direction': -1,},
         
-        ('UC5', 'TC1')  : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 6, 'Bmax': 8, 'Cost': 4, 'vCost': 1, 'sCost': 31.5, 'direction': 1,},
+        ('UC5', 'TC1')  : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 6, 'Bmax': 8, 'Cost': 4, 'vCost': 1, 'sCost': 31.5, 'direction': 1,},
         ('UC5', 'ITC1') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 4, 'Bmax': 4, 'Cost': 6, 'vCost': 1, 'sCost': 0, 'direction': 1,},
         ('UC5', 'TC1I') : {'tau_min': 0, 'tau_max': 0, 'tau': 1, 'Bmin': 2, 'Bmax': 2, 'Cost': 3, 'vCost': 1, 'sCost': 0, 'direction': -1,},
     },
