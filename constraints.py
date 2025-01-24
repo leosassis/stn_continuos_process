@@ -17,18 +17,12 @@ def unit_capacity_ub_eq2(model, i, j, n):
 def material_mass_balance_eq3(model, k, n):
     if k not in model.S_Raw_Materials:    
         return model.V_S[k,n] == ((model.V_S[k,n-1] if n >= 1 else 0) + (model.P_Init_Inventory_Material[k] if n == 0 else 0)
-                                            + sum(
-                                                model.P_Rho_Minus[i,k]*model.V_B[i,j,n] 
-                                                for i in model.S_I_Consuming_K[k]
-                                                for j in model.S_J_Executing_I[i] 
+                                + sum(model.P_Rho_Minus[i,k]*model.V_B[i,j,n] for i in model.S_I_Consuming_K[k] for j in model.S_J_Executing_I[i] 
                                                 #for (i,j) in model.P_Task_Unit_Network 
                                                 #if i in model.S_I_Consuming_K[k]
                                             )    
                                                                                         
-                                            + sum(
-                                                model.P_Rho_Plus[i,k]*model.V_B[i,j,n - model.P_Tau[i,j]] 
-                                                for i in model.S_I_Producing_K[k]
-                                                for j in model.S_J_Executing_I[i] 
+                                + sum(model.P_Rho_Plus[i,k]*model.V_B[i,j,n - model.P_Tau[i,j]] for i in model.S_I_Producing_K[k] for j in model.S_J_Executing_I[i] 
                                                 #for (i,j) in model.P_Task_Unit_Network
                                                 #if i in model.S_I_Producing_K[k] 
                                                 #if t >= n - model.P_Tau[i,j] + 1 and t <= n
@@ -205,50 +199,6 @@ def unit_availability_eq21(model, j, n):
 def material_capacity(model, k, n):
     return model.V_S[k,n] <= model.P_Chi[k]
 
-def unit_activity_track(model, j):
-    
-    return model.V_N_Unit[j] == sum(model.V_X[i,j,n] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network for n in model.S_Time)
-    
-def unit_activity_bound(model, j):
-    
-    return model.V_N_Unit[j] <= floor(H/(min(model.P_Tau[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)))
-
-def y_end_upper_bound(model, k, STATES):
-    if STATES[k]['isProd'] == True:
-        return sum(model.V_Y_End[i,j,n]*model.P_Beta_Min[i,j]*model.P_Tau_Min[i,j] for i in (model.S_I_Producing_K[k] & model.S_I_Production_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n <= P_Largest_Demand_Point if (i,j) in model.P_Task_Unit_Network) <= sum(model.P_Material_Demand[k,n] for n in model.S_Time if (k,n) in STATES_SHIPMENT)  
-    else:
-        return Constraint.Skip
-
-def y_start_upper_bound(model, k, STATES):
-    if STATES[k]['isProd'] == True:
-        return sum(model.V_Y_Start[i,j,n]*model.P_Beta_Min[i,j]*model.P_Tau_Min[i,j] for i in (model.S_I_Producing_K[k] & model.S_I_Production_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n <= P_Largest_Demand_Point if (i,j) in model.P_Task_Unit_Network) <= sum(model.P_Material_Demand[k,n] for n in model.S_Time if (k,n) in STATES_SHIPMENT)  
-    else:
-        return Constraint.Skip
-
-def x_production_upper_bound(model, k, STATES):
-    if STATES[k]['isProd'] == True:
-        return sum(model.V_X[i,j,n]*model.P_Beta_Min[i,j] for i in (model.S_I_Producing_K[k] & model.S_I_Production_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n <= P_Largest_Demand_Point if (i,j) in model.P_Task_Unit_Network) <= sum(model.P_Material_Demand[k,n] for n in model.S_Time if (k,n) in STATES_SHIPMENT)  
-    else:
-        return Constraint.Skip
-
-def y_start_lower_bound(model, k, STATES):
-    if STATES[k]['isProd'] == True:
-        return sum(model.V_Y_Start[i,j,n]*model.P_Beta_Max[i,j]*model.P_Tau_Max[i,j] for i in (model.S_I_Producing_K[k] & model.S_I_Production_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n <= P_Largest_Demand_Point if (i,j) in model.P_Task_Unit_Network) >= sum(model.P_Material_Demand[k,n] for n in model.S_Time if (k,n) in STATES_SHIPMENT)  
-    else:
-        return Constraint.Skip
-
-def y_end_lower_bound(model, k, STATES):
-    if STATES[k]['isProd'] == True:
-        return sum(model.V_Y_End[i,j,n]*model.P_Beta_Max[i,j]*model.P_Tau_Max[i,j] for i in (model.S_I_Producing_K[k] & model.S_I_Production_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n <= P_Largest_Demand_Point if (i,j) in model.P_Task_Unit_Network) >= sum(model.P_Material_Demand[k,n] for n in model.S_Time if (k,n) in STATES_SHIPMENT)  
-    else:
-        return Constraint.Skip
-   
-def x_production_lower_bound(model, k, STATES):
-    if STATES[k]['isProd'] == True:
-        return sum(model.V_X[i,j,n]*model.P_Beta_Max[i,j] for i in (model.S_I_Producing_K[k] & model.S_I_Production_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n <= P_Largest_Demand_Point if (i,j) in model.P_Task_Unit_Network) >= sum(model.P_Material_Demand[k,n] for n in model.S_Time if (k,n) in STATES_SHIPMENT)  
-    else:
-        return Constraint.Skip
-    
 def if_start_end(model, i, j, n):
     if (i in model.S_I_Production_Tasks) and (i,j) in model.P_Task_Unit_Network and (n <= H - model.P_Tau_Max[i,j]):
         return sum(model.V_Y_End[i,j,nprime] for nprime in model.S_Time if nprime >= n + model.P_Tau_Min[i,j] and nprime <= n + model.P_Tau_Max[i,j]) >= model.V_Y_Start[i,j,n]
@@ -287,15 +237,8 @@ def create_constraints(model, STN, H):
    model.C_Track_Start_Production_Task_After_Transition_Eq20 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_production_task_after_transition_eq20)
    model.C_Unit_Availability_Eq21 = Constraint(model.S_Units, model.S_Time, rule = unit_availability_eq21)
    model.C_Material_Availability = Constraint(model.S_Materials, model.S_Time, rule = material_capacity)
-    
+
+def add_fp_constraint(model):    
    #model.C_Max_Lenght_Run_Eq19_Reformulation = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19_reformulation)
    #model.If_Start_End = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = if_start_end)
-   
-   #model.Y_Start_Lower_Bound = Constraint(model.S_Materials, rule = y_start_lower_bound(STATES))
-   #model.Y_End_Lower_Bound = Constraint(model.S_Materials, rule = y_end_lower_bound(STATES))
-   #model.X_Prod_Lower_Bound = Constraint(model.S_Materials, rule = x_production_lower_bound(STATES))
-   #model.Y_Start_Upper_Bound = Constraint(model.S_Materials, rule = y_start_upper_bound(STATES))
-   #model.Y_End_Upper_Bound = Constraint(model.S_Materials, rule = y_end_upper_bound(STATES))
-   #model.X_Prod_Upper_Bound = Constraint(model.S_Materials, rule = x_production_upper_bound(STATES))
-   
-   #model.Forward_Propagation_Inequality = Constraint(model.S_Tasks, rule = forward_propagation_inequality)
+   model.Forward_Propagation_Inequality = Constraint(model.S_Tasks, rule = forward_propagation_inequality)

@@ -15,7 +15,7 @@ from parameters import create_parameters
 from utils import plot_gantt_chart, plot_inventory_chart
 from fp import forward_propagation
 from objective import create_objective_function
-from constraints import create_constraints
+from constraints import create_constraints, add_fp_constraint
 
 #from network_0_v1 import *
 #from network_0_v2 import *
@@ -37,6 +37,7 @@ create_objective_function(model, STN)
 try:
     
     forward_propagation(model, H)
+    add_fp_constraint(model)
     solver = SolverFactory('gurobi')
     
     set_solver_options(solver, model, model_nature = 'original_model')

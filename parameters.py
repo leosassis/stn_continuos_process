@@ -70,6 +70,7 @@ def create_parameters(model, STN, H):
     model.P_Tau_Max = Param(model.S_Tasks, model.S_Units, initialize = init_tau_max(model, UNIT_TASKS))
     model.P_Unit_Initialization = Param(model.S_Units, initialize = unit_initialization(model))
     model.P_StartUp_Cost = Param(model.S_Units, model.S_Tasks, initialize =  start_up_cost(UNIT_TASKS))
+    model.P_Material_State = Param(model.S_Materials)
     
     model.P_Tau.pprint()
     model.P_Init_Inventory_Material.pprint()
