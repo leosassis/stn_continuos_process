@@ -11,11 +11,9 @@ def define_stn_network(beta_min_factor, tau_max_factor):
             'P2'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True},       
         },
 
-        'STATES_SHIPMENT': {                       
-        ('P1', 25) : {'demand':25},
-        ('P2', 35) : {'demand':25},        
-        ('P1', 55) : {'demand':25},
-        ('P2', 60) : {'demand':25},        
+        'STATES_SHIPMENT': {             
+        ('P1', 35) : {'demand':25},
+        ('P2', 40) : {'demand':25},        
         ('P1', 75) : {'demand':25},
         ('P2', 90) : {'demand':25},
         },

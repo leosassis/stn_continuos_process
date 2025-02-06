@@ -51,7 +51,18 @@ def forward_propagation(model, H):
                     # To Do: what if I have less raw material then my production capacity
 
                     # Since we the floor to have an integer number of runs, this is necessary to catch situation where I can have more runs (and production) considering model.P_Tau_Min.
-                    model.mu_tw[i] = min(model.omega[k].value, sum(model.P_Tau_Max[i,j]*model.P_Beta_Max[i,j]*floor(model.theta[i,j].value/(1+model.P_Tau[i,j]*model.P_Tau_Max[i,j])) for j in model.S_J_Executing_I[i]))    
+                    if i in model.S_I_Production_Tasks_Without_Transition:                   
+                        # Compute total production of task i within a planning horizon for tasks without transition. This means that it is only necessary to add 1 period for Y_End. 
+                        model.mu_tw[i] = min(model.omega[k].value, sum(model.P_Tau_Max[i,j]*model.P_Beta_Max[i,j]*floor((1 + model.theta[i,j].value)/(1+model.P_Tau[i,j]*model.P_Tau_Max[i,j])) for j in model.S_J_Executing_I[i]))    
+                    
+                    elif i in model.S_I_Production_Tasks_With_Indirect_Transition and i not in model.S_I_Production_Tasks_With_Direct_Transition:                   
+                        # Compute total production of task i within a planning horizon for tasks with SU and SD. This means that it is necessary to add the production during startup and shutdowns and their durantions. 
+                        model.mu_tw[i] = min(model.omega[k].value, sum((4 + 2 + model.P_Tau_Max[i,j]*model.P_Beta_Max[i,j])*floor((1 + model.theta[i,j].value)/(2 + 1 + model.P_Tau[i,j]*model.P_Tau_Max[i,j])) for j in model.S_J_Executing_I[i]))    
+                    
+                    elif i in model.S_I_Production_Tasks_With_Direct_Transition:                   
+                        # Compute total production of task i within a planning horizon for tasks with direct and indirect transisitons. This means that it is necessary to add the best case scenario for the production during startup, shutdowns and transition and their durantions. 
+                        model.mu_tw[i] = min(model.omega[k].value, sum((6 + model.P_Tau_Max[i,j]*model.P_Beta_Max[i,j])*floor((1 + model.theta[i,j].value)/(2 + model.P_Tau[i,j]*model.P_Tau_Max[i,j])) for j in model.S_J_Executing_I[i]))    
+                                        
                     model.mu[i] = model.mu_tw[i]
 
                     print(f"\tMax cumulative amount for {i} in a time windows mu_tw = {model.mu_tw[i].value}")
@@ -116,4 +127,7 @@ def forward_propagation(model, H):
                         model.omega[k] = sum(model.mu_adjusted[i].value for i in (model.S_I_Producing_K[k] & model.I_Exp))
                         print(f"The maximum cumulative production (propagate inventory) for material {k} is {model.omega[k].value}.")
 
-    model.omega.pprint()   
+    model.omega.pprint()
+    model.mu_adjusted.pprint()
+    total_predicted_production = sum(model.omega[k].value for k in model.S_Materials if k in model.S_Final_Products)
+    return total_predicted_production 

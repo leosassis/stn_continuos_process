@@ -72,8 +72,6 @@ def create_parameters(model, STN, H):
     model.P_Unit_Initialization = Param(model.S_Units, initialize = unit_initialization(model))
     model.P_StartUp_Cost = Param(model.S_Units, model.S_Tasks, initialize =  start_up_cost(UNIT_TASKS))
     model.P_Material_State = Param(model.S_Materials)
+    model.P_Product_Production = Param(model.S_Materials, mutable = True, initialize = 0) 
     
-    model.P_Tau.pprint()
-    model.P_Init_Inventory_Material.pprint()
-    model.P_Chi.pprint()
-    model.P_Material_Demand.pprint()
+    

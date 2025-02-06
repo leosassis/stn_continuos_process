@@ -15,41 +15,47 @@ from parameters import create_parameters
 from utils import plot_gantt_chart, plot_inventory_chart
 from fp import forward_propagation
 from objective import create_objective_function
-from constraints import create_constraints, add_fp_constraint
+from constraints import create_constraints, add_fp_constraint, add_if_start_end, add_tau_max_reformulation_YS, add_tau_max_reformulation_YE
 
 #from network_0_v1 import *
 #from network_0_v2 import *
-from network_1_v1 import *
+#from network_1_v1 import *
 #from network_1_v2 import *
+#from network_2 import *
+#from network_3 import *
 
-H = 100
-STN = STN
+#from network_2 import define_stn_network
+#from network_4 import define_stn_network
+from network_6 import define_stn_network
+
+H = 50
+beta_min_factor = 0.75
+tau_max_factor = 1
+STN = define_stn_network(beta_min_factor, tau_max_factor)
+
 model = ConcreteModel()
 create_main_sets_parameters(model, STN, H)
 create_variables(model)    
 create_parameters(model, STN, H)
 init_variables(model, H)
 create_constraints(model, STN, H)
-create_objective_function(model, STN)
+create_objective_function(model, STN, maximize, 'production_revenue')
 
 try:
-    
-    forward_propagation(model, H)
-    add_fp_constraint(model)
+    #forward_propagation(model, H)
     solver = SolverFactory('gurobi')
-    
     set_solver_options(solver, model, model_nature = 'original_model')
     solve_model(solver, model)
     
-    total_production = sum(model.V_B[i,j,n].value for n in model.S_Time for k in model.S_Materials for i in model.S_I_Producing_K[k] for j in model.S_J_Executing_I[i] if (i,j) in model.P_Task_Unit_Network if k in model.S_Final_Products)
+    print_model_constraints(model)
+    for i in model.S_Tasks:
+        for j in model.S_J_Executing_I[i]:
+            for n in model.S_Time:
+                if model.V_B[i,j,n].value != None and model.V_B[i,j,n].value > 0:
+                    print(f"{i}-{j}-{n}: {model.V_B[i,j,n].value}")
+    plot_gantt_chart(H, model)
+    plot_inventory_chart(H, model)
     
-    set_solver_options(solver, model, model_nature = 'relaxed_model')
-    solve_model(solver, model)
-    
-    total_production_relaxed = sum(model.V_B[i,j,n].value for n in model.S_Time for k in model.S_Materials for i in model.S_I_Producing_K[k] for j in model.S_J_Executing_I[i] if (i,j) in model.P_Task_Unit_Network if k in model.S_Final_Products)
-    
-    print(f'Total production is = {total_production}')
-    print(f'Total relaxed production is = {total_production_relaxed}')    
     
 except:
 

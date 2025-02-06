@@ -24,6 +24,21 @@ def create_variables(model):
 
 
 def init_variables(model, H):
-    [model.V_X_Hat[i,j,n].fix(0) for i in model.S_Tasks for j in model.S_Units for n in model.S_Time if n < H] #Variable model.V_X_Hat seams to have effect on the model.
-    [model.V_X[i,j,n].fix(0) for i in model.S_Tasks for j in model.S_Units for n in model.S_Time if n >= H-1] #On the last period it can be maximum Y_End = 0.
-    [model.V_X['TA1',j,n].fix(1) for j in model.S_Units for n in model.S_Time if n == 0] #Initialization. TA1 is the first task to reveice feed.
+    #Variable model.V_X_Hat seams to have effect on the model.
+    [model.V_X_Hat[i,j,n].fix(0) for i in model.S_Tasks for j in model.S_Units for n in model.S_Time if n < H] 
+        
+    #On the last period it can be maximum Y_End = 1.
+    [model.V_X[i,j,n].fix(0) for i in (model.S_Tasks - model.S_I_Shutdown_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n >= H - model.P_Tau[i,j]] 
+    #[model.V_X[i,j,n].fix(0) for i in (model.S_Tasks - model.S_I_Shutdown_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n >= H - model.P_Tau[i,j] + 1] 
+        
+    #Initialization. TA1 (no transitions) is the first task to reveice feed.
+    [model.V_X['TA1',j,n].fix(1) for j in model.S_Units for n in model.S_Time if n == 0] 
+        
+    #Y_End = 0 for the first taumin periods.
+    [model.V_Y_End[i,j,n].fix(0) for i in model.S_I_Production_Tasks for j in model.S_J_Executing_I[i] for n in model.S_Time if n < model.P_Tau_Min[i,j]] 
+    
+    #Y_Start = 0 for the last taumin periods.
+    [model.V_Y_Start[i,j,n].fix(0) for i in model.S_I_Production_Tasks for j in model.S_J_Executing_I[i] for n in model.S_Time if n > H - model.P_Tau_Min[i,j]] 
+    
+    #Y_End = 0 for the first taumin periods.
+    [model.V_X[i,j,n].fix(0) for i in (model.S_I_Shutdown_Tasks | model.S_I_Direct_Transition_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n >= H - model.P_Tau[i,j]] 

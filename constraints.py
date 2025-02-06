@@ -22,13 +22,29 @@ def material_mass_balance_eq3(model, k, n):
                                                 #if i in model.S_I_Consuming_K[k]
                                             )    
                                                                                         
-                                + sum(model.P_Rho_Plus[i,k]*model.V_B[i,j,n - model.P_Tau[i,j]] for i in model.S_I_Producing_K[k] for j in model.S_J_Executing_I[i] 
+                               # + sum(model.P_Rho_Plus[i,k]*model.V_B[i,j,n - model.P_Tau[i,j]] for i in model.S_I_Producing_K[k] for j in model.S_J_Executing_I[i] 
+                               #                 #for (i,j) in model.P_Task_Unit_Network
+                               #                 #if i in model.S_I_Producing_K[k] 
+                               #                 #for t in model.S_Time 
+                               #                 #if t >= 0 and t <= n - model.P_Tau[i,j]
+                               #                 if n - model.P_Tau[i,j] >= 0
+                               #             )
+                                + sum(model.P_Rho_Plus[i,k]*model.V_B[i,j,n] for i in model.S_I_Producing_K[k] for j in model.S_J_Executing_I[i] 
+                                                if i in model.S_I_Production_Tasks
                                                 #for (i,j) in model.P_Task_Unit_Network
                                                 #if i in model.S_I_Producing_K[k] 
-                                                #if t >= n - model.P_Tau[i,j] + 1 and t <= n
-                                                if n - model.P_Tau[i,j] >= 0
-                                            )
-                                            - model.P_Material_Demand[k,n]
+                                                #for t in model.S_Time 
+                                                #if t >= n and t <= n - model.P_Tau[i,j]
+                                                #if n - model.P_Tau[i,j] >= 0
+                                    )
+                                + sum(model.P_Rho_Plus[i,k]*model.V_B[i,j,t] for t in model.S_Time for i in model.S_I_Producing_K[k] for j in model.S_J_Executing_I[i] 
+                                                if i in model.S_I_All_Transition_Tasks
+                                                #for (i,j) in model.P_Task_Unit_Network
+                                                #if i in model.S_I_Producing_K[k]                                                 
+                                                if t >= n - model.P_Tau[i,j] and t <= n - 1 
+                                                #if n - model.P_Tau[i,j] >= 0
+                                    )
+                                - model.P_Material_Demand[k,n]
         )
     else:
         return Constraint.Skip
@@ -144,6 +160,16 @@ def min_lenght_run_eq18(model, i, j, n):
     else:
         return Constraint.Skip
 
+#def min_lenght_run_eq18_reformulation_startup(model, i, j, n):
+#    if (i,j) in model.P_Task_Unit_Network and i in (model.S_I_Production_Tasks & ):
+#        return model.V_X[i,j,n] >= sum(
+#                                        model.V_Y_Start[i,j,nprime] 
+#                                        for nprime in model.S_Time 
+#                                        if (nprime >= n - model.P_Tau_Min[i,j] + 1 and nprime <= n)
+#                                      )    
+#    else:
+#        return Constraint.Skip
+
 def max_lenght_run_eq19(model, i, j, n):
     if (i,j) in model.P_Task_Unit_Network and i in model.S_I_Production_Tasks:
         return sum(
@@ -154,12 +180,20 @@ def max_lenght_run_eq19(model, i, j, n):
     else:
         return Constraint.Skip
 
-def max_lenght_run_eq19_reformulation(model, i, j, n):
+def max_lenght_run_eq19_reformulation_YS(model, i, j, n):
+    if (i,j) in model.P_Task_Unit_Network and i in model.S_I_Production_Tasks:
+        return model.V_X[i,j,n] <= sum(model.V_Y_Start[i,j,nprime] for nprime in model.S_Time if ( (nprime >= n - model.P_Tau_Max[i,j] + 1) and (nprime <= n) )) 
+    else:
+        return Constraint.Skip
+
+
+def max_lenght_run_eq19_reformulation_YE(model, i, j, n):
     if (i,j) in model.P_Task_Unit_Network and i in model.S_I_Production_Tasks:
         return model.V_X[i,j,n] <= sum(model.V_Y_End[i,j,nprime] for nprime in model.S_Time if ( (nprime >= n + 1) and (nprime <= n + model.P_Tau_Max[i,j]) )) 
     else:
         return Constraint.Skip
 
+    
 def track_start_production_task_after_transition_eq20(model, i, j, n):
     if i in model.S_I_Production_Tasks_With_Transition and j in model.S_J_Executing_I[i]:
         return (
@@ -200,7 +234,7 @@ def material_capacity(model, k, n):
     return model.V_S[k,n] <= model.P_Chi[k]
 
 def if_start_end(model, i, j, n):
-    if (i in model.S_I_Production_Tasks) and (i,j) in model.P_Task_Unit_Network and (n <= H - model.P_Tau_Max[i,j]):
+    if (i in model.S_I_Production_Tasks) and j in model.S_J_Executing_I[i] and (n <= (len(model.S_Time) - 1) - model.P_Tau_Max[i,j]):
         return sum(model.V_Y_End[i,j,nprime] for nprime in model.S_Time if nprime >= n + model.P_Tau_Min[i,j] and nprime <= n + model.P_Tau_Max[i,j]) >= model.V_Y_Start[i,j,n]
     else:
         return Constraint.Skip
@@ -211,40 +245,42 @@ def forward_propagation_inequality(model, i):
     else:
         return Constraint.Skip
 
-
-
 def create_constraints(model, STN, H):
    
-   STATES = STN['STATES']
-   STATES_SHIPMENT = STN['STATES_SHIPMENT']
-   ST_ARCS = STN['ST_ARCS']
-   TS_ARCS = STN['TS_ARCS']
-   UNIT_TASKS = STN['UNIT_TASKS']
-   #TIME = STN['TIME']
-   TASKS_TRANSITION_TASKS = STN['TASKS_TRANSITION_TASKS']
-   H = H
+    STATES = STN['STATES']
+    STATES_SHIPMENT = STN['STATES_SHIPMENT']
+    ST_ARCS = STN['ST_ARCS']
+    TS_ARCS = STN['TS_ARCS']
+    UNIT_TASKS = STN['UNIT_TASKS']
+    #TIME = STN['TIME']
+    TASKS_TRANSITION_TASKS = STN['TASKS_TRANSITION_TASKS']
+    H = H
 
-   model.C_Unit_Capacity_LB_Eq2 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = unit_capacity_lb_eq2)
-   model.C_Unit_Capacity_UB_Eq2 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = unit_capacity_ub_eq2)
-   model.C_Material_Mass_Balance_Eq3 = Constraint(model.S_Materials, model.S_Time, rule = material_mass_balance_eq3)
-   #model.C_Track_Startup_Shutdown_Eq12 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_transitions_unit_eq12)
-   model.C_Track_Idle_Unit_Eq13 = Constraint(model.S_Units, model.S_Time, rule = track_idle_unit_eq13)
-   model.C_Track_Transitions_units_Eq15 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_transitions_unit_eq15)
-   model.C_Track_Start_End_Batch_Task_Eq16 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_production_task_eq16)
-   model.C_Track_Start_End_Batch_Task_Eq17 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_batch_task_eq17)
-   model.C_Min_Lenght_Run_Eq18 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = min_lenght_run_eq18)
-   model.C_Max_Lenght_Run_Eq19 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19)
-   model.C_Track_Start_Production_Task_After_Transition_Eq20 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_production_task_after_transition_eq20)
-   model.C_Unit_Availability_Eq21 = Constraint(model.S_Units, model.S_Time, rule = unit_availability_eq21)
-   model.C_Material_Availability = Constraint(model.S_Materials, model.S_Time, rule = material_capacity)
-
+    model.C_Unit_Capacity_LB_Eq2 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = unit_capacity_lb_eq2)
+    model.C_Unit_Capacity_UB_Eq2 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = unit_capacity_ub_eq2)
+    #model.C_Track_Startup_Shutdown_Eq12 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_transitions_unit_eq12)
+    model.C_Track_Idle_Unit_Eq13 = Constraint(model.S_Units, model.S_Time, rule = track_idle_unit_eq13)
+    model.C_Track_Transitions_units_Eq15 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_transitions_unit_eq15)
+    model.C_Track_Start_End_Batch_Task_Eq16 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_production_task_eq16)
+    model.C_Track_Start_End_Batch_Task_Eq17 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_batch_task_eq17)
+    model.C_Min_Lenght_Run_Eq18 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = min_lenght_run_eq18)
+    model.C_Max_Lenght_Run_Eq19 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19)
+    model.C_Track_Start_Production_Task_After_Transition_Eq20 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_production_task_after_transition_eq20)
+    model.C_Unit_Availability_Eq21 = Constraint(model.S_Units, model.S_Time, rule = unit_availability_eq21)
+    model.C_Material_Availability = Constraint(model.S_Materials, model.S_Time, rule = material_capacity)
+    model.C_Material_Mass_Balance_Eq3 = Constraint(model.S_Materials, model.S_Time, rule = material_mass_balance_eq3)
+   
 def add_fp_constraint(model):    
    model.Forward_Propagation_Inequality = Constraint(model.S_Tasks, rule = forward_propagation_inequality)
 
 def add_if_start_end(model):
    model.If_Start_End = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = if_start_end)
 
-def add_tau_max_reformulation(model):
+def add_tau_max_reformulation_YS(model):
    model.C_Max_Lenght_Run_Eq19.clear()
-   model.C_Max_Lenght_Run_Eq19_Reformulation = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19_reformulation)
+   model.C_Max_Lenght_Run_Eq19_Reformulation_YS = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19_reformulation_YS)
+   
+def add_tau_max_reformulation_YE(model):
+   model.C_Max_Lenght_Run_Eq19.clear()
+   model.C_Max_Lenght_Run_Eq19_Reformulation_YE = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19_reformulation_YE)
    

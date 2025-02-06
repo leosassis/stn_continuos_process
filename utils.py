@@ -3,7 +3,16 @@ import matplotlib.pyplot as plt
 
 def print_set(model, set):
     print(set.data())
-    
+
+def compute_product_production(model):
+    production_values = {k: (sum(model.V_B[i,j,n].value for n in model.S_Time for i in model.S_I_Producing_K[k] for j in model.S_J_Executing_I[i] if (i,j) in model.P_Task_Unit_Network if k in model.S_Final_Products)) for k in model.S_Materials if k in model.S_Final_Products}
+    for k, v in production_values.items():
+        print(f"Material: {k}, Production: {v}")
+
+def compute_total_production(model):
+    total_production = sum(model.V_B[i,j,n].value for n in model.S_Time for k in model.S_Materials for i in model.S_I_Producing_K[k] for j in model.S_J_Executing_I[i] if (i,j) in model.P_Task_Unit_Network if k in model.S_Final_Products)
+    return total_production
+
 def plot_gantt_chart(H, model):
     
     plt.figure(figsize=(12,6))
@@ -23,7 +32,7 @@ def plot_gantt_chart(H, model):
                     plt.plot([t+gap, t + model.P_Tau[i,j]-gap], [idx,idx],'b', lw=20, solid_capstyle='butt')
                     txt = "{0:.2f}".format(model.V_B[i,j,t]())
                     plt.text(t + model.P_Tau[i,j]/2, idx, txt, color='white', weight='bold', ha='center', va='center')
-    plt.xlim(0,H)
+    plt.xlim(0,H+1)
     plt.gca().set_yticks(ticks)
     plt.gca().set_yticklabels(lbls) 
     
