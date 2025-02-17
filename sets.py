@@ -208,7 +208,7 @@ def create_main_sets_parameters(model, STN, H):
     model.P_Task_Production_Comsumption = Param(model.S_Tasks, model.S_Materials, initialize = init_task_prod_consump(ST_ARCS, TS_ARCS))
     model.P_Task_Transitions_Unit = Param(model.S_Units, model.S_Tasks, model.S_Tasks, initialize = init_task_transitions_unit(UNIT_TASKS, TASKS_TRANSITION_TASKS))
     
-    print(model.S_Time.data())
+"""     print(model.S_Time.data())
     print(model.S_Tasks.data())
     print(model.S_Units.data())
     print(model.S_Materials.data())
@@ -241,5 +241,5 @@ def create_main_sets_parameters(model, STN, H):
     model.P_Task_Unit_Network.pprint()
     model.P_Task_Transitions.pprint()
     model.P_Task_Production_Comsumption.pprint()
-    model.P_Task_Transitions_Unit.pprint()
+    model.P_Task_Transitions_Unit.pprint() """
       
