@@ -54,6 +54,7 @@ def compute_num_variables_constraints(model):
         return num_total_vars, num_binary_vars, num_constraints
 
 def create_model(model, STN, H):
+    
     create_main_sets_parameters(model, STN, H)
     create_variables(model)    
     create_parameters(model, STN, H)

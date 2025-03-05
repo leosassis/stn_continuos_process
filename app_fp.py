@@ -11,21 +11,16 @@ import time
 import numpy as np
 from pyomo.environ import *
 from optimization import set_solver_options, solve_model, print_model_constraints, compute_num_variables_constraints, create_model
-from constraints import add_fp_constraint
 from utils import plot_gantt_chart, plot_inventory_chart, compute_product_production, compute_total_production
 from fp import forward_propagation
 from objective import get_objective_value
 
-#from network_0_v1 import *
-#from network_0_v2 import *
-#from network_1_v1 import *
-#from network_1_v2 import *
-#from network_6 import define_stn_network
 #from network_7 import define_stn_network
-from network_8 import define_stn_network
+#from network_7_new import define_stn_network
 
+from network_8 import define_stn_network
 results_list = []
-H_Values = range(25, 126, 25)
+H_Values = range(25, 26, 25)
 
 for H in H_Values:
                 
@@ -33,10 +28,8 @@ for H in H_Values:
             
     model = ConcreteModel()
     create_model(model, STN, H)
-            
     #total_predicted_production = forward_propagation(model, H)
-    #add_fp_constraint(model)
-        
+            
     #Solve original model.
     solver = SolverFactory('gurobi')
     set_solver_options(solver, model, model_nature = 'original_model')
@@ -72,7 +65,7 @@ for H in H_Values:
     results_list.append({
         "Instance": instance_name,
         "Objective Function": objective_value,
-        "LP Relaxation New Formulation": lp_objective_value,
+        "LP Relaxation": lp_objective_value,
         "Gap %": 100*(lp_objective_value - objective_value)/lp_objective_value,
         "Solution Time (s)": end_time - start_time,
         "Termination Condition": termination_condition,
@@ -82,7 +75,6 @@ for H in H_Values:
         "Total Production": total_production,
         "Relaxed Production": total_production_relaxed,
         "Production Gap %": 100*(total_production_relaxed - total_production)/total_production_relaxed,
-        #"Predicted Production": total_predicted_production
     })
         
     # Convert results list to DataFrame
@@ -90,3 +82,6 @@ for H in H_Values:
 
     # Save results to Excel
     results_df.to_excel("model_results_fp.xlsx", index=False)
+    
+    #print_model_constraints(model)
+    plot_gantt_chart(H, model)

@@ -35,6 +35,8 @@ def plot_gantt_chart(H, model):
     plt.xlim(0,H+1)
     plt.gca().set_yticks(ticks)
     plt.gca().set_yticklabels(lbls) 
+    plt.tight_layout()
+    plt.show(block=True) 
     
 def plot_inventory_chart(H, model):
     
