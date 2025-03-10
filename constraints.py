@@ -206,15 +206,21 @@ def forward_propagation_inequality(model, i):
     else:
         return Constraint.Skip
 
-def est_constraint_1(model, i, j):
-    if (i in model.S_I_Production_Tasks) and (j in model.S_J_Executing_I[i]) and ((i,j) in model.P_Task_Unit_Network):
-        return sum(model.V_X[i,j,n] for n in model.S_Time) <= max(model.S_Time) - model.P_EST[i,j]
+def est_constraint_x_to_zero(model, i, j):
+    if (i in model.S_I_Production_Tasks) and (j in model.S_J_Executing_I[i]) and ((i,j) in model.P_Task_Unit_Network) and (model.P_EST[i,j] > 0):
+        return sum(model.V_X[i,j,n] for n in model.S_Time if (n >= 0 and n <= (model.P_EST[i,j] - 1))) == 0
     else:
         return Constraint.Skip
-    
-def est_constraint_2(model, j):
-    return sum(model.V_X[i,j,n] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network for n in model.S_Time) <= max(model.S_Time) - model.P_EST_Unit[j]
-    
+
+def est_constraint_upper_bound_number_of_runs(model, i, j):
+    if (i in model.S_I_Production_Tasks) and (j in model.S_J_Executing_I[i]) and ((i,j) in model.P_Task_Unit_Network):
+        return sum(model.V_Y_Start[i,j,n] for n in model.S_Time) <= floor((max(model.S_Time) - model.P_EST[i,j])/model.P_Tau_Min[i,j])
+    else:
+        return Constraint.Skip    
+
+def est_constraint_upper_bound_number_of_runs_unit(model, j):
+    return sum(model.V_Y_Start[i,j,n] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network for n in model.S_Time) <= floor((max(model.S_Time) - model.P_EST_Unit[j])/min(model.P_Tau_Min[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network))
+     
     
 def create_constraints(model, STN, H):
    
@@ -239,10 +245,15 @@ def create_constraints(model, STN, H):
     model.C_Unit_Availability_Eq21 = Constraint(model.S_Units, model.S_Time, rule = unit_availability_eq21)
     model.C_Material_Availability = Constraint(model.S_Materials, model.S_Time, rule = material_capacity)
     model.C_Material_Mass_Balance_Eq3 = Constraint(model.S_Materials, model.S_Time, rule = material_mass_balance_eq3)
-    model.If_Start_End = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = if_start_end)
+    
+    #Tightening Constraints EST - Base Form
+    model.C_EST_X_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = est_constraint_x_to_zero)
+    model.C_EST_Upper_Bound_Number_Runs = Constraint(model.S_Tasks, model.S_Units, rule = est_constraint_upper_bound_number_of_runs)
+    model.C_EST_Upper_Bound_Number_Runs_Unit = Constraint(model.S_Units, rule = est_constraint_upper_bound_number_of_runs_unit)
+    
+    #Tightening Constraints
+    #model.If_Start_End = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = if_start_end)
     #model.C_Max_Lenght_Run_Eq19_Reformulation_YS = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19_reformulation_YS)
     #model.C_Max_Lenght_Run_Eq19_Reformulation_YE = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19_reformulation_YE)
     #model.C_Forward_Propagation_Inequality = Constraint(model.S_Tasks, rule = forward_propagation_inequality)
-    #model.C_EST_1 = Constraint(model.S_Tasks, model.S_Units, rule = est_constraint_1)
-    #model.C_EST_2 = Constraint(model.S_Units, rule = est_constraint_2)
     

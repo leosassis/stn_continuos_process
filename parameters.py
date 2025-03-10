@@ -90,8 +90,3 @@ def create_parameters(model, STN, H):
     model.P_EST = Param(model.S_Tasks, model.S_Units, initialize = est_initialization(EST))
     model.P_EST_Unit = Param(model.S_Units, initialize = est_initialization_unit)
     model.mu_adjusted = Param(model.S_Tasks, initialize = mu_initialization(EST))
-    
-    #model.P_EST.pprint()
-    #model.P_EST_Unit.pprint()
-    #model.mu_adjusted.pprint()
-    

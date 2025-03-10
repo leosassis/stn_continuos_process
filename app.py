@@ -15,10 +15,9 @@ from utils import plot_gantt_chart, plot_inventory_chart, compute_product_produc
 from fp import forward_propagation
 from objective import get_objective_value
 
-#from network_7 import define_stn_network
-#from network_7_new import define_stn_network
+from network_7_slow_upstream_fast_downstream import define_stn_network
+#from network_8_fast_upstream_slow_downstream import define_stn_network
 
-from network_8 import define_stn_network
 results_list = []
 H_Values = range(25, 26, 25)
 
@@ -28,8 +27,7 @@ for H in H_Values:
             
     model = ConcreteModel()
     create_model(model, STN, H)
-    #total_predicted_production = forward_propagation(model, H)
-            
+                
     #Solve original model.
     solver = SolverFactory('gurobi')
     set_solver_options(solver, model, model_nature = 'original_model')
@@ -37,7 +35,7 @@ for H in H_Values:
     results = solve_model(solver, model)
     end_time = time.time()
         
-    if (results.solver.termination_condition != TerminationCondition.infeasible):
+    """ if (results.solver.termination_condition != TerminationCondition.infeasible):
                 
         num_total_vars, num_binary_vars, num_constraints = compute_num_variables_constraints(model)
         objective_value = get_objective_value(model, STN)
@@ -81,7 +79,11 @@ for H in H_Values:
     results_df = pd.DataFrame(results_list)
 
     # Save results to Excel
-    results_df.to_excel("model_results_fp.xlsx", index=False)
+    results_df.to_excel("model_results_fp.xlsx", index=False) """
     
     #print_model_constraints(model)
     plot_gantt_chart(H, model)
+    
+    for i, j, n, in model.V_X:
+        if model.V_X[i,j,n].value == 1:
+            print(f"[{i}, {j}, {n}] = 1")
