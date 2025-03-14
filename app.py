@@ -30,7 +30,7 @@ for H in H_Values:
                 
     #Solve original model.
     solver = SolverFactory('gurobi')
-    set_solver_options(solver, model, model_nature = 'original_model')
+    set_solver_options(solver, model, model_nature = 'relaxed_model')
     start_time = time.time()
     results = solve_model(solver, model)
     end_time = time.time()
@@ -84,6 +84,4 @@ for H in H_Values:
     #print_model_constraints(model)
     plot_gantt_chart(H, model)
     
-    for i, j, n, in model.V_X:
-        if model.V_X[i,j,n].value == 1:
-            print(f"[{i}, {j}, {n}] = 1")
+    #print_model_constraints(model)      
