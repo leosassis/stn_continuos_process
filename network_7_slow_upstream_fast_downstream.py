@@ -79,8 +79,8 @@ def define_stn_network():
             ('UA7', 'TC2') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
             ('UA5', 'TC5') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
             ('UA5', 'TC6') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UC6', 'TC3') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 31, 'direction': 1,},
-            ('UC6', 'TC4') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 31, 'direction': 1,},
+            ('UA6', 'TC3') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 31, 'direction': 1,},
+            ('UA6', 'TC4') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 31, 'direction': 1,},
         },
         
         'EST': {
@@ -96,8 +96,8 @@ def define_stn_network():
             ('UA7', 'TC2') : {'est': 9, 'mu': 600,},
             ('UA5', 'TC5') : {'est': 9, 'mu': 600,},
             ('UA5', 'TC6') : {'est': 9, 'mu': 600,},
-            ('UC6', 'TC3') : {'est': 9, 'mu': 600,},
-            ('UC6', 'TC4') : {'est': 9, 'mu': 600,},
+            ('UA6', 'TC3') : {'est': 9, 'mu': 600,},
+            ('UA6', 'TC4') : {'est': 9, 'mu': 600,},
         },
     }
     return STN

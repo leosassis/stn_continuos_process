@@ -272,6 +272,8 @@ def create_constraints(model, STN, H):
     TASKS_TRANSITION_TASKS = STN['TASKS_TRANSITION_TASKS']
     H = H
 
+    #################################################Base Model#################################################
+
     model.C_Unit_Capacity_LB_Eq2 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = unit_capacity_lb_eq2)
     model.C_Unit_Capacity_UB_Eq2 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = unit_capacity_ub_eq2)
     model.C_Track_Idle_Unit_Eq13 = Constraint(model.S_Units, model.S_Time, rule = track_idle_unit_eq13)
@@ -285,21 +287,48 @@ def create_constraints(model, STN, H):
     model.C_Material_Availability = Constraint(model.S_Materials, model.S_Time, rule = material_capacity)
     model.C_Material_Mass_Balance_Eq3 = Constraint(model.S_Materials, model.S_Time, rule = material_mass_balance_eq3)
     
+    ############################################Tightening Constraints############################################
+    
     #Tightening Constraints EST - Static
-    model.C_EST_X_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = est_constraint_x_to_zero)
+    #model.C_EST_X_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = est_constraint_x_to_zero)
     #model.C_EST_Upper_Bound_Number_Runs = Constraint(model.S_Tasks, model.S_Units, rule = est_constraint_upper_bound_number_of_runs)
     #model.C_EST_Upper_Bound_Number_Runs_Unit = Constraint(model.S_Units, rule = est_constraint_upper_bound_number_of_runs_unit)
     
     #Tightening Constraints EST - Dynamic
-    model.C_Lower_Bound_EST_Dynamic = Constraint(model.S_Tasks, model.S_Units, rule = lower_bound_variables_est_dynamic_est)
-    model.C_Upper_Bound_Number_Runs_EST_Dynamic = Constraint(model.S_Tasks, model.S_Units, rule = est_constraint_upper_bound_number_of_runs_dynamic_est)
-    model.C_Subsequent_Tasks_Dynamic_EST = Constraint(model.S_Tasks, model.S_Tasks, model.S_Units, model.S_Units, model.S_Materials, rule = subsequent_tasks_dynamic_est)
+    #model.C_Lower_Bound_EST_Dynamic = Constraint(model.S_Tasks, model.S_Units, rule = lower_bound_variables_est_dynamic_est)
+    #model.C_Upper_Bound_Number_Runs_EST_Dynamic = Constraint(model.S_Tasks, model.S_Units, rule = est_constraint_upper_bound_number_of_runs_dynamic_est)
     
-    #Tightening Constraints
-    #model.If_Start_End = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = if_start_end)
-    #model.C_Max_Lenght_Run_Eq19_Reformulation_YS = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19_reformulation_YS)
-    #model.C_Max_Lenght_Run_Eq19_Reformulation_YE = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19_reformulation_YE)
+    #Tightening Constraints EST - Dynamic - Subsequent Tasks
+    #model.C_Subsequent_Tasks_Dynamic_EST = Constraint(model.S_Tasks, model.S_Tasks, model.S_Units, model.S_Units, model.S_Materials, rule = subsequent_tasks_dynamic_est)
+    
+    #Tightening Constraints EST - Dynamic - Same Material - Slow Upstream
+    #model.Slow_Upstream_Same_Material_1 = Constraint(expr = model.V_EST['TB1','UA3'] + model.V_EST['TB2','UA3'] >= 2*model.V_EST['TA1','UA1'] + 25)
+    #model.Slow_Upstream_Same_Material_2 = Constraint(expr = model.V_EST['TB3','UA4'] + model.V_EST['TB4','UA4'] >= 2*model.V_EST['TA2','UA2'] + 25)
+    #model.Slow_Upstream_Same_Material_3 = Constraint(expr = model.V_EST['TC3','UA6'] + model.V_EST['TC4','UA6'] >= 2*model.V_EST['TB4','UA4'] + 30)
+    #model.Slow_Upstream_Same_Material_4 = Constraint(expr = model.V_EST['TC1','UA7'] + model.V_EST['TC2','UA7'] >= 2*model.V_EST['TB1','UA3'] + 30)
+    
+    #Tightening Constraints EST - Dynamic - Same Unit - Slow Upstream
+    #model.Slow_Upstream_Same_Unit_1 = Constraint(expr = model.V_EST['TB1','UA3'] + model.V_EST['TB2','UA3'] >= 16)
+    #model.Slow_Upstream_Same_Unit_2 = Constraint(expr = model.V_EST['TB3','UA4'] + model.V_EST['TB4','UA4'] >= 16)
+    #model.Slow_Upstream_Same_Unit_4 = Constraint(expr = model.V_EST['TC1','UA7'] + model.V_EST['TC2','UA7'] >= 24)
+    #model.Slow_Upstream_Same_Unit_5 = Constraint(expr = model.V_EST['TC5','UA5'] + model.V_EST['TC6','UA5'] >= 24)
+    #model.Slow_Upstream_Same_Unit_3 = Constraint(expr = model.V_EST['TC3','UA6'] + model.V_EST['TC4','UA6'] >= 24)   
+       
+        
+    #Tightening Constraints EST - Dynamic - Same Material - Fast Upstream
+    #model.Fast_Upstream_Same_Material_1 = Constraint(expr = model.V_EST['TB1','UA3'] + model.V_EST['TB2','UA3'] >= 2*model.V_EST['TA1','UA1'] + 10)
+    #model.Fast_Upstream_Same_Material_2 = Constraint(expr = model.V_EST['TB3','UA4'] + model.V_EST['TB4','UA4'] >= 2*model.V_EST['TA2','UA2'] + 10)
+    #model.Fast_Upstream_Same_Material_3 = Constraint(expr = model.V_EST['TC3','UA6'] + model.V_EST['TC4','UA6'] >= 2*model.V_EST['TB4','UA4'] + 12)
+    #model.Fast_Upstream_Same_Material_4 = Constraint(expr = model.V_EST['TC1','UA7'] + model.V_EST['TC2','UA7'] >= 2*model.V_EST['TB1','UA3'] + 12)
+    
+    #Tightening Constraints EST - Dynamic - Same Unit - Fast Upstream
+    #model.Fast_Upstream_Same_Unit_1 = Constraint(expr = model.V_EST['TB1','UA3'] + model.V_EST['TB2','UA3'] >= 8)
+    #model.Fast_Upstream_Same_Unit_2 = Constraint(expr = model.V_EST['TB3','UA4'] + model.V_EST['TB4','UA4'] >= 8)
+    #model.Fast_Upstream_Same_Unit_4 = Constraint(expr = model.V_EST['TC1','UA7'] + model.V_EST['TC2','UA7'] >= 11)
+    #model.Fast_Upstream_Same_Unit_5 = Constraint(expr = model.V_EST['TC5','UA5'] + model.V_EST['TC6','UA5'] >= 11)
+    #model.Fast_Upstream_Same_Unit_3 = Constraint(expr = model.V_EST['TC3','UA6'] + model.V_EST['TC4','UA6'] >= 11)  
+    
     
     #Forward Propagation
-    #model.C_Forward_Propagation_Inequality = Constraint(model.S_Tasks, rule = forward_propagation_inequality)
+    model.C_Forward_Propagation_Inequality = Constraint(model.S_Tasks, rule = forward_propagation_inequality)
     

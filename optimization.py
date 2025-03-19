@@ -57,6 +57,7 @@ def create_model(model, STN, H):
     
     create_main_sets_parameters(model, STN, H)
     create_variables(model)    
+    print(list(model.V_EST.keys()))    
     create_parameters(model, STN, H)
     init_variables(model, H)
     create_constraints(model, STN, H)

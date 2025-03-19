@@ -15,8 +15,8 @@ from utils import plot_gantt_chart, plot_inventory_chart, compute_product_produc
 from fp import forward_propagation
 from objective import get_objective_value
 
-from network_7_slow_upstream_fast_downstream import define_stn_network
-#from network_8_fast_upstream_slow_downstream import define_stn_network
+#from network_7_slow_upstream_fast_downstream import define_stn_network
+from network_8_fast_upstream_slow_downstream import define_stn_network
 
 results_list = []
 H_Values = range(25, 26, 25)
@@ -27,10 +27,10 @@ for H in H_Values:
             
     model = ConcreteModel()
     create_model(model, STN, H)
-                
+            
     #Solve original model.
     solver = SolverFactory('gurobi')
-    set_solver_options(solver, model, model_nature = 'relaxed_model')
+    set_solver_options(solver, model, model_nature = 'original_model')
     start_time = time.time()
     results = solve_model(solver, model)
     end_time = time.time()
@@ -84,4 +84,5 @@ for H in H_Values:
     #print_model_constraints(model)
     plot_gantt_chart(H, model)
     
-    #print_model_constraints(model)      
+    #print_model_constraints(model) 
+      
