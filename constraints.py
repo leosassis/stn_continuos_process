@@ -1,15 +1,30 @@
 from pyomo.environ import *
 
-# Lower bound on the batch size of all tasks.
+
 def unit_capacity_lb_eq2(model, i, j, n):
+    """ 
+    Lower bound on the processing rate of all tasks.        
+    
+    Input: set of tasks, units and time points.
+    
+    Output: constraints on the lower bound of processing rate of all tasks. 
+    """
+    
     if (i,j) in model.P_Task_Unit_Network:
         return model.V_X[i,j,n]*model.P_Beta_Min[i,j] <= model.V_B[i,j,n] 
     else:
         return Constraint.Skip    
 
 
-# Upper bound on the batch size of all tasks.
 def unit_capacity_ub_eq2(model, i, j, n):
+    """ 
+    Upper bound on the processing rate of all tasks.        
+    
+    Input: set of tasks, units and time points.
+    
+    Output: constraints on the upper bound of processing rate of all tasks. 
+    """
+    
     if (i,j) in model.P_Task_Unit_Network:
         return model.V_B[i,j,n] <= model.V_X[i,j,n]*model.P_Beta_Max[i,j]
     else:
@@ -17,30 +32,37 @@ def unit_capacity_ub_eq2(model, i, j, n):
 
 
 def material_mass_balance_eq3(model, k, n):
+    """ 
+    Mass balance of material k (except raw material which are considered to be always available). Consider the initial inventory, the inventory in the previou time point, what is consumed, what is produced by production tasks and what is produced by transition tasks.        
+    
+    Input: set of material and time points.
+    
+    Output: constraints on on the mass balance of material k. 
+    """
+    
     if k not in model.S_Raw_Materials:    
-        return model.V_S[k,n] == ((model.V_S[k,n-1] if n >= 1 else 0) 
+        return model.V_S[k,n] == ((model.V_S[k,n-1] 
+                                    if n >= 1 else 0) 
                                   
-                                + (model.P_Init_Inventory_Material[k] if n == 0 else 0)
+                                + (model.P_Init_Inventory_Material[k] 
+                                    if n == 0 else 0)
                                 
-                                + sum(
-                                    model.P_Rho_Minus[i,k]*model.V_B[i,j,n] 
+                                + sum(model.P_Rho_Minus[i,k]*model.V_B[i,j,n] 
                                     for i in model.S_I_Consuming_K[k] 
                                     for j in model.S_J_Executing_I[i])    
                                                                                         
-                                + sum(
-                                    model.P_Rho_Plus[i,k]*model.V_B[i,j,n-1]
-                                    if n >= 1 else 0 
+                                + sum(model.P_Rho_Plus[i,k]*model.V_B[i,j,n-model.P_Tau[i,j]]
+                                    if n >= model.P_Tau[i,j] else 0 
                                     for i in model.S_I_Producing_K[k] 
                                     for j in model.S_J_Executing_I[i] 
                                     if i in model.S_I_Production_Tasks)
                                 
-                                + sum(
-                                    model.P_Rho_Plus[i,k]*model.V_B[i,j,t] 
+                                + sum(model.P_Rho_Plus[i,k]*model.V_B[i,j,t] 
                                     for t in model.S_Time 
                                     for i in model.S_I_Producing_K[k] 
                                     for j in model.S_J_Executing_I[i] 
                                     if i in model.S_I_All_Transition_Tasks
-                                    if t >= n - model.P_Tau[i,j] and t <= n - 1)
+                                    if (t >= n - model.P_Tau[i,j] and t <= n - 1))
                                 
                                 - model.P_Material_Demand[k,n])
     else:
@@ -127,8 +149,15 @@ def track_transitions_unit_eq15(model, i, j, n):
         return Constraint.Skip
 
 
-# Tracks the start and end of all production tasks.    
 def track_start_end_production_task_eq16(model, i, j, n):
+    """ 
+    Models the relationship between the start and end of a run (part 1).
+    
+    Input: set of tasks, units and time points.
+    
+    Output: constraints that make sure that start and end variables are properly activated when there is a run.
+    """
+    
     if i in model.S_I_Production_Tasks and j in model.S_J_Executing_I[i]:
         return model.V_Y_Start[i,j,n] == model.V_X[i,j,n] - (model.V_X[i,j,n-1] if n >= 1 else 0) + model.V_Y_End[i,j,n]
     else:
@@ -136,6 +165,14 @@ def track_start_end_production_task_eq16(model, i, j, n):
 
 
 def track_start_end_batch_task_eq17(model, i, j, n):
+    """ 
+    Models the relationship between the start and end of a run by stating that start and end cannot happen happen at the (part 2).
+    
+    Input: set of tasks, units and time points.
+    
+    Output: constraints that make sure that start and end variables are properly activated when there is a run.
+    """
+    
     if i in model.S_I_Production_Tasks and j in model.S_J_Executing_I[i]:
         return model.V_Y_Start[i,j,n] + model.V_Y_End[i,j,n] <= 1
     else:
@@ -143,15 +180,35 @@ def track_start_end_batch_task_eq17(model, i, j, n):
 
 
 def min_lenght_run_eq18(model, i, j, n):
+    """ 
+    If a run starts, it needs to continue for at least P_Tau_Min periods.
+    
+    Input: set of tasks, units and time points.
+    
+    Output: constraints that model the minimum run length.
+    """
+    
     if (i,j) in model.P_Task_Unit_Network and i in model.S_I_Production_Tasks:
-        return model.V_X[i,j,n] >= sum(model.V_Y_Start[i,j,nprime] for nprime in model.S_Time if (nprime >= n - model.P_Tau_Min[i,j] + 1 and nprime <= n))    
+        return model.V_X[i,j,n] >= sum(model.V_Y_Start[i,j,nprime] 
+                                       for nprime in model.S_Time 
+                                       if (nprime >= n - model.P_Tau_Min[i,j] + 1 and nprime <= n))    
     else:
         return Constraint.Skip
 
 
 def max_lenght_run_eq19(model, i, j, n):
+    """ 
+    If a run starts, it can run at most P_Tau_Max periods.
+    
+    Input: set of tasks, units and time points.
+    
+    Output: constraints that model the maximum run length.
+    """
+    
     if (i,j) in model.P_Task_Unit_Network and i in model.S_I_Production_Tasks:
-        return sum(model.V_X[i,j,nprime] for nprime in model.S_Time if (nprime >= n - model.P_Tau_Max[i,j] and nprime <= n)) <= model.P_Tau_Max[i,j] 
+        return sum(model.V_X[i,j,nprime] 
+                   for nprime in model.S_Time 
+                   if (nprime >= n - model.P_Tau_Max[i,j] and nprime <= n)) <= model.P_Tau_Max[i,j] 
     else:
         return Constraint.Skip
 
@@ -189,6 +246,14 @@ def unit_availability_eq21(model, j, n):
 
 
 def material_capacity(model, k, n):
+    """ 
+    Storage limits for material k.
+    
+    Input: set of material and time points
+    
+    Output: constraints on storage capacity of materials.
+    """
+    
     return model.V_S[k,n] <= model.P_Chi[k]
 
 
