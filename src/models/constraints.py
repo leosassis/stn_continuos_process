@@ -69,51 +69,68 @@ def material_mass_balance_eq3(model, k, n):
         return Constraint.Skip
 
 
-def track_idle_unit_eq13(model, j, n):
-    if j in model.S_J_Units_With_Shutdown_Tasks:
-        return model.V_X_Hat_Idle[j,n] == ((model.V_X_Hat_Idle[j,n-1] if n >= 1 else 0)
-                                         
-                                + (model.P_Unit_Initialization[j] if n == 0 else 0)  
-                                         
-                                + sum(
-                                    model.V_X[i,j,n-model.P_Tau[i,j]] 
-                                    for i in model.S_I_Indirect_Transition_Tasks
-                                    if (i,j) in model.P_Task_Unit_Network 
-                                    if model.P_Task_Unit_Network[i,j] == -1
-                                    if n-model.P_Tau[i,j] >= 0)
-                                 
-                                - sum(
-                                    model.V_X[i,j,n] 
-                                    for i in model.S_I_Indirect_Transition_Tasks
-                                    if (i,j) in model.P_Task_Unit_Network 
-                                    if model.P_Task_Unit_Network[i,j] == 1))                                         
-    else:
-        return Constraint.Skip
+def material_capacity_eq4(model, k, n):
+    """ 
+    Storage limits for material k.
+    
+    Input: set of material and time points
+    
+    Output: constraints on storage capacity of materials.
+    """
+    
+    return model.V_S[k,n] <= model.P_Chi[k]
 
 
 def track_transitions_unit_eq12(model, i, j, n):
     if i in model.S_I_Production_Tasks and j in model.S_J_Executing_I[i]:
         return model.V_X_Hat[i,j,n] == ((model.V_X_Hat[i,j,n-1] if n >= 1 else 0) 
                                         
-                                + (model.V_X[i,j,n-1] if n >= 1 else 0)
+                                      + (model.V_X[i,j,n-1] if n >= 1 else 0)
                                         
-                                + sum(
-                                    model.V_X[ii,j,n-model.P_Tau[ii,j]] 
-                                    for ii in model.S_I_Startup_Tasks
-                                    if (j,i,ii) in model.P_Task_Transitions_Unit 
-                                    if model.P_Task_Transitions_Unit[j,i,ii] == 1
-                                    if n - model.P_Tau[ii,j] >= 0)
+                                      + sum(model.V_X[ii,j,n-model.P_Tau[ii,j]] 
+                                            for ii in model.S_I_Startup_Tasks
+                                            if (j,i,ii) in model.P_Task_Transitions_Unit 
+                                            if model.P_Task_Transitions_Unit[j,i,ii] == 1
+                                            if n - model.P_Tau[ii,j] >= 0)
                                 
-                                - model.V_X[i,j,n]
+                                      - model.V_X[i,j,n]
                                 
-                                - sum(
-                                    model.V_X[ii,j,n] 
-                                    for ii in model.S_I_Shutdown_Tasks
-                                    if (j,i,ii) in model.P_Task_Transitions_Unit 
-                                    if model.P_Task_Transitions_Unit[j,i,ii] == -1))                                         
+                                      - sum(model.V_X[ii,j,n] 
+                                            for ii in model.S_I_Shutdown_Tasks
+                                            if (j,i,ii) in model.P_Task_Transitions_Unit 
+                                            if model.P_Task_Transitions_Unit[j,i,ii] == -1))                                         
     else:
         return Constraint.Skip
 
+
+def track_idle_unit_eq13(model, j, n):
+    """ 
+    Model the relationship between startup, shutdown and idle model. Basically, if a shutdown happens, the unit goes to idle mode and it leaves it if there is a startup.
+    It tracks the idle mode between consecutive time points (model.V_X_Hat_Idle[j,n] and model.V_X_Hat_Idle[j,n-1]); it tracks if a unit has a shutdown or a startup.
+    
+    Input: set units with startup and shutdown and set of time points.
+    
+    Output: constraints to model the relationship between startup, shutdown and idle model.
+    """
+    
+    if j in model.S_J_Units_With_Shutdown_Tasks:
+        return model.V_X_Hat_Idle[j,n] == ((model.V_X_Hat_Idle[j,n-1] if n >= 1 else 0)
+                                         
+                                         + (model.P_Unit_Initialization[j] if n == 0 else 0)  
+                                         
+                                         + sum(model.V_X[i,j,n-model.P_Tau[i,j]] 
+                                            for i in model.S_I_Indirect_Transition_Tasks
+                                            if (i,j) in model.P_Task_Unit_Network 
+                                            if model.P_Task_Unit_Network[i,j] == -1
+                                            if n-model.P_Tau[i,j] >= 0)
+                                 
+                                         - sum(model.V_X[i,j,n] 
+                                            for i in model.S_I_Indirect_Transition_Tasks
+                                            if (i,j) in model.P_Task_Unit_Network 
+                                            if model.P_Task_Unit_Network[i,j] == 1))                                         
+    else:
+        return Constraint.Skip
+    
 
 def track_transitions_unit_eq15(model, i, j, n):
     if j in (model.S_J_Units_With_Direct_Transition_Tasks or model.S_J_Units_With_Shutdown_Tasks) and (i,j) in model.P_Task_Unit_Network and i in model.S_I_Production_Tasks:
@@ -149,7 +166,7 @@ def track_transitions_unit_eq15(model, i, j, n):
         return Constraint.Skip
 
 
-def track_start_end_production_task_eq16(model, i, j, n):
+def track_start_end_run_task_eq16(model, i, j, n):
     """ 
     Models the relationship between the start and end of a run (part 1).
     
@@ -164,7 +181,7 @@ def track_start_end_production_task_eq16(model, i, j, n):
         return Constraint.Skip
 
 
-def track_start_end_batch_task_eq17(model, i, j, n):
+def track_start_end_run_task_eq17(model: ConcreteModel, i: Set, j: Set, n: Set) -> Constraint:
     """ 
     Models the relationship between the start and end of a run by stating that start and end cannot happen happen at the (part 2).
     
@@ -177,6 +194,18 @@ def track_start_end_batch_task_eq17(model, i, j, n):
         return model.V_Y_Start[i,j,n] + model.V_Y_End[i,j,n] <= 1
     else:
         return Constraint.Skip
+
+
+def track_start_end_run_unit_eq22(model: ConcreteModel, j: Set, n: Set) -> Constraint:
+    """ 
+    Makes sure that in a unit there is a 1 period of interval between the end and start of different tasks.
+    
+    Input: set of units and time points.
+    
+    Output: constraints to guarantee an interval between the run of different tasks in a unit.
+    """
+    
+    return sum(model.V_Y_Start[i,j,n] for i in model.S_I_Production_Tasks) + sum(model.V_Y_End[i,j,n] for i in model.S_I_Production_Tasks) <= 1 
 
 
 def min_lenght_run_eq18(model, i, j, n):
@@ -229,6 +258,16 @@ def track_start_production_task_after_transition_eq20(model, i, j, n):
 
 
 def unit_availability_eq21(model, j, n):
+    return sum(
+            model.V_X[i,j,nprime] 
+            for i in model.S_Tasks
+            if (i,j) in model.P_Task_Unit_Network 
+            for nprime in model.S_Time 
+            if ((nprime >= n - model.P_Tau[i,j] + 1) and (nprime <= n))) <= 1
+        
+
+
+""" def unit_availability_eq21(model, j, n):
     return (
         sum(
             model.V_X[i,j,nprime] 
@@ -242,19 +281,7 @@ def unit_availability_eq21(model, j, n):
             for i in (model.S_I_Production_Tasks_With_Transition)
             if i in model.S_I_In_J[j])
         
-        + (model.V_X_Hat_Idle[j,n] if j in model.S_J_Units_With_Shutdown_Tasks else 0)) <= 1
-
-
-def material_capacity(model, k, n):
-    """ 
-    Storage limits for material k.
-    
-    Input: set of material and time points
-    
-    Output: constraints on storage capacity of materials.
-    """
-    
-    return model.V_S[k,n] <= model.P_Chi[k]
+        + (model.V_X_Hat_Idle[j,n] if j in model.S_J_Units_With_Shutdown_Tasks else 0)) <= 1 """
 
 
 def if_start_end(model, i, j, n):
@@ -341,16 +368,21 @@ def create_constraints(model, STN, H):
 
     model.C_Unit_Capacity_LB_Eq2 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = unit_capacity_lb_eq2)
     model.C_Unit_Capacity_UB_Eq2 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = unit_capacity_ub_eq2)
-    model.C_Track_Idle_Unit_Eq13 = Constraint(model.S_Units, model.S_Time, rule = track_idle_unit_eq13)
-    model.C_Track_Transitions_units_Eq15 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_transitions_unit_eq15)
-    model.C_Track_Start_End_Batch_Task_Eq16 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_production_task_eq16)
-    model.C_Track_Start_End_Batch_Task_Eq17 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_batch_task_eq17)
+    model.C_Material_Mass_Balance_Eq3 = Constraint(model.S_Materials, model.S_Time, rule = material_mass_balance_eq3)
+    model.C_Material_Capacity_Eq4 = Constraint(model.S_Materials, model.S_Time, rule = material_capacity_eq4)
+    #model.C_Track_Indirect_Transitions_Eq12 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_transitions_unit_eq12)
+    #model.C_Track_Idle_Unit_Eq13 = Constraint(model.S_Units, model.S_Time, rule = track_idle_unit_eq13)
+    #model.C_Track_Transitions_Units_Eq15 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_transitions_unit_eq15)
+    model.C_Track_Start_End_Run_Task_Eq16 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq16)
+    model.C_Track_Start_End_Run_Task_Eq17 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq17)
+    model.C_Track_Start_End_Runs_Unit_Eq_22 = Constraint(model.S_Units, model.S_Time, rule = track_start_end_run_unit_eq22)
     model.C_Min_Lenght_Run_Eq18 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = min_lenght_run_eq18)
     model.C_Max_Lenght_Run_Eq19 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19)
-    model.C_Track_Start_Production_Task_After_Transition_Eq20 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_production_task_after_transition_eq20)
+    #model.C_Track_Start_Production_Task_After_Transition_Eq20 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_production_task_after_transition_eq20)
     model.C_Unit_Availability_Eq21 = Constraint(model.S_Units, model.S_Time, rule = unit_availability_eq21)
-    model.C_Material_Availability = Constraint(model.S_Materials, model.S_Time, rule = material_capacity)
-    model.C_Material_Mass_Balance_Eq3 = Constraint(model.S_Materials, model.S_Time, rule = material_mass_balance_eq3)
+    
+   
+    
     
     ############################################Tightening Constraints############################################
     
@@ -395,5 +427,5 @@ def create_constraints(model, STN, H):
     
     
     #Forward Propagation
-    model.C_Forward_Propagation_Inequality = Constraint(model.S_Tasks, rule = forward_propagation_inequality)
+    #model.C_Forward_Propagation_Inequality = Constraint(model.S_Tasks, rule = forward_propagation_inequality)
     

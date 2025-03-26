@@ -1,8 +1,9 @@
 
 
-def define_stn_network():
+def define_stn_network() -> dict:
     
     STN = {
+        
         # states
         'STATES': {
             'RM'     : {'capacity': 10000, 'initial': 10000, 'price': 0, 'isRM': True, 'isIntermed': False, 'isProd': False},
@@ -67,38 +68,41 @@ def define_stn_network():
         
         # unit data indexed by (unit, task)
         'UNIT_TASKS': {
-            ('UA1', 'TA1') : {'tau_min': 4, 'tau_max': 4, 'tau': 1, 'Bmin': 5, 'Bmax': 10, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA2', 'TA2') : {'tau_min': 4, 'tau_max': 4, 'tau': 1, 'Bmin': 5, 'Bmax': 10, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA1', 'TA1') : {'tau_min': 4, 'tau_max': 4, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA2', 'TA2') : {'tau_min': 4, 'tau_max': 4, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
             
-            ('UA3', 'TB1') : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA3', 'TB2') : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA4', 'TB3') : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA4', 'TB4') : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA3', 'TB1') : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 10, 'Bmax': 15, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA3', 'TB2') : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 10, 'Bmax': 15, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA4', 'TB3') : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 10, 'Bmax': 15, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA4', 'TB4') : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 10, 'Bmax': 15, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
             
-            ('UA7', 'TC1') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC2') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TC5') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TC6') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA6', 'TC3') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 31, 'direction': 1,},
-            ('UA6', 'TC4') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 31, 'direction': 1,},
+            ('UA7', 'TC1') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA7', 'TC2') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA5', 'TC5') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA5', 'TC6') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA6', 'TC3') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA6', 'TC4') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
         },
         
+       
+        
         'EST': {
-            ('UA1', 'TA1') : {'est': 0, 'mu': 600,},
-            ('UA2', 'TA2') : {'est': 0, 'mu': 600,},
+            ('UA1', 'TA1') : {'est': 0, 'mu': 200,},
+            ('UA2', 'TA2') : {'est': 0, 'mu': 200,},
             
-            ('UA3', 'TB1') : {'est': 5, 'mu': 600,},
-            ('UA3', 'TB2') : {'est': 5, 'mu': 600,},
-            ('UA4', 'TB3') : {'est': 5, 'mu': 600,},
-            ('UA4', 'TB4') : {'est': 5, 'mu': 600,},
+            ('UA3', 'TB1') : {'est': 1, 'mu': 100,},
+            ('UA3', 'TB2') : {'est': 1, 'mu': 100,},
+            ('UA4', 'TB3') : {'est': 1, 'mu': 100,},
+            ('UA4', 'TB4') : {'est': 1, 'mu': 100,},
             
-            ('UA7', 'TC1') : {'est': 9, 'mu': 600,},
-            ('UA7', 'TC2') : {'est': 9, 'mu': 600,},
-            ('UA5', 'TC5') : {'est': 9, 'mu': 600,},
-            ('UA5', 'TC6') : {'est': 9, 'mu': 600,},
-            ('UA6', 'TC3') : {'est': 9, 'mu': 600,},
-            ('UA6', 'TC4') : {'est': 9, 'mu': 600,},
+            ('UA7', 'TC1') : {'est': 2, 'mu': 90,},
+            ('UA7', 'TC2') : {'est': 2, 'mu': 90,},
+            ('UA5', 'TC5') : {'est': 2, 'mu': 90,},
+            ('UA5', 'TC6') : {'est': 2, 'mu': 90,},
+            ('UA6', 'TC3') : {'est': 2, 'mu': 90},
+            ('UA6', 'TC4') : {'est': 2, 'mu': 90,},
         },
     }
+    
     return STN
 

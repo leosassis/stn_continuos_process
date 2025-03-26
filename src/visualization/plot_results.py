@@ -1,17 +1,6 @@
-from pyomo.environ import *
 import matplotlib.pyplot as plt
+from pyomo.environ import *
 
-def print_set(model, set):
-    print(set.data())
-
-def compute_product_production(model):
-    production_values = {k: (sum(model.V_B[i,j,n].value for n in model.S_Time for i in model.S_I_Producing_K[k] for j in model.S_J_Executing_I[i] if (i,j) in model.P_Task_Unit_Network if k in model.S_Final_Products)) for k in model.S_Materials if k in model.S_Final_Products}
-    for k, v in production_values.items():
-        print(f"Material: {k}, Production: {v}")
-
-def compute_total_production(model):
-    total_production = sum(model.V_B[i,j,n].value for n in model.S_Time for k in model.S_Materials for i in model.S_I_Producing_K[k] for j in model.S_J_Executing_I[i] if (i,j) in model.P_Task_Unit_Network if k in model.S_Final_Products)
-    return total_production
 
 def plot_gantt_chart(H, model):
     
@@ -37,6 +26,7 @@ def plot_gantt_chart(H, model):
     plt.gca().set_yticklabels(lbls) 
     plt.tight_layout()
     plt.show(block=True) 
+
     
 def plot_inventory_chart(H, model):
     
@@ -51,4 +41,4 @@ def plot_inventory_chart(H, model):
         plt.plot([0,H],[model.P_Chi[k],model.P_Chi[k]],'r--')
         plt.title(k)
     plt.tight_layout()
-    plt.show(block=True)   
+    plt.show(block=True) 
