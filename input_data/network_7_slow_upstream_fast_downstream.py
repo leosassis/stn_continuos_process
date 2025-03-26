@@ -1,8 +1,9 @@
 
 
-def define_stn_network():
+def define_stn_network() -> dict:
     
     STN = {
+        
         # states
         'STATES': {
             'RM'     : {'capacity': 10000, 'initial': 10000, 'price': 0, 'isRM': True, 'isIntermed': False, 'isProd': False},
@@ -100,5 +101,6 @@ def define_stn_network():
             ('UA6', 'TC4') : {'est': 9, 'mu': 600,},
         },
     }
+    
     return STN
 
