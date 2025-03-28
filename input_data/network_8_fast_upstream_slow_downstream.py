@@ -68,39 +68,39 @@ def define_stn_network() -> dict:
         
         # unit data indexed by (unit, task)
         'UNIT_TASKS': {
-            ('UA1', 'TA1') : {'tau_min': 4, 'tau_max': 4, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA2', 'TA2') : {'tau_min': 4, 'tau_max': 4, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA1', 'TA1') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA2', 'TA2') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
             
-            ('UA3', 'TB1') : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 10, 'Bmax': 15, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA3', 'TB2') : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 10, 'Bmax': 15, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA4', 'TB3') : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 10, 'Bmax': 15, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA4', 'TB4') : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 10, 'Bmax': 15, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA3', 'TB1') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 10, 'Bmax': 15, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA3', 'TB2') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 10, 'Bmax': 15, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA4', 'TB3') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 10, 'Bmax': 15, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA4', 'TB4') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 10, 'Bmax': 15, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
             
-            ('UA7', 'TC1') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC2') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TC5') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TC6') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA6', 'TC3') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA6', 'TC4') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA7', 'TC1') : {'tau_min': 6, 'tau_max': 9, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA7', 'TC2') : {'tau_min': 6, 'tau_max': 9, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA5', 'TC5') : {'tau_min': 6, 'tau_max': 9, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA5', 'TC6') : {'tau_min': 6, 'tau_max': 9, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA6', 'TC3') : {'tau_min': 6, 'tau_max': 9, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA6', 'TC4') : {'tau_min': 6, 'tau_max': 9, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
         },
         
        
         
         'EST': {
-            ('UA1', 'TA1') : {'est': 0, 'mu': 200,},
-            ('UA2', 'TA2') : {'est': 0, 'mu': 200,},
+            ('UA1', 'TA1') : {'est': 0,},
+            ('UA2', 'TA2') : {'est': 0,},
             
-            ('UA3', 'TB1') : {'est': 1, 'mu': 100,},
-            ('UA3', 'TB2') : {'est': 1, 'mu': 100,},
-            ('UA4', 'TB3') : {'est': 1, 'mu': 100,},
-            ('UA4', 'TB4') : {'est': 1, 'mu': 100,},
+            ('UA3', 'TB1') : {'est': 1,},
+            ('UA3', 'TB2') : {'est': 1,},
+            ('UA4', 'TB3') : {'est': 1,},
+            ('UA4', 'TB4') : {'est': 1,},
             
-            ('UA7', 'TC1') : {'est': 2, 'mu': 90,},
-            ('UA7', 'TC2') : {'est': 2, 'mu': 90,},
-            ('UA5', 'TC5') : {'est': 2, 'mu': 90,},
-            ('UA5', 'TC6') : {'est': 2, 'mu': 90,},
-            ('UA6', 'TC3') : {'est': 2, 'mu': 90},
-            ('UA6', 'TC4') : {'est': 2, 'mu': 90,},
+            ('UA7', 'TC1') : {'est': 2,},
+            ('UA7', 'TC2') : {'est': 2,},
+            ('UA5', 'TC5') : {'est': 2,},
+            ('UA5', 'TC6') : {'est': 2,},
+            ('UA6', 'TC3') : {'est': 2,},
+            ('UA6', 'TC4') : {'est': 2,},
         },
     }
     

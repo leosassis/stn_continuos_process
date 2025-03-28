@@ -1,5 +1,6 @@
 
-""" if (results.solver.termination_condition != TerminationCondition.infeasible):
+""" results_list = []
+    if (results.solver.termination_condition != TerminationCondition.infeasible):
                     
             num_total_vars, num_binary_vars, num_constraints = compute_num_variables_constraints(model)
             objective_value = get_objective_value(model, STN)

@@ -56,10 +56,6 @@ def est_initialization_unit(model, j):
     P_EST_Unit = min(model.P_EST[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
     return P_EST_Unit
 
-def mu_initialization(EST):
-    P_mu = {(i): EST[(j,i)]['mu'] for (j,i) in EST}
-    return P_mu
-
 
 def create_parameters(model, STN, H):
     
@@ -89,5 +85,5 @@ def create_parameters(model, STN, H):
     model.P_Product_Production = Param(model.S_Materials, mutable = True, initialize = 0) 
     model.P_EST = Param(model.S_Tasks, model.S_Units, initialize = est_initialization(EST))
     model.P_EST_Unit = Param(model.S_Units, initialize = est_initialization_unit)
-    model.mu_adjusted = Param(model.S_Tasks, initialize = mu_initialization(EST))
-    model.P_TAU_END = Param(model.S_Tasks, default = 1)
+    model.P_Tau_End_Task = Param(model.S_Tasks, default = 1)
+    model.P_Tau_End_Unit = Param(model.S_Units, default = 1)

@@ -9,9 +9,11 @@ from src.methods.fp import forward_propagation
 from src.data.load_data import load_data
 
 def main():
-        
-    results_list = []
-    H_Values = range(25, 26, 25)
+    """ 
+    Main function to run the model.
+    """    
+    
+    H_Values = range(50, 51, 25)
 
     for H in H_Values:
         
@@ -34,7 +36,9 @@ def main():
             plot_gantt_chart(H, model) 
                 
         except:
-            print("Model was not loaded/solved correctly.")
+            print("Model was not loaded/solved correctly or it was interrupted.")
+        
+        #print_model_constraints(model)
             
     
 if __name__=="__main__":
