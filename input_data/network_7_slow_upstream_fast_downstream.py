@@ -84,21 +84,21 @@ def define_stn_network() -> dict:
             ('UA6', 'TC4') : {'tau_min': 2, 'tau_max': 4, 'tau': 1, 'Bmin': 25, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 31, 'direction': 1,},
         },
         
-        'EST': {
-            ('UA1', 'TA1') : {'est': 0,},
-            ('UA2', 'TA2') : {'est': 0,},
+        'EST_ST': {
+            ('UA1', 'TA1') : {'est': 0, 'st': 0,},
+            ('UA2', 'TA2') : {'est': 0, 'st': 0,},
             
-            ('UA3', 'TB1') : {'est': 3,},
-            ('UA3', 'TB2') : {'est': 3,},
-            ('UA4', 'TB3') : {'est': 3,},
-            ('UA4', 'TB4') : {'est': 3,},
+            ('UA3', 'TB1') : {'est': 3, 'st': 0,},
+            ('UA3', 'TB2') : {'est': 3, 'st': 0,},
+            ('UA4', 'TB3') : {'est': 3, 'st': 0,},
+            ('UA4', 'TB4') : {'est': 3, 'st': 0,},
             
-            ('UA7', 'TC1') : {'est': 5,},
-            ('UA7', 'TC2') : {'est': 5,},
-            ('UA5', 'TC5') : {'est': 5,},
-            ('UA5', 'TC6') : {'est': 5,},
-            ('UA6', 'TC3') : {'est': 5,},
-            ('UA6', 'TC4') : {'est': 5,},
+            ('UA7', 'TC1') : {'est': 5, 'st': 0,},
+            ('UA7', 'TC2') : {'est': 5, 'st': 0,},
+            ('UA5', 'TC5') : {'est': 5, 'st': 0,},
+            ('UA5', 'TC6') : {'est': 5, 'st': 0,},
+            ('UA6', 'TC3') : {'est': 5, 'st': 0,},
+            ('UA6', 'TC4') : {'est': 5, 'st': 0,},
         },
     }
     

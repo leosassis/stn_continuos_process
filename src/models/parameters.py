@@ -48,9 +48,13 @@ def start_up_cost(UNIT_TASKS):
     P_StarUp_Cost = {(j,i): UNIT_TASKS[(j,i)]['sCost'] for (j,i) in UNIT_TASKS}
     return P_StarUp_Cost
 
-def est_initialization(EST):
-    P_EST = {(i,j): EST[(j,i)]['est'] for (j,i) in EST}
+def est_initialization(EST_ST):
+    P_EST = {(i,j): EST_ST[(j,i)]['est'] for (j,i) in EST_ST}
     return P_EST
+
+def st_initialization(EST_ST: dict) -> dict:
+    P_ST = {(i,j): EST_ST[(j,i)]['st'] for (j,i) in EST_ST}
+    return P_ST
 
 def est_initialization_unit(model, j):
     P_EST_Unit = min(model.P_EST[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
@@ -66,7 +70,7 @@ def create_parameters(model, STN, H):
     UNIT_TASKS = STN['UNIT_TASKS']
     #TIME = STN['TIME']
     TASKS_TRANSITION_TASKS = STN['TASKS_TRANSITION_TASKS']
-    EST = STN['EST']
+    EST_ST = STN['EST_ST']
     H = H
     
     model.P_Tau = Param(model.S_Tasks, model.S_Units, initialize = init_parameter_tau(UNIT_TASKS))
@@ -83,7 +87,8 @@ def create_parameters(model, STN, H):
     model.P_StartUp_Cost = Param(model.S_Units, model.S_Tasks, initialize =  start_up_cost(UNIT_TASKS))
     model.P_Material_State = Param(model.S_Materials)
     model.P_Product_Production = Param(model.S_Materials, mutable = True, initialize = 0) 
-    model.P_EST = Param(model.S_Tasks, model.S_Units, initialize = est_initialization(EST))
+    model.P_EST = Param(model.S_Tasks, model.S_Units, initialize = est_initialization(EST_ST))
+    model.P_ST = Param(model.S_Tasks, model.S_Units, initialize = st_initialization(EST_ST))
     model.P_EST_Unit = Param(model.S_Units, initialize = est_initialization_unit)
     model.P_Tau_End_Task = Param(model.S_Tasks, default = 1)
     model.P_Tau_End_Unit = Param(model.S_Units, default = 1)

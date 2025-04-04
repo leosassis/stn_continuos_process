@@ -22,8 +22,11 @@ def create_variables(model):
     # V_X_Hat_Idle[j,n] is 1 if unit j is in idle mode at time point n.
     model.V_X_Hat_Idle = Var(model.S_Units, model.S_Time, bounds = (0, 1), domain = Binary)
     
-    # V_EST[i,j] is the variable start time bound by parameter P_EST[i,j]
+    # V_EST[i,j] is the variable start time bounded by parameter P_EST[i,j]
     model.V_EST = Var(model.S_Tasks, model.S_Units, domain = NonNegativeReals)
+
+    # V_ST[i,j] is the variable shortest tail bounded by parameter P_ST[i,j]
+    model.V_ST = Var(model.S_Tasks, model.S_Units, domain = NonNegativeReals)
 
 
 def init_variables(model, H):

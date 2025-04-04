@@ -13,7 +13,7 @@ def main():
     Main function to run the model.
     """    
     
-    H_Values = range(50, 51, 25)
+    H_Values = range(25, 26, 25)
 
     for H in H_Values:
         
@@ -25,6 +25,7 @@ def main():
         
         # Step 3: Define solver configurations        
         set_solver_options_milp(solver)
+        #set_solver_options_relaxation(model)
         
         try:
             # Step 4: Solve the model
