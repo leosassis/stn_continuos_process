@@ -1,5 +1,4 @@
 from pyomo.environ import *
-import matplotlib.pyplot as plt
 
 def print_set(model, set):
     print(set.data())

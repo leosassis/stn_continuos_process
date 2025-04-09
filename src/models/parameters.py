@@ -60,6 +60,10 @@ def est_initialization_unit(model, j):
     P_EST_Unit = min(model.P_EST[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
     return P_EST_Unit
 
+def st_initialization_unit(model, j):
+    P_ST_Unit = min(model.P_ST[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
+    return P_ST_Unit
+
 
 def create_parameters(model, STN, H):
     
@@ -90,5 +94,6 @@ def create_parameters(model, STN, H):
     model.P_EST = Param(model.S_Tasks, model.S_Units, initialize = est_initialization(EST_ST))
     model.P_ST = Param(model.S_Tasks, model.S_Units, initialize = st_initialization(EST_ST))
     model.P_EST_Unit = Param(model.S_Units, initialize = est_initialization_unit)
+    model.P_ST_Unit = Param(model.S_Units, initialize = st_initialization_unit)
     model.P_Tau_End_Task = Param(model.S_Tasks, default = 1)
     model.P_Tau_End_Unit = Param(model.S_Units, default = 1)

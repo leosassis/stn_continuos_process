@@ -1,4 +1,3 @@
-from pkg_resources import _initialize
 from pyomo.environ import *
 import numpy as np 
 

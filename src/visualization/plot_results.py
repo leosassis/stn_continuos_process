@@ -1,8 +1,35 @@
 import matplotlib.pyplot as plt
 from pyomo.environ import *
 
+def plot_gantt_chart_Y(H, model):
+    plt.figure(figsize=(12,6))
+    gap = (H+1)/500
+    idx = 1
+    lbls = []
+    ticks = []
+    for j in sorted(model.S_Units):
+        idx -= 1
+        for i in sorted(model.S_I_In_J[j]):
+            idx -= 1
+            ticks.append(idx)
+            lbls.append("{0:s} -> {1:s}".format(j,i))
+            plt.plot([0,H+5],[idx,idx],lw=20,alpha=.3,color='y')
+            for t in model.S_Time:
+                if model.V_Y_Start[i,j,t]() > 0.0001:
+                    plt.plot([t+gap, t + model.P_Tau[i,j]-gap], [idx,idx],'g', lw=20, solid_capstyle='butt')
+                    txt = "Y_S"
+                    plt.text(t + model.P_Tau[i,j]/2, idx, txt, color='white', weight='bold', ha='center', va='center')
+                if model.V_Y_End[i,j,t]() > 0.0001:
+                    plt.plot([t+gap, t + model.P_Tau[i,j]-gap], [idx,idx],'r', lw=20, solid_capstyle='butt')
+                    txt = "Y_E"
+                    plt.text(t + model.P_Tau[i,j]/2, idx, txt, color='white', weight='bold', ha='center', va='center')                    
+    plt.xlim(0,H+1)
+    plt.gca().set_yticks(ticks)
+    plt.gca().set_yticklabels(lbls) 
+    plt.tight_layout()
+    plt.show(block=True)
 
-def plot_gantt_chart(H, model):
+def plot_gantt_chart_X(H, model):
     
     plt.figure(figsize=(12,6))
     gap = (H+1)/500
