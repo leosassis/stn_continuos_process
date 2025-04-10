@@ -84,6 +84,7 @@ def subsequent_tasks_dynamic_est(model, i, ii, j, jj, k):
                                                                - model.P_Tau_End_Task[ii] + 1 - model.P_Tau_Min[i,j] ) )
     else:
         return Constraint.Skip
+    
 
 def create_tightening_constraints(model, STN, H):
    

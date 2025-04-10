@@ -1,9 +1,9 @@
-#from input_data.network_2 import define_stn_network
-#from input_data.network_7_slow_upstream_fast_downstream import define_stn_network
-from input_data.network_8_fast_upstream_slow_downstream import define_stn_network
-#from input_data.network_9_uniform import define_stn_network
-#from input_data.network_10_dow import define_stn_network
+from input_data.networks import define_stn_network_1, define_stn_network_2
 
-def load_data() -> dict:
+def load_network(network, case, tau_factor, beta_factor) -> dict:
     
-    return define_stn_network()
+    if network == "network_1":
+        return define_stn_network_1(case, tau_factor, beta_factor)
+    elif network == "network_2":
+        return define_stn_network_2(case, tau_factor, beta_factor) 
+    
