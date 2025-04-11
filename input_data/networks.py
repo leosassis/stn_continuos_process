@@ -6,19 +6,19 @@ def define_stn_network_1(case, tau_factor, beta_factor) -> dict:
         
         # states
         'STATES': {
-            'RM'     : {'capacity': 10000, 'initial': 10000, 'price': 0, 'isRM': True, 'isIntermed': False, 'isProd': False},
-            'IA1'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False},       
-            'IA2'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False},       
-            'IB1'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False},       
-            'IB2'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False},       
-            'IB3'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False},       
-            'IB4'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False},       
-            'P1'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True},       
-            'P2'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True},       
-            'P3'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True},       
-            'P4'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True},       
-            'P5'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True},       
-            'P6'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True},       
+            'RM'     : {'capacity': 10000, 'initial': 10000, 'price': 0, 'isRM': True, 'isIntermed': False, 'isProd': False, 'order': 1,},
+            'IA1'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 2,},       
+            'IA2'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 3,},       
+            'IB1'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 4,},       
+            'IB2'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 5,},       
+            'IB3'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 6,},       
+            'IB4'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 7,},       
+            'P1'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 8,},       
+            'P2'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 9,},       
+            'P3'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 10,},       
+            'P4'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 11,},       
+            'P5'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 12,},       
+            'P6'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 13,},       
         },
 
         'STATES_SHIPMENT': { 
@@ -95,29 +95,29 @@ def define_stn_network_1(case, tau_factor, beta_factor) -> dict:
             ('UA5', 'TB3') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
             ('UA5', 'TB4') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
             
-            ('UA6', 'TC1') : {'tau_min': 6, 'tau_max': ceil(7*tau_factor), 'tau': 1, 'Bmin': 5, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA6', 'TC2') : {'tau_min': 6, 'tau_max': ceil(7*tau_factor), 'tau': 1, 'Bmin': 5, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC5') : {'tau_min': 6, 'tau_max': ceil(7*tau_factor), 'tau': 1, 'Bmin': 5, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC6') : {'tau_min': 6, 'tau_max': ceil(7*tau_factor), 'tau': 1, 'Bmin': 5, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA8', 'TC3') : {'tau_min': 6, 'tau_max': ceil(7*tau_factor), 'tau': 1, 'Bmin': 5, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA8', 'TC4') : {'tau_min': 6, 'tau_max': ceil(7*tau_factor), 'tau': 1, 'Bmin': 5, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA6', 'TC1') : {'tau_min': ceil(5*tau_factor), 'tau_max': ceil(7*tau_factor), 'tau': 1, 'Bmin': 5*beta_factor, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA6', 'TC2') : {'tau_min': ceil(5*tau_factor), 'tau_max': ceil(7*tau_factor), 'tau': 1, 'Bmin': 5*beta_factor, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA7', 'TC5') : {'tau_min': ceil(5*tau_factor), 'tau_max': ceil(7*tau_factor), 'tau': 1, 'Bmin': 5*beta_factor, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA7', 'TC6') : {'tau_min': ceil(5*tau_factor), 'tau_max': ceil(7*tau_factor), 'tau': 1, 'Bmin': 5*beta_factor, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA8', 'TC3') : {'tau_min': ceil(5*tau_factor), 'tau_max': ceil(7*tau_factor), 'tau': 1, 'Bmin': 5*beta_factor, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA8', 'TC4') : {'tau_min': ceil(5*tau_factor), 'tau_max': ceil(7*tau_factor), 'tau': 1, 'Bmin': 5*beta_factor, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
         }
     elif case == "slow_upstream":    
         UNIT_TASKS = {
             ('UA1', 'TA1') : {'tau_min': 6, 'tau_max': ceil(7*tau_factor), 'tau': 1, 'Bmin': 5, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
             ('UA2', 'TA2') : {'tau_min': 6, 'tau_max': ceil(7*tau_factor), 'tau': 1, 'Bmin': 5, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
             
-            ('UA3', 'TB1') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 10, 'Bmax': 15, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA4', 'TB2') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 10, 'Bmax': 15, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TB3') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 10, 'Bmax': 15, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TB4') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 10, 'Bmax': 15, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA3', 'TB1') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA4', 'TB2') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA5', 'TB3') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA5', 'TB4') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
             
-            ('UA6', 'TC1') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA6', 'TC2') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC5') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC6') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA8', 'TC3') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA8', 'TC4') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA6', 'TC1') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA6', 'TC2') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA7', 'TC5') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA7', 'TC6') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA8', 'TC3') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA8', 'TC4') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
         }
     elif case == "uniform":    
         UNIT_TASKS = {
