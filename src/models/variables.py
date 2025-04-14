@@ -1,6 +1,11 @@
 from pyomo.environ import *
 
-def create_variables(model):
+
+def create_variables(model: ConcreteModel) -> None:
+    """ 
+    Create model variables.
+    """
+    
     # V_X[i,j,n] = 1 if unit j processes (sub)task i at time point n.
     model.V_X = Var(model.S_Tasks, model.S_Units, model.S_Time, bounds = (0, 1), domain = Binary)
 
@@ -23,13 +28,17 @@ def create_variables(model):
     model.V_X_Hat_Idle = Var(model.S_Units, model.S_Time, bounds = (0, 1), domain = Binary)
     
     # V_EST[i,j] is the variable start time bounded by parameter P_EST[i,j]
-    model.V_EST = Var(model.S_Tasks, model.S_Units, domain = NonNegativeReals)
+    #model.V_EST = Var(model.S_Tasks, model.S_Units, domain = NonNegativeReals)
 
     # V_ST[i,j] is the variable shortest tail bounded by parameter P_ST[i,j]
-    model.V_ST = Var(model.S_Tasks, model.S_Units, domain = NonNegativeReals)
+    #model.V_ST = Var(model.S_Tasks, model.S_Units, domain = NonNegativeReals)
 
 
-def init_variables(model, H):
+def init_variables(model: ConcreteModel, H: int) -> None:
+    """ 
+    Fix values for variables.
+    """
+    
     #Variable model.V_X_Hat seams to have effect on the model.
     [model.V_X_Hat[i,j,n].fix(0) for i in model.S_Tasks for j in model.S_Units for n in model.S_Time if n < H] 
     

@@ -2,6 +2,7 @@ from pyomo.environ import *
 
 
 def define_solver() -> Any:
+    
     return SolverFactory('gurobi')
 
 def set_solver_options_milp(solver: Any) -> None: 

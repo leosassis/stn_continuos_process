@@ -1,47 +1,59 @@
+from src.utils.utils import compute_num_variables_constraints
+from pyomo.environ import *
 
-""" results_list = []
-    if (results.solver.termination_condition != TerminationCondition.infeasible):
-                    
-            num_total_vars, num_binary_vars, num_constraints = compute_num_variables_constraints(model)
-            objective_value = get_objective_value(model, STN)
-            termination_condition = results.solver.termination_condition
-            total_production = compute_total_production(model)
-            
-            #Solve LP relaxation.
-            solver = SolverFactory('gurobi')
-            set_solver_options_relaxation(solver, model)
-            solve_model(solver, model)                
-            lp_objective_value = get_objective_value(model, STN)
-            total_production_relaxed = compute_total_production(model)
-                            
-        else:                
-            objective_value = 0
-            lp_objective_value = 0
-            num_total_vars = 0
-            num_binary_vars = 0
-            num_constraints = 0
-            termination_condition = results.solver.termination_condition
-                        
-        instance_name = f"H{H}"
-            
-        # Add results as a dictionary
-        results_list.append({
-            "Instance": instance_name,
-            "Objective Function": objective_value,
-            "LP Relaxation": lp_objective_value,
-            "Gap %": 100*(lp_objective_value - objective_value)/lp_objective_value,
-            "Solution Time (s)": end_time - start_time,
-            "Termination Condition": termination_condition,
-            "Number of Constraints": num_constraints,
-            "Total Variables": num_total_vars,
-            "Binary Variables": num_binary_vars,
-            "Total Production": total_production,
-            "Relaxed Production": total_production_relaxed,
-            "Production Gap %": 100*(total_production_relaxed - total_production)/total_production_relaxed,
-        })
-            
-        # Convert results list to DataFrame
-        results_df = pd.DataFrame(results_list)
 
-        # Save results to Excel
-        results_df.to_excel("model_results_fp.xlsx", index=False) """
+def initialize_results_dict(network: str, case: str, H: int, tau_factor: int, beta_factor: int) -> dict:
+    
+    return {
+            "Network": network,
+            "Case": case,
+            "Horizon": H,
+            "Tau_Factor": tau_factor,
+            "Beta_Factor": beta_factor,
+            
+            "MILP Objective": None,
+            "Upper Bound": None,
+            "MILP Time": None,
+            "MILP Status": None,
+            "MILP Term. Condition": None,
+            "LP Relaxation": None,
+            "Num. Binary Var.": None,
+            "Total Num. Var.": None,
+            "Num. Constraints": None,
+            
+            "MILP+est Objective": None,
+            "Upper Bound est": None,
+            "MILP+est Time": None,
+            "MILP+est Status": None,
+            "MILP+est Term. Condition": None,
+            "LP+est Relaxation": None,
+            "Num. Binary Var. est": None,
+            "Total Num. Var. est": None,
+            "Num. Constraints est": None,
+            }
+    
+def create_dict_result(result: dict, model_milp: ConcreteModel, results_milp: Any, results_lp: ConcreteModel, model_milp_est: ConcreteModel, results_milp_est: Any, results_est_lp: ConcreteModel) -> dict:
+    
+    if results_milp.solver.status == 'ok' and results_milp_est.solver.status == 'ok':  
+    
+        result['MILP Objective'] = round(results_milp.problem.lower_bound, 2)
+        result['Upper Bound'] = round(results_milp.problem.upper_bound, 2)
+        result['MILP Time'] = round(results_milp.solver.time, 2)
+        result['MILP Status'] = str(results_milp.solver.status)
+        result['MILP Term. Condition'] = str(results_milp.solver.termination_condition)
+        result['LP Relaxation'] = round(results_lp.problem.lower_bound, 2)
+        result['Num. Binary Var.'] = compute_num_variables_constraints(model_milp)[1]
+        result['Total Num. Var.'] = compute_num_variables_constraints(model_milp)[0]
+        result['Num. Constraints'] = compute_num_variables_constraints(model_milp)[2]
+        
+        result['MILP+est Objective'] = round(results_milp_est.problem.lower_bound, 2)
+        result['Upper Bound est'] = round(results_milp_est.problem.upper_bound, 2)
+        result['MILP+est Time'] = round(results_milp_est.solver.time, 2)
+        result['MILP+est Status'] = str(results_milp_est.solver.status)
+        result['MILP+est Term. Condition'] = str(results_milp_est.solver.termination_condition)
+        result['LP+est Relaxation'] = round(results_est_lp.problem.lower_bound, 2)
+        result['Num. Binary Var. est'] = compute_num_variables_constraints(model_milp_est)[1]
+        result['Total Num. Var. est'] = compute_num_variables_constraints(model_milp_est)[0]
+        result['Num. Constraints est'] = compute_num_variables_constraints(model_milp_est)[2]
+    
+    return result

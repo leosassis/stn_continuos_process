@@ -49,7 +49,7 @@ def start_up_cost(UNIT_TASKS):
     return P_StarUp_Cost
 
 def est_initialization(EST_ST):
-    P_EST = {(i,j): EST_ST[(j,i)]['est'] for (j,i) in EST_ST}
+    P_EST = {(i,j): EST_ST[(j,i)] for (j,i) in EST_ST}
     return P_EST
 
 def st_initialization(EST_ST: dict) -> dict:
@@ -74,7 +74,6 @@ def create_parameters(model, STN, H):
     UNIT_TASKS = STN['UNIT_TASKS']
     #TIME = STN['TIME']
     TASKS_TRANSITION_TASKS = STN['TASKS_TRANSITION_TASKS']
-    EST_ST = STN['EST_ST']
     H = H
     
     model.P_Tau = Param(model.S_Tasks, model.S_Units, initialize = init_parameter_tau(UNIT_TASKS))
@@ -91,9 +90,24 @@ def create_parameters(model, STN, H):
     model.P_StartUp_Cost = Param(model.S_Units, model.S_Tasks, initialize =  start_up_cost(UNIT_TASKS))
     model.P_Material_State = Param(model.S_Materials)
     model.P_Product_Production = Param(model.S_Materials, mutable = True, initialize = 0) 
-    model.P_EST = Param(model.S_Tasks, model.S_Units, initialize = est_initialization(EST_ST))
-    model.P_ST = Param(model.S_Tasks, model.S_Units, initialize = st_initialization(EST_ST))
-    model.P_EST_Unit = Param(model.S_Units, initialize = est_initialization_unit)
-    model.P_ST_Unit = Param(model.S_Units, initialize = st_initialization_unit)
     model.P_Tau_End_Task = Param(model.S_Tasks, default = 1)
     model.P_Tau_End_Unit = Param(model.S_Units, default = 1)
+    
+   
+def create_est_parameters(model, STN, H):
+    
+    STATES = STN['STATES']
+    STATES_SHIPMENT = STN['STATES_SHIPMENT']
+    ST_ARCS = STN['ST_ARCS']
+    TS_ARCS = STN['TS_ARCS']
+    UNIT_TASKS = STN['UNIT_TASKS']
+    #TIME = STN['TIME']
+    TASKS_TRANSITION_TASKS = STN['TASKS_TRANSITION_TASKS']
+    EST_ST = STN['EST_ST']
+    H = H
+           
+    model.P_EST = Param(model.S_Tasks, model.S_Units, initialize = est_initialization(EST_ST))
+    #model.P_ST = Param(model.S_Tasks, model.S_Units, initialize = st_initialization(EST_ST))
+    #model.P_ST_Unit = Param(model.S_Units, initialize = st_initialization_unit)
+    model.P_EST_Unit = Param(model.S_Units, initialize = est_initialization_unit)
+     
