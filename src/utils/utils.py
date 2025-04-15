@@ -1,4 +1,6 @@
 from pyomo.environ import *
+import pprint
+
 
 def print_set(model, set: Any) -> None:
     """ 
@@ -6,6 +8,14 @@ def print_set(model, set: Any) -> None:
     """
     
     print(set.data())
+
+
+def print_dict(dictionary: dict) -> None:
+    """ 
+    Print dictionary.
+    """
+    
+    pprint.pprint(dictionary)    
 
 
 def compute_product_production(model: ConcreteModel) -> float:

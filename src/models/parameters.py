@@ -72,8 +72,6 @@ def create_parameters(model, STN, H):
     ST_ARCS = STN['ST_ARCS']
     TS_ARCS = STN['TS_ARCS']
     UNIT_TASKS = STN['UNIT_TASKS']
-    #TIME = STN['TIME']
-    TASKS_TRANSITION_TASKS = STN['TASKS_TRANSITION_TASKS']
     H = H
     
     model.P_Tau = Param(model.S_Tasks, model.S_Units, initialize = init_parameter_tau(UNIT_TASKS))
@@ -94,17 +92,9 @@ def create_parameters(model, STN, H):
     model.P_Tau_End_Unit = Param(model.S_Units, default = 1)
     
    
-def create_est_parameters(model, STN, H):
+def create_est_parameters(model, STN):
     
-    STATES = STN['STATES']
-    STATES_SHIPMENT = STN['STATES_SHIPMENT']
-    ST_ARCS = STN['ST_ARCS']
-    TS_ARCS = STN['TS_ARCS']
-    UNIT_TASKS = STN['UNIT_TASKS']
-    #TIME = STN['TIME']
-    TASKS_TRANSITION_TASKS = STN['TASKS_TRANSITION_TASKS']
     EST_ST = STN['EST_ST']
-    H = H
            
     model.P_EST = Param(model.S_Tasks, model.S_Units, initialize = est_initialization(EST_ST))
     #model.P_ST = Param(model.S_Tasks, model.S_Units, initialize = st_initialization(EST_ST))

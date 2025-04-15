@@ -284,19 +284,8 @@ def unit_availability_eq21(model, j, n):
         + (model.V_X_Hat_Idle[j,n] if j in model.S_J_Units_With_Shutdown_Tasks else 0)) <= 1 """
 
     
-def create_constraints(model, STN, H):
+def create_constraints(model: ConcreteModel):
    
-    STATES = STN['STATES']
-    STATES_SHIPMENT = STN['STATES_SHIPMENT']
-    ST_ARCS = STN['ST_ARCS']
-    TS_ARCS = STN['TS_ARCS']
-    UNIT_TASKS = STN['UNIT_TASKS']
-    #TIME = STN['TIME']
-    TASKS_TRANSITION_TASKS = STN['TASKS_TRANSITION_TASKS']
-    H = H
-
-    #################################################Base Model#################################################
-
     model.C_Unit_Capacity_LB_Eq2 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = unit_capacity_lb_eq2)
     model.C_Unit_Capacity_UB_Eq2 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = unit_capacity_ub_eq2)
     model.C_Material_Mass_Balance_Eq3 = Constraint(model.S_Materials, model.S_Time, rule = material_mass_balance_eq3)

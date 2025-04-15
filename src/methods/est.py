@@ -1,20 +1,21 @@
 from pyomo.environ import *
 from itertools import product
 from numpy import ceil
+from src.utils.utils import print_dict
 
 INITIAL_SHIFT = 1  # Initial shift of a consuming task in case the methods calculates that it should start before the start of the producing task
 SHIFT_TO_END_RUN = 1  # Shift to reach the end of a consuming task run
 
 
-def materials_to_be_explored(STN: dict) -> set:
+def materials_to_be_explored(STN: dict) -> list:
     """ 
-    Return an ordered set of materials to be explored.
+    Return an ordered list of materials to be explored.
     """
     
     STATES = STN['STATES']
-    S_SubSet_Materials = set({k: v for k, v in STATES.items() if v['isIntermed']})
+    intermediate_materials = {k: v for k, v in STATES.items() if v['isIntermed']}
         
-    return sorted(S_SubSet_Materials.keys(), key=lambda k: S_SubSet_Materials[k]['order'])
+    return sorted(intermediate_materials.keys(), key=lambda k: intermediate_materials[k]['order'])
 
 
 def get_production_relationship(model: ConcreteModel, i_producing: Any, j_producing: Any, ii_consuming: Any, jj_consuming: Any) -> int:
@@ -55,6 +56,7 @@ def get_est(model: ConcreteModel, i_producing: Any, j_producing: Any, ii_consumi
 def compute_est_cuts(model: ConcreteModel, STN: dict) -> None:
     """ 
     Computes the est for all tasks in the STN network.
+    The while loop goes through the ordered set of intermediate materials and computes the est of the consuming task, assuming as 0 the est of tasks connected to raw materials. 
     Updates the STN dictionary with 'EST_ST', a mapping of (j,i) -> est value.
     """
     
@@ -81,3 +83,7 @@ def compute_est_cuts(model: ConcreteModel, STN: dict) -> None:
             est_task[jj_consuming, ii_consuming] = get_est(model, *key, number_periods, est_task) 
     
     STN['EST_ST'] = est_task    
+    
+    print_dict(production_relationship)
+    print_dict(number_periods)
+    print_dict(est_task)
