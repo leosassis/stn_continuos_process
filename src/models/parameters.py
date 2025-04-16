@@ -48,56 +48,77 @@ def start_up_cost(UNIT_TASKS):
     P_StarUp_Cost = {(j,i): UNIT_TASKS[(j,i)]['sCost'] for (j,i) in UNIT_TASKS}
     return P_StarUp_Cost
 
-def est_initialization(EST_ST):
-    P_EST = {(i,j): EST_ST[(j,i)] for (j,i) in EST_ST}
-    return P_EST
-
-def st_initialization(EST_ST: dict) -> dict:
-    P_ST = {(i,j): EST_ST[(j,i)]['st'] for (j,i) in EST_ST}
-    return P_ST
-
-def est_initialization_unit(model, j):
-    P_EST_Unit = min(model.P_EST[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
-    return P_EST_Unit
-
-def st_initialization_unit(model, j):
-    P_ST_Unit = min(model.P_ST[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
-    return P_ST_Unit
+def est_initialization(EST: dict) -> dict:
+    est = {(i,j): EST[(j,i)] for (j,i) in EST}
+    return est
 
 
-def create_parameters(model, STN, H):
+def est_unit_initialization(model: ConcreteModel, j: Any) -> Any:
+    est_unit = min(model.P_EST[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
+    return est_unit
+
+
+def st_initialization(EST: dict) -> dict:
+    st = {(i,j): EST[(j,i)]['st'] for (j,i) in EST}
+    return st
+
+
+def st_initialization_unit(model: ConcreteModel, j: Any) -> Any:
+    st_unit = min(model.P_ST[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
+    return st_unit
+
+
+def upper_bound_x_initialization(upper_bound_x: dict) -> dict:
+    dict_upper_bound_x = {(i,j): upper_bound_x[(j,i)] for (j,i) in upper_bound_x}
+    return dict_upper_bound_x
+
+
+def upper_bound_x_unit_initialization(model: ConcreteModel, j: Any) -> dict:
+    dict_upper_bound_x_unit =  min(model.P_Upper_Bound_X[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
+    return dict_upper_bound_x_unit
+
+
+def create_parameters(model: ConcreteModel, STN: dict, H: int) -> None:
     
-    STATES = STN['STATES']
-    STATES_SHIPMENT = STN['STATES_SHIPMENT']
-    ST_ARCS = STN['ST_ARCS']
-    TS_ARCS = STN['TS_ARCS']
-    UNIT_TASKS = STN['UNIT_TASKS']
+    states = STN['STATES']
+    states_shipment = STN['STATES_SHIPMENT']
+    st_arcs = STN['ST_ARCS']
+    ts_arcs = STN['TS_ARCS']
+    unit_tasks = STN['UNIT_TASKS']
     H = H
     
-    model.P_Tau = Param(model.S_Tasks, model.S_Units, initialize = init_parameter_tau(UNIT_TASKS))
-    model.P_Init_Inventory_Material = Param(model.S_Materials, initialize = init_initial_inventory(STATES))
-    model.P_Chi = Param(model.S_Materials, initialize = init_storage_limits(STATES))
-    model.P_Material_Demand = Param(model.S_Materials, model.S_Time, initialize = init_material_demand(STATES_SHIPMENT, H), default = 0)
-    model.P_Beta_Max = Param(model.S_Tasks, model.S_Units, initialize = init_beta_max(UNIT_TASKS))
-    model.P_Beta_Min = Param(model.S_Tasks, model.S_Units, initialize = init_beta_min(UNIT_TASKS))
-    model.P_Rho_Minus = Param(model.S_Tasks, model.S_Materials, initialize = init_conversion_rate_consuming(ST_ARCS))
-    model.P_Rho_Plus = Param(model.S_Tasks, model.S_Materials, initialize = init_conversion_rate_production(TS_ARCS))
-    model.P_Tau_Min = Param(model.S_Tasks, model.S_Units, initialize = init_tau_min(model, UNIT_TASKS))
-    model.P_Tau_Max = Param(model.S_Tasks, model.S_Units, initialize = init_tau_max(model, UNIT_TASKS))
+    model.P_Tau = Param(model.S_Tasks, model.S_Units, initialize = init_parameter_tau(unit_tasks))
+    model.P_Init_Inventory_Material = Param(model.S_Materials, initialize = init_initial_inventory(states))
+    model.P_Chi = Param(model.S_Materials, initialize = init_storage_limits(states))
+    model.P_Material_Demand = Param(model.S_Materials, model.S_Time, initialize = init_material_demand(states_shipment, H), default = 0)
+    model.P_Beta_Max = Param(model.S_Tasks, model.S_Units, initialize = init_beta_max(unit_tasks))
+    model.P_Beta_Min = Param(model.S_Tasks, model.S_Units, initialize = init_beta_min(unit_tasks))
+    model.P_Rho_Minus = Param(model.S_Tasks, model.S_Materials, initialize = init_conversion_rate_consuming(st_arcs))
+    model.P_Rho_Plus = Param(model.S_Tasks, model.S_Materials, initialize = init_conversion_rate_production(ts_arcs))
+    model.P_Tau_Min = Param(model.S_Tasks, model.S_Units, initialize = init_tau_min(model, unit_tasks))
+    model.P_Tau_Max = Param(model.S_Tasks, model.S_Units, initialize = init_tau_max(model, unit_tasks))
     model.P_Unit_Initialization = Param(model.S_Units, initialize = unit_initialization(model))
-    model.P_StartUp_Cost = Param(model.S_Units, model.S_Tasks, initialize =  start_up_cost(UNIT_TASKS))
+    model.P_StartUp_Cost = Param(model.S_Units, model.S_Tasks, initialize =  start_up_cost(unit_tasks))
     model.P_Material_State = Param(model.S_Materials)
     model.P_Product_Production = Param(model.S_Materials, mutable = True, initialize = 0) 
     model.P_Tau_End_Task = Param(model.S_Tasks, default = 1)
     model.P_Tau_End_Unit = Param(model.S_Units, default = 1)
     
    
-def create_est_parameters(model, STN):
+def create_est_parameters(model: ConcreteModel, STN: dict) -> None:
     
-    EST_ST = STN['EST_ST']
+    est_stn = STN['EST']
+    upper_bound_x = STN['UPPER_BOUND_X']
            
-    model.P_EST = Param(model.S_Tasks, model.S_Units, initialize = est_initialization(EST_ST))
-    #model.P_ST = Param(model.S_Tasks, model.S_Units, initialize = st_initialization(EST_ST))
+    model.P_EST = Param(model.S_Tasks, model.S_Units, initialize = est_initialization(est_stn))
+    model.P_EST_Unit = Param(model.S_Units, initialize = est_unit_initialization)
+    model.P_Upper_Bound_X = Param(model.S_Tasks, model.S_Units, initialize = upper_bound_x_initialization(upper_bound_x))
+    model.P_Upper_Bound_X_Unit = Param(model.S_Units, initialize = upper_bound_x_unit_initialization)
+    #model.P_ST = Param(model.S_Tasks, model.S_Units, initialize = st_initialization(est_stn))
     #model.P_ST_Unit = Param(model.S_Units, initialize = st_initialization_unit)
-    model.P_EST_Unit = Param(model.S_Units, initialize = est_initialization_unit)
+    
+    model.P_EST.pprint()
+    model.P_EST_Unit.pprint()
+    model.P_Upper_Bound_X.pprint()
+    model.P_Upper_Bound_X_Unit.pprint()
      

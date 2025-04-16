@@ -8,7 +8,7 @@ def compute_upper_bound_x(model: ConcreteModel, STN: dict) -> None:
     Computes upper bounds on x variables based on its operational window.
     """
     
-    est = STN['EST_ST']
+    est = STN['EST']
     number_ys = {}
     upper_bound_x = {}
     number_remaining_periods_for_x = {}

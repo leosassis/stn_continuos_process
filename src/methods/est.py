@@ -82,8 +82,4 @@ def compute_est(model: ConcreteModel, STN: dict) -> None:
             number_periods[key] = get_number_periods(model, *key, production_relationship) 
             est_task[jj_consuming, ii_consuming] = get_est(model, *key, number_periods, est_task) 
     
-    STN['EST_ST'] = est_task    
-    
-    #print_dict(production_relationship)
-    #print_dict(number_periods)
-    print_dict(est_task)
+    STN['EST'] = est_task    
