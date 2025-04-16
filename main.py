@@ -37,16 +37,14 @@ def run_instance(network: str, case: str, H: int, tau_factor: int, beta_factor:i
         # Step 3: Build, configure and solve the MILP model
         model_milp = create_model(STN, H)
         set_solver_options_milp(solver)
-        results_milp: SolverResults = solve_model(solver, model_milp)
-        
+        results_milp: SolverResults = solve_model(solver, model_milp)        
         set_solver_options_relaxation(model_milp)
         results_lp: SolverResults = solve_model(solver, model_milp)
     
         # Step 4: Build, configure and solve the MILP+est model
         model_milp_est = create_model_est(STN, H)
         set_solver_options_milp(solver)
-        results_milp_est: SolverResults = solve_model(solver, model_milp_est)
-        
+        results_milp_est: SolverResults = solve_model(solver, model_milp_est)        
         set_solver_options_relaxation(model_milp_est)
         results_est_lp: SolverResults = solve_model(solver, model_milp_est)
         
@@ -56,7 +54,7 @@ def run_instance(network: str, case: str, H: int, tau_factor: int, beta_factor:i
         # Step 6: Analyze and visualize the solution    
         #plot_gantt_chart_X(25, model) 
         
-        logging.info(f"Model solved in {round(results_milp.solver.time, 2)} s. MILP Objective: {round(results_milp.problem.lower_bound, 2)}. MILP + EST Objective: {round(results_milp_est.problem.lower_bound, 2)}")            
+        logging.info(f"Models were solved. MILP Objective: {round(results_milp.problem.lower_bound, 2)}. MILP + EST Objective: {round(results_milp_est.problem.lower_bound, 2)}")            
             
     except Exception as e:
         

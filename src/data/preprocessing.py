@@ -3,7 +3,7 @@ def instace_factors_network():
     
     NETWORKS = ["network_1" ]
     CASES = ["slow_upstream"]
-    PLANNING_HORIZON_ARRAY = [25]
+    PLANNING_HORIZON_ARRAY = [31]
     TAU_FACTOR_MAX = 2
     BETA_FACTOR_MAX = 2
 

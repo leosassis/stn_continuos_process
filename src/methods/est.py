@@ -23,7 +23,7 @@ def get_production_relationship(model: ConcreteModel, i_producing: Any, j_produc
     Computes the production relationship between a consuming task ii_consuming and a producing task i_producing.
     """
     
-    numerator = model.P_Tau_Min[ii_consuming,jj_consuming]*model.P_Beta_Min[ii_consuming,jj_consuming]
+    numerator = model.P_Tau_Min[ii_consuming,jj_consuming] * model.P_Beta_Min[ii_consuming,jj_consuming]
     denominator = model.P_Tau_Max[i_producing, j_producing] * model.P_Beta_Max[i_producing, j_producing]
     
     return numerator/denominator
@@ -53,7 +53,7 @@ def get_est(model: ConcreteModel, i_producing: Any, j_producing: Any, ii_consumi
     return max(est_prod_task + INITIAL_SHIFT, est_prod_task + num_periods + SHIFT_TO_END_RUN - tau_min_consuming_task)
 
 
-def compute_est_cuts(model: ConcreteModel, STN: dict) -> None:
+def compute_est(model: ConcreteModel, STN: dict) -> None:
     """ 
     Computes the est for all tasks in the STN network.
     The while loop goes through the ordered set of intermediate materials and computes the est of the consuming task, assuming as 0 the est of tasks connected to raw materials. 
@@ -84,6 +84,6 @@ def compute_est_cuts(model: ConcreteModel, STN: dict) -> None:
     
     STN['EST_ST'] = est_task    
     
-    print_dict(production_relationship)
-    print_dict(number_periods)
+    #print_dict(production_relationship)
+    #print_dict(number_periods)
     print_dict(est_task)
