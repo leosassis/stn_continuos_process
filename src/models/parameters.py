@@ -58,23 +58,13 @@ def est_unit_initialization(model: ConcreteModel, j: Any) -> Any:
     return est_unit
 
 
-def st_initialization(EST: dict) -> dict:
-    st = {(i,j): EST[(j,i)]['st'] for (j,i) in EST}
-    return st
-
-
-def st_initialization_unit(model: ConcreteModel, j: Any) -> Any:
-    st_unit = min(model.P_ST[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
-    return st_unit
-
-
 def upper_bound_x_initialization(upper_bound_x: dict) -> dict:
     dict_upper_bound_x = {(i,j): upper_bound_x[(j,i)] for (j,i) in upper_bound_x}
     return dict_upper_bound_x
 
 
 def upper_bound_x_unit_initialization(model: ConcreteModel, j: Any) -> dict:
-    dict_upper_bound_x_unit =  min(model.P_Upper_Bound_X[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
+    dict_upper_bound_x_unit =  max(model.P_Upper_Bound_X[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
     return dict_upper_bound_x_unit
 
 
@@ -114,9 +104,7 @@ def create_est_parameters(model: ConcreteModel, STN: dict) -> None:
     model.P_EST_Unit = Param(model.S_Units, initialize = est_unit_initialization)
     model.P_Upper_Bound_X = Param(model.S_Tasks, model.S_Units, initialize = upper_bound_x_initialization(upper_bound_x))
     model.P_Upper_Bound_X_Unit = Param(model.S_Units, initialize = upper_bound_x_unit_initialization)
-    #model.P_ST = Param(model.S_Tasks, model.S_Units, initialize = st_initialization(est_stn))
-    #model.P_ST_Unit = Param(model.S_Units, initialize = st_initialization_unit)
-    
+        
     model.P_EST.pprint()
     model.P_EST_Unit.pprint()
     model.P_Upper_Bound_X.pprint()

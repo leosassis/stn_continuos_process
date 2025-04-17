@@ -11,7 +11,7 @@ def set_solver_options_milp(solver: Any) -> None:
     solver.options['TimeLimit'] = 3600  # Set time limit
 
 
-def set_solver_options_relaxation(model: ConcreteModel) -> None:    
+def activate_model_lp_relaxation(model: ConcreteModel) -> None:    
         
     for var in model.component_objects(Var, active=True):            
         for index in var:                

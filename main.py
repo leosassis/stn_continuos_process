@@ -2,7 +2,7 @@ import pandas as pd
 import time
 import logging
 from itertools import product
-from src.models.optimization_config import set_solver_options_milp, set_solver_options_relaxation, define_solver
+from src.models.optimization_config import set_solver_options_milp, activate_model_lp_relaxation, define_solver
 from src.models.create_model import solve_model, create_model, create_model_est
 from src.utils.utils import compute_product_production, compute_total_production, get_objective_value, print_model_constraints, compute_num_variables_constraints
 from src.visualization.plot_results import plot_gantt_chart_X, plot_inventory_chart, plot_gantt_chart_Y
@@ -34,22 +34,24 @@ def run_instance(network: str, case: str, H: int, tau_factor: int, beta_factor:i
         # Step 2: Define the solver
         solver = define_solver()
         
-        # Step 3: Build, configure and solve the MILP model
+        # Step 3: Build, configure and solve the MILP model        
         model_milp = create_model(STN, H)
         set_solver_options_milp(solver)
-        results_milp: SolverResults = solve_model(solver, model_milp)        
-        set_solver_options_relaxation(model_milp)
+        results_milp: SolverResults = solve_model(solver, model_milp)   
+        model_analytics_milp = compute_num_variables_constraints(model_milp)     
+        activate_model_lp_relaxation(model_milp)
         results_lp: SolverResults = solve_model(solver, model_milp)
     
         # Step 4: Build, configure and solve the MILP+est model
         model_milp_est = create_model_est(STN, H)
         set_solver_options_milp(solver)
         results_milp_est: SolverResults = solve_model(solver, model_milp_est)        
-        set_solver_options_relaxation(model_milp_est)
+        model_analytics_milp_est = compute_num_variables_constraints(model_milp_est)
+        activate_model_lp_relaxation(model_milp_est)
         results_est_lp: SolverResults = solve_model(solver, model_milp_est)
         
         # Step 5: Create result dictionary
-        result = create_dict_result(result, model_milp, results_milp, results_lp, model_milp_est, results_milp_est, results_est_lp)
+        result = create_dict_result(result, model_analytics_milp, results_milp, results_lp, model_analytics_milp_est, results_milp_est, results_est_lp)
         
         # Step 6: Analyze and visualize the solution    
         #plot_gantt_chart_X(25, model) 
