@@ -7,11 +7,6 @@ def initialize_results_dict(network: str, case: str, H: int, tau_factor: int, be
     instance_name = f"{network}_{case}_{H}_{tau_factor}_{beta_factor}"
     
     return {
-            #"Network": network,
-            #"Case": case,
-            #"Horizon": H,
-            #"Tau_Factor": tau_factor,
-            #"Beta_Factor": beta_factor,
             "Instance": instance_name,
             "MILP Objective": None,
             "Upper Bound": None,
@@ -36,7 +31,7 @@ def initialize_results_dict(network: str, case: str, H: int, tau_factor: int, be
     
 def create_dict_result(result: dict, model_analytics_milp: list, results_milp: Any, results_lp: ConcreteModel, model_analytics_milp_est: list, results_milp_est: Any, results_est_lp: ConcreteModel) -> dict:
     
-    if results_milp.solver.status == 'ok' and results_milp_est.solver.status == 'ok':  
+    if results_milp.solver.termination_condition != TerminationCondition.infeasible and results_milp_est.solver.termination_condition != TerminationCondition.infeasible:  
     
         result['MILP Objective'] = round(results_milp.problem.lower_bound, 2)
         result['Upper Bound'] = round(results_milp.problem.upper_bound, 2)

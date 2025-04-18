@@ -2,17 +2,27 @@ from pyomo.environ import *
 
 
 def define_solver() -> Any:
+    """ 
+    Defines Gurobi as the solver
+    """
     
     return SolverFactory('gurobi')
 
+
 def set_solver_options_milp(solver: Any) -> None: 
-      
+    """ 
+    Define solver options.
+    """  
+    
     #solver.options['MIPGap'] = 0.01  # Set MIP gap
     solver.options['TimeLimit'] = 3600  # Set time limit
 
 
 def activate_model_lp_relaxation(model: ConcreteModel) -> None:    
-        
+    """ 
+    Relax binary and integer variables.
+    """    
+    
     for var in model.component_objects(Var, active=True):            
         for index in var:                
             if var[index].domain == Binary:
