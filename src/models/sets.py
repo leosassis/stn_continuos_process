@@ -186,15 +186,15 @@ def create_main_sets_parameters(model, STN, H):
     model.S_K_Produced_I = Set(model.S_Tasks, initialize = init_set_materials_produced_task(model, TS_ARCS))
     model.S_K_Consumed_I = Set(model.S_Tasks, initialize = init_set_materials_consumed_task(model, ST_ARCS))    
     model.S_I_Production_Tasks_With_Transition = Set(initialize = init_set_production_tasks_with_transitions(TASKS_TRANSITION_TASKS))
+    model.S_I_Production_Tasks_With_Direct_Transition = Set(initialize = init_set_production_tasks_with_direct_transition(TASKS_TRANSITION_TASKS)) 
+    model.S_I_Production_Tasks_With_Indirect_Transition = Set(initialize = init_set_production_tasks_with_indirect_transition(TASKS_TRANSITION_TASKS))
     model.S_I_All_Transition_Tasks = Set(initialize = init_set_all_transitions(TASKS_TRANSITION_TASKS))
     model.S_I_Production_Tasks_Without_Transition = Set(initialize = init_set_production_tasks_without_transition(model))
     model.S_I_Direct_Transition_Tasks = Set(initialize = init_set_direct_transition_tasks(TASKS_TRANSITION_TASKS))
     model.S_I_Indirect_Transition_Tasks = Set(initialize = init_set_indirect_transition_tasks(TASKS_TRANSITION_TASKS))
     model.S_I_Startup_Tasks = Set(initialize = init_set_startup_tasks(TASKS_TRANSITION_TASKS))
     model.S_I_Shutdown_Tasks = Set(initialize = init_set_shutdown_tasks(TASKS_TRANSITION_TASKS))
-    model.S_I_Production_Tasks_With_Direct_Transition = Set(initialize = init_set_production_tasks_with_direct_transition(TASKS_TRANSITION_TASKS)) 
-    model.S_I_Production_Tasks_With_Indirect_Transition = Set(initialize = init_set_production_tasks_with_indirect_transition(TASKS_TRANSITION_TASKS))
-   
+    
     model.S_J_Units_With_Direct_Transition_Tasks = Set(initialize = init_set_units_with_direct_transition_tasks(model, UNIT_TASKS))  
     model.S_J_Units_With_Shutdown_Tasks = Set(initialize = init_set_units_with_shutdown_tasks(model, UNIT_TASKS))  
     model.S_J_Units_Without_Transition_Tasks = Set(initialize = init_set_units_without_transition_tasks(model))

@@ -66,23 +66,6 @@ def define_stn_network_1(case, tau_factor, beta_factor) -> dict:
         # Equivalent to parameter ipits(i, ii) in the GAMS code.
         'TASKS_TRANSITION_TASKS': { 
             },      
-        
-        #'EST_ST': {
-        #    ('UA1', 'TA1') : {'est': 0, 'st': 0,},
-        #    ('UA2', 'TA2') : {'est': 0, 'st': 0,},
-            
-        #    ('UA3', 'TB1') : {'est': 1, 'st': 0,},
-        #    ('UA4', 'TB2') : {'est': 1, 'st': 0,},
-        #    ('UA5', 'TB3') : {'est': 1, 'st': 0,},
-        #    ('UA5', 'TB4') : {'est': 1, 'st': 0,},
-            
-        #    ('UA6', 'TC1') : {'est': 2, 'st': 0,},
-        #    ('UA6', 'TC2') : {'est': 2, 'st': 0,},
-        #    ('UA7', 'TC5') : {'est': 2, 'st': 0,},
-        #    ('UA7', 'TC6') : {'est': 2, 'st': 0,},
-        #    ('UA8', 'TC3') : {'est': 2, 'st': 0,},
-        #    ('UA8', 'TC4') : {'est': 2, 'st': 0,},
-        #},
     }
     
     # unit data indexed by (unit, task)
@@ -239,34 +222,7 @@ def define_stn_network_2(case, tau_factor, beta_factor) -> dict:
         # Transition-To-Task = 1. Task-To-Transition = -1.
         # Equivalent to parameter ipits(i, ii) in the GAMS code.
         'TASKS_TRANSITION_TASKS': { 
-            },
-        
-        #'EST_ST': {
-        #    ('UA1', 'TA1') : {'est': 0, 'st': 15,},
-        #    ('UA1', 'TA2') : {'est': 0, 'st': 15,},
-        #    ('UA1', 'TA3') : {'est': 0, 'st': 15,},           
-            
-        #    ('UA2', 'TB1') : {'est': 1, 'st': 18,},
-        #    ('UA2', 'TB2') : {'est': 1, 'st': 18,},
-        #    ('UA2', 'TB3') : {'est': 1, 'st': 18,},
-            
-        #    ('UA3', 'TC1') : {'est': 2, 'st': 17,},
-        #    ('UA3', 'TC2') : {'est': 2, 'st': 17,},
-        #    ('UA3', 'TC3') : {'est': 2, 'st': 17,},
-            
-        #    ('UA4', 'TD1') : {'est': 3, 'st': 2,},
-        #    ('UA4', 'TD2') : {'est': 3, 'st': 2,},
-        #    ('UA4', 'TD3') : {'est': 3, 'st': 2,},
-            
-        #    ('UA5', 'TE1') : {'est': 4, 'st': 1,},
-        #    ('UA5', 'TE2') : {'est': 4, 'st': 1,},
-        #    ('UA5', 'TE3') : {'est': 4, 'st': 1,},
-            
-        #    ('UA6', 'TF1') : {'est': 5, 'st': 0,},
-        #    ('UA6', 'TF2') : {'est': 5, 'st': 0,},
-        #    ('UA6', 'TF3') : {'est': 5, 'st': 0,},
-                        
-        #},
+            },                
     }
     
     # unit data indexed by (unit, task)

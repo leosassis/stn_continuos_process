@@ -104,11 +104,4 @@ def create_est_parameters(model: ConcreteModel, STN: dict) -> None:
     model.P_EST_Unit = Param(model.S_Units, initialize = est_unit_initialization)
     model.P_Upper_Bound_X = Param(model.S_Tasks, model.S_Units, initialize = upper_bound_x_initialization(upper_bound_x))
     model.P_Upper_Bound_X_Unit = Param(model.S_Units, initialize = upper_bound_x_unit_initialization)
-        
-    model.P_EST.pprint()
-    model.P_EST_Unit.pprint()
-    model.P_Upper_Bound_X.pprint()
-    model.P_Upper_Bound_X_Unit.pprint()
-    model.P_Tau_Min.pprint()
-    model.P_Tau_Max.pprint()
      
