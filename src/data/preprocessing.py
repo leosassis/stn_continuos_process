@@ -1,5 +1,8 @@
 
 def instace_factors_network():
+    """ 
+    Defines and returns the data to create instances. 
+    """
     
     NETWORKS = ["network_1", "network_2"]
     CASES = ["fast_upstream", "slow_upstream", "uniform"]

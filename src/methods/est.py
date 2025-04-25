@@ -9,7 +9,7 @@ SHIFT_TO_END_RUN = 1  # Shift to reach the end of a consuming task run
 
 def materials_to_be_explored(STN: dict) -> list:
     """ 
-    Return an ordered list of materials to be explored.
+    Returns an ordered list of materials to be explored.
     """
     
     STATES = STN['STATES']

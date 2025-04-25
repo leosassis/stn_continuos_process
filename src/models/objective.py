@@ -47,7 +47,7 @@ def define_objective(model: ConcreteModel, STN: dict) -> Any:
    
 def create_objective_function(model: ConcreteModel, STN: dict) -> None:
    """ 
-   Attach the objective function.
+   Attaches the objective function to the model.
    """
     
    model.C_Objective = Objective(expr = define_objective(model, STN), sense = maximize)

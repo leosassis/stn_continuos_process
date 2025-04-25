@@ -4,7 +4,7 @@ import pprint
 
 def print_set(model, set: Any) -> None:
     """ 
-    Print the data in a pyomo set.
+    Prints the data in a pyomo set.
     """
     
     print(set.data())
@@ -12,7 +12,7 @@ def print_set(model, set: Any) -> None:
 
 def print_dict(dictionary: dict) -> None:
     """ 
-    Print dictionary.
+    Prints dictionary.
     """
     
     pprint.pprint(dictionary)    
@@ -20,7 +20,7 @@ def print_dict(dictionary: dict) -> None:
 
 def compute_product_production(model: ConcreteModel) -> float:
     """ 
-    Compute and print the production amount of each material k.
+    Computes and prints the production amount of each material k.
     """
     
     production_values = {k: (sum(model.V_B[i,j,n].value for n in model.S_Time for i in model.S_I_Producing_K[k] for j in model.S_J_Executing_I[i] if (i,j) in model.P_Task_Unit_Network if k in model.S_Final_Products)) for k in model.S_Materials if k in model.S_Final_Products}
@@ -31,7 +31,7 @@ def compute_product_production(model: ConcreteModel) -> float:
 
 def compute_total_production(model: ConcreteModel) -> float:
     """ 
-    Compute and print the total production of products. 
+    Computes and prints the total production of products. 
     """
     total_production = sum(model.V_B[i,j,n].value for n in model.S_Time for k in model.S_Materials for i in model.S_I_Producing_K[k] for j in model.S_J_Executing_I[i] if (i,j) in model.P_Task_Unit_Network if k in model.S_Final_Products)
     
@@ -40,7 +40,7 @@ def compute_total_production(model: ConcreteModel) -> float:
 
 def get_objective_value(model: ConcreteModel, STN: dict) -> float:
    """ 
-   Get the value of the objective function.
+   Gets the value of the objective function.
    """
    
    UNIT_TASKS = STN['UNIT_TASKS']
@@ -56,7 +56,7 @@ def get_objective_value(model: ConcreteModel, STN: dict) -> float:
 
 def print_model_constraints(model: ConcreteModel) -> None:
     """ 
-    Print the model constraints.
+    Prints the model constraints.
     """
     
     for con in model.component_map(Constraint).itervalues():
@@ -65,7 +65,7 @@ def print_model_constraints(model: ConcreteModel) -> None:
         
 def compute_num_variables_constraints(model: ConcreteModel) -> int:
     """ 
-    Compute the number of constraints and variables.
+    Computes the number of constraints and variables.
     """
     
     num_constraints = sum(len(constraint) for constraint in model.component_objects(Constraint, active=True))

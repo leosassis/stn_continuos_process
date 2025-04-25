@@ -3,6 +3,9 @@ from pyomo.environ import *
 
 
 def initialize_results_dict(network: str, case: str, H: int, tau_factor: int, beta_factor: int) -> dict:
+    """ 
+    Initializes the dictionary that receives the results of each instance.
+    """
     
     instance_name = f"{network}_{case}_{H}_{tau_factor}_{beta_factor}"
     
@@ -30,6 +33,9 @@ def initialize_results_dict(network: str, case: str, H: int, tau_factor: int, be
             }
     
 def create_dict_result(result: dict, model_analytics_milp: list, results_milp: Any, results_lp: ConcreteModel, model_analytics_milp_est: list, results_milp_est: Any, results_est_lp: ConcreteModel) -> dict:
+    """ 
+    Retrives information from results and saves them into a specific key in the dictionary.
+    """
     
     if results_milp.solver.termination_condition != TerminationCondition.infeasible and results_milp_est.solver.termination_condition != TerminationCondition.infeasible:  
     

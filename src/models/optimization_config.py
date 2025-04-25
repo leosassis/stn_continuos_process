@@ -11,7 +11,7 @@ def define_solver() -> Any:
 
 def set_solver_options_milp(solver: Any) -> None: 
     """ 
-    Define solver options.
+    Defines solver options.
     """  
     
     #solver.options['MIPGap'] = 0.01  # Set MIP gap
@@ -20,7 +20,7 @@ def set_solver_options_milp(solver: Any) -> None:
 
 def activate_model_lp_relaxation(model: ConcreteModel) -> None:    
     """ 
-    Relax binary and integer variables.
+    Relaxes binary and integer variables.
     """    
     
     for var in model.component_objects(Var, active=True):            
