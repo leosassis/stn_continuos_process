@@ -3,7 +3,7 @@ from pyomo.environ import *
 
 def define_solver() -> Any:
     """ 
-    Defines Gurobi as the solver
+    Defines Gurobi as the solver.
     """
     
     return SolverFactory('gurobi')

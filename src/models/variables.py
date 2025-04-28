@@ -3,7 +3,7 @@ from pyomo.environ import *
 
 def create_variables(model: ConcreteModel) -> None:
     """ 
-    Create model variables.
+    Creates model variables.
     """
     
     # V_X[i,j,n] = 1 if unit j processes (sub)task i at time point n.
@@ -36,7 +36,7 @@ def create_variables(model: ConcreteModel) -> None:
 
 def init_variables(model: ConcreteModel, H: int) -> None:
     """ 
-    Fix values for variables.
+    Fixes values for variables.
     """
     
     #Variable model.V_X_Hat seams to have effect on the model.
