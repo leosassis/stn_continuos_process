@@ -77,9 +77,6 @@ def compute_upper_bound_x_knapsack_problem(model: ConcreteModel, STN: dict) -> N
         solver.solve(model_max_runs, tee = False)
         
         upper_bound_x[j,i] = sum(run_lenght * model_max_runs.V_Number_Runs[run_lenght].value for run_lenght in model_max_runs.S_Run_Lenghts)
-        print(f"upper_bound_x[{j},{i}]={upper_bound_x[j,i]}")
         objective[j,i] = sum(run_lenght * model_max_runs.V_Number_Runs[run_lenght].value for run_lenght in model_max_runs.S_Run_Lenghts)
-        print(f"number_of_runs[{j},{i}]={objective[j,i]}")
-        
-        
+                
     STN['UPPER_BOUND_X'] = upper_bound_x     

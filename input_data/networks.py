@@ -37,10 +37,10 @@ def define_stn_network_1(case, tau_factor, beta_factor) -> dict:
         
             ('IB1', 'TC1')  : {'rho': -1.0, 'direction': -1},
             ('IB1', 'TC2')  : {'rho': -1.0, 'direction': -1},           
-            ('IB2', 'TC5')  : {'rho': -1.0, 'direction': -1},
-            ('IB3', 'TC6')  : {'rho': -1.0, 'direction': -1},            
-            ('IB4', 'TC3')  : {'rho': -1.0, 'direction': -1},
-            ('IB4', 'TC4')  : {'rho': -1.0, 'direction': -1},
+            ('IB2', 'TC3')  : {'rho': -1.0, 'direction': -1},
+            ('IB3', 'TC4')  : {'rho': -1.0, 'direction': -1},            
+            ('IB4', 'TC5')  : {'rho': -1.0, 'direction': -1},
+            ('IB4', 'TC6')  : {'rho': -1.0, 'direction': -1},
         },
         
         # task-to-state arcs indexed by (task, state)
@@ -55,10 +55,10 @@ def define_stn_network_1(case, tau_factor, beta_factor) -> dict:
                        
             ('TC1', 'P1')  : {'rho': 1.0, 'direction': 1},            
             ('TC2', 'P2')  : {'rho': 1.0, 'direction': 1},            
-            ('TC5', 'P3')  : {'rho': 1.0, 'direction': 1},            
-            ('TC6', 'P4')  : {'rho': 1.0, 'direction': 1},            
-            ('TC3', 'P5')  : {'rho': 1.0, 'direction': 1},            
-            ('TC4', 'P6')  : {'rho': 1.0, 'direction': 1},
+            ('TC3', 'P3')  : {'rho': 1.0, 'direction': 1},            
+            ('TC4', 'P4')  : {'rho': 1.0, 'direction': 1},            
+            ('TC5', 'P5')  : {'rho': 1.0, 'direction': 1},            
+            ('TC6', 'P6')  : {'rho': 1.0, 'direction': 1},
         },
         
         # Tasks and their corresponding transition. 
