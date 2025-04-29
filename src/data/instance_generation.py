@@ -5,10 +5,10 @@ def load_network(network_name: str, case: str, tau_factor: int, beta_factor: int
     Loads and returns a dictionary of network data.
     
     Args:
-            - network_name (str): identifier of the network.
-            - case (str): configuration of the network (e.g., 'fast_upstream').
-            - tau_factor (int): multiplying factor for tau parameters.
-            - beta_factor (int): multiplying factor for beta parameters.
+        - network_name (str): identifier of the network.
+        - case (str): configuration of the network (e.g., 'fast_upstream').
+        - tau_factor (int): multiplying factor for tau parameters.
+        - beta_factor (int): multiplying factor for beta parameters.
             
     Returns: 
         dict: a dictionary containing the network data. 
@@ -28,11 +28,11 @@ def instace_factors_network() -> tuple[list[str], list[str], list[int], int, int
     
     Returns:
         tuple:
-                - list of networks (list of str).
-                - list of cases (list of str).
-                - list of horizons (list of int).
-                - maximum tau multiplier (int).
-                - maximum beta multiplier (int). 
+            - list of networks (list of str).
+            - list of cases (list of str).
+            - list of horizons (list of int).
+            - maximum tau multiplier (int).
+            - maximum beta multiplier (int). 
     """
     
     #NETWORKS = ["network_1", "network_2"]
@@ -42,8 +42,8 @@ def instace_factors_network() -> tuple[list[str], list[str], list[int], int, int
     #BETA_FACTOR_MAX = 3
     
     NETWORKS = ["network_1"]
-    CASES = ["fast_upstream"]
-    PLANNING_HORIZON_ARRAY = [25]
+    CASES = ["slow_upstream"]
+    PLANNING_HORIZON_ARRAY = [28]
     TAU_FACTOR_MAX = 2
     BETA_FACTOR_MAX = 2
     

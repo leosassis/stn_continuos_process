@@ -1,34 +1,44 @@
 from pyomo.environ import *
 
 
-def unit_capacity_lb_eq2(model, i, j, n):
-    """ 
-    Lower bound on the processing rate of all tasks.        
-    
-    Input: set of tasks, units and time points.
-    
-    Output: constraints on the lower bound of processing rate of all tasks. 
+def unit_capacity_lb_eq2(model: ConcreteModel, task, unit, time_point) -> Constraint:
+    """
+    Enforces a lower bound on the processing rate for a task-unit pair at a given time point.
+
+    Args:
+        - model (ConcreteModel): pyomo model instance.
+        - task (str): task index.
+        - unit (str): unit index.
+        - time_point (int): time point index.
+
+    Returns:
+        A Pyomo constraint expression or Constraint.Skip if the task-unit pair is not in the network.
     """
     
-    if (i,j) in model.P_Task_Unit_Network:
-        return model.V_X[i,j,n]*model.P_Beta_Min[i,j] <= model.V_B[i,j,n] 
-    else:
-        return Constraint.Skip    
+    if (task, unit) in model.P_Task_Unit_Network:
+        return model.V_X[task, unit, time_point]*model.P_Beta_Min[task, unit] <= model.V_B[task, unit, time_point] 
+    
+    return Constraint.Skip    
 
 
-def unit_capacity_ub_eq2(model, i, j, n):
-    """ 
-    Upper bound on the processing rate of all tasks.        
-    
-    Input: set of tasks, units and time points.
-    
-    Output: constraints on the upper bound of processing rate of all tasks. 
+def unit_capacity_ub_eq2(model: ConcreteModel, task, unit, time_point) -> Constraint:
+    """
+    Enforces an upper bound on the processing rate for a task-unit pair at a given time point.
+
+    Args:
+        - model (ConcreteModel): pyomo model instance.
+        - task (str): task index.
+        - unit (str): unit index.
+        - time_point (int): time point index.
+
+    Returns:
+        A Pyomo constraint expression or Constraint.Skip if the task-unit pair is not in the network.
     """
     
-    if (i,j) in model.P_Task_Unit_Network:
-        return model.V_B[i,j,n] <= model.V_X[i,j,n]*model.P_Beta_Max[i,j]
-    else:
-        return Constraint.Skip
+    if (task, unit) in model.P_Task_Unit_Network:
+        return model.V_B[task, unit, time_point] <= model.V_X[task, unit, time_point]*model.P_Beta_Max[task, unit]
+    
+    return Constraint.Skip
 
 
 def material_mass_balance_eq3(model, k, n):
