@@ -52,7 +52,7 @@ def run_instance(network: str, case: str, H: int, tau_factor: int, beta_factor:i
         result = create_dict_result(result, model_analytics_milp, results_milp, results_lp, model_analytics_milp_est, results_milp_est, results_est_lp)
         
         # Step 6: Analyze and visualize the solution    
-        #plot_gantt_chart_X(H, model_milp) 
+        #plot_gantt_chart_X(H, model_milp_est) 
         
         logging.info(f"Models were solved. MILP Objective: {round(results_milp.problem.lower_bound, 2)}. MILP + EST Objective: {round(results_milp_est.problem.lower_bound, 2)}")            
             

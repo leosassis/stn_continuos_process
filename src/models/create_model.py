@@ -6,7 +6,7 @@ from src.models.constraints import create_constraints
 from src.models.objective import create_objective_function
 from src.models.constraints_est import create_constraints_est
 from src.methods.est import compute_est
-from src.methods.upper_bound_x import compute_upper_bound_x_knapsack_problem
+from src.methods.upper_bound_x import compute_upper_bound_x, compute_upper_bound_x_unit
 
 
 def create_model(STN: dict, H: int) -> ConcreteModel:
@@ -34,7 +34,8 @@ def create_model_est(STN: dict, H: int) -> ConcreteModel:
     create_constraints(model)
     create_objective_function(model, STN)    
     compute_est(model, STN)
-    compute_upper_bound_x_knapsack_problem(model, STN)
+    compute_upper_bound_x(model, STN)
+    compute_upper_bound_x_unit(model, STN)
     create_est_parameters(model, STN)
     create_constraints_est(model)
         

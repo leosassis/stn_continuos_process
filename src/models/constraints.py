@@ -6,13 +6,13 @@ def unit_capacity_lb_eq2(model: ConcreteModel, task, unit, time_point) -> Constr
     Enforces a lower bound on the processing rate for a task-unit pair at a given time point.
 
     Args:
-        - model (ConcreteModel): pyomo model instance.
+        - model (ConcreteModel): Pyomo model instance.
         - task (str): task index.
         - unit (str): unit index.
         - time_point (int): time point index.
 
     Returns:
-        A Pyomo constraint expression or Constraint.Skip if the task-unit pair is not in the network.
+        A Pyomo constraint or Constraint.Skip if the task-unit pair is not in the network.
     """
     
     if (task, unit) in model.P_Task_Unit_Network:
@@ -26,13 +26,13 @@ def unit_capacity_ub_eq2(model: ConcreteModel, task, unit, time_point) -> Constr
     Enforces an upper bound on the processing rate for a task-unit pair at a given time point.
 
     Args:
-        - model (ConcreteModel): pyomo model instance.
+        - model (ConcreteModel): Pyomo model instance.
         - task (str): task index.
         - unit (str): unit index.
         - time_point (int): time point index.
 
     Returns:
-        A Pyomo constraint expression or Constraint.Skip if the task-unit pair is not in the network.
+        A Pyomo constraint or Constraint.Skip if the task-unit pair is not in the network.
     """
     
     if (task, unit) in model.P_Task_Unit_Network:

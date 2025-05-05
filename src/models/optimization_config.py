@@ -4,6 +4,12 @@ from pyomo.environ import *
 def define_solver() -> Any:
     """ 
     Defines Gurobi as the solver.
+    
+    Args:
+        - none.
+    
+    Returns:
+        - solver (Any): Pyomo SolverFactory instance configured for Gurobi.
     """
     
     return SolverFactory('gurobi')
@@ -11,7 +17,13 @@ def define_solver() -> Any:
 
 def set_solver_options_milp(solver: Any) -> None: 
     """ 
-    Defines solver options.
+    Sets solver options for MILP optimization.
+    
+    Args:
+        - solver (Any): Pyomo solver instance (e.g., Gurobi).
+    
+    Returns:
+        - none.
     """  
     
     #solver.options['MIPGap'] = 0.01  # Set MIP gap
@@ -20,8 +32,14 @@ def set_solver_options_milp(solver: Any) -> None:
 
 def activate_model_lp_relaxation(model: ConcreteModel) -> None:    
     """ 
-    Relaxes binary and integer variables.
-    """    
+    Relaxes all binary and integer variables in the model to continuous variables.
+    
+    Args:
+        - model (ConcreteModel): Pyomo model instance.
+    
+    Returns:
+        - none.
+    """   
     
     for var in model.component_objects(Var, active=True):            
         for index in var:                

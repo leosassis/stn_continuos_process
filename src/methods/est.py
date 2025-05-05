@@ -1,7 +1,6 @@
 from pyomo.environ import *
 from itertools import product
 from numpy import ceil
-from src.utils.utils import print_dict
 
 INITIAL_SHIFT = 1  # Initial shift of a consuming task in case the methods calculates that it should start before the start of the producing task
 SHIFT_TO_END_RUN = 1  # Shift to reach the end of a consuming task run

@@ -23,6 +23,8 @@ def define_stn_network_1(case, tau_factor, beta_factor) -> dict:
         },
 
         'STATES_SHIPMENT': { 
+            #('P4', 28) : {'demand':60},        
+            #('P6', 28) : {'demand':60},
         },
         
         # state-to-task arcs indexed by (state, task)
