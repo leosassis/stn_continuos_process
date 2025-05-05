@@ -42,8 +42,8 @@ def instace_factors_network() -> tuple[list[str], list[str], list[int], int, int
     #BETA_FACTOR_MAX = 3
     
     NETWORKS = ["network_1"]
-    CASES = ["slow_upstream"]
-    PLANNING_HORIZON_ARRAY = [30]
+    CASES = ["fast_upstream"]
+    PLANNING_HORIZON_ARRAY = [35]
     TAU_FACTOR_MAX = 2
     BETA_FACTOR_MAX = 2
     

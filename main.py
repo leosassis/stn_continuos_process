@@ -3,7 +3,7 @@ import logging
 from itertools import product
 from src.models.optimization_config import set_solver_options_milp, activate_model_lp_relaxation, define_solver
 from src.models.create_model import solve_model, create_model, create_model_est
-from src.utils.utils import compute_num_variables_constraints
+from src.utils.utils import compute_num_variables_constraints, print_model_constraints
 from src.visualization.plot_results import plot_gantt_chart_X, plot_inventory_chart, plot_gantt_chart_Y
 from src.data.instance_generation import load_network, instace_factors_network
 from src.data.postprocessing import initialize_results_dict, create_dict_result

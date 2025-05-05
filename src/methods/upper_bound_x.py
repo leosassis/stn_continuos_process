@@ -177,5 +177,3 @@ def compute_upper_bound_x_unit(model: ConcreteModel, stn: dict) -> None:
         upper_bound_x_unit[j] = sum(run_length_unit * model_max_runs_unit.V_Number_Runs_Unit[run_length_unit].value for run_length_unit in model_max_runs_unit.S_Run_Lenghts_Unit)
                
     stn['UPPER_BOUND_X_UNIT'] = upper_bound_x_unit    
-    print(stn['UPPER_BOUND_X_UNIT'])
-    
