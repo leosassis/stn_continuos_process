@@ -53,7 +53,7 @@ def est_initialization(EST: dict) -> dict:
     return est
 
 
-def est_unit_initialization(model: ConcreteModel, j: Any) -> Any:
+def est_unit_initialization(model: ConcreteModel, j: Any) -> dict:
     est_unit = min(model.P_EST[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
     return est_unit
 

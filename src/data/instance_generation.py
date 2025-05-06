@@ -22,7 +22,7 @@ def load_network(network_name: str, case: str, tau_factor: int, beta_factor: int
         raise ValueError(f"Unsupported network name: {network_name}") 
     
 
-def instace_factors_network() -> tuple[list[str], list[str], list[int], int, int]:
+def instance_factors_network() -> tuple[list[str], list[str], list[int], int, int]:
     """ 
     Defines the configuration parameters for generating instances.
     

@@ -1,14 +1,12 @@
 import pandas as pd
 import logging
 from itertools import product
-from src.models.optimization_config import set_solver_options_milp, activate_model_lp_relaxation, define_solver
-from src.models.create_model import solve_and_analyze_model, create_model, create_model_est
-from src.utils.utils import compute_num_variables_constraints, print_model_constraints
+from src.models.optimization_config import define_solver
+from src.models.create_model import create_model_f0, create_model_f1
 from src.visualization.plot_results import plot_gantt_chart_X, plot_inventory_chart, plot_gantt_chart_Y
-from src.data.instance_generation import load_network, instace_factors_network
+from src.data.instance_generation import load_network, instance_factors_network
 from src.data.postprocessing import initialize_results_dict, create_dict_result
-from pyomo.opt import SolverResults
-
+from src.models.solve_model import solve_and_analyze_model 
 
 # Constant
 RESULTS_PATH = "src/results/model_results.xlsx"
@@ -29,7 +27,7 @@ def run_instance(network: str, case: str, planning_horizon: int, tau_factor: int
         - beta_factor (int): factor to multiply beta parameters when creating instances.
     
     Returns:
-        - dict: returns a dictionary of results for excel logging.
+        - dict: a dictionary of results for excel logging.
     """    
     
     # Spet 0: Initialize results dict
@@ -40,17 +38,17 @@ def run_instance(network: str, case: str, planning_horizon: int, tau_factor: int
         logging.info(f"Running instance: network = {network}, case = {case}, horizon = {planning_horizon}, tau_factor = {tau_factor}, beta_factor = {beta_factor}")
         
         # Step 1: Load network            
-        STN = load_network(network, case, tau_factor, beta_factor)
+        state_task_network = load_network(network, case, tau_factor, beta_factor)
 
         # Step 2: Define the solver
         solver = define_solver()
         
         # Step 3: Build, configure and solve the MILP model        
-        model_milp = create_model(STN, planning_horizon)
+        model_milp = create_model_f0(state_task_network, planning_horizon)
         results_milp, stats_milp, results_lp = solve_and_analyze_model(solver, model_milp)
             
         # Step 4: Build, configure and solve the MILP+est model
-        model_milp_est = create_model_est(STN, planning_horizon)
+        model_milp_est = create_model_f1(state_task_network, planning_horizon)
         results_milp_est, stats_milp_est, results_est_lp = solve_and_analyze_model(solver, model_milp_est)
         
         # Step 5: Create result dictionary
@@ -80,7 +78,7 @@ def main() -> None:
     """
     
     # Step 1: Load Data to create instances
-    networks, cases, planning_horizons, tau_factor_max, beta_factor_max = instace_factors_network()
+    networks, cases, planning_horizons, tau_factor_max, beta_factor_max = instance_factors_network()
     
     # Step 2: Create combinations of parameters to create instances
     results_list = []
