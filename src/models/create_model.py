@@ -10,9 +10,18 @@ from src.methods.upper_bound_x import compute_upper_bound_x, compute_upper_bound
 from src.utils.utils import print_model_constraints
 
 
-def create_model_f0(state_task_network: dict, planning_horizon: int) -> ConcreteModel:
+def _initialize_base_model(model: ConcreteModel, state_task_network: dict, planning_horizon: int) -> None:
+    """
+    Initializes base model components: sets, variables, parameters, and constraints.
     
-    model = ConcreteModel()
+    Args:
+        - model (ConcreteModel): an empty Pyomo model to be configured.
+        - state_task_network (dict): a dictionary with the state-task network instance data.
+        - planning_horizon (int): planning horizon.
+
+    Returns:
+        - None. modifies the model in-place.    
+    """
     
     create_main_sets_parameters(model, state_task_network, planning_horizon)
     create_variables(model)    
@@ -21,19 +30,41 @@ def create_model_f0(state_task_network: dict, planning_horizon: int) -> Concrete
     create_constraints(model)
     create_objective_function(model, state_task_network)
     
+
+def create_model_f0(state_task_network: dict, planning_horizon: int) -> ConcreteModel:
+    """
+    Creates the base MILP model.
+    
+    Args:
+        - state_task_network (dict): a dictionary with the state-task network instance data.
+        - planning_horizon (int): planning horizon.
+
+    Returns:
+        - ConcreteModel: return a Pyomo model.
+    """
+    
+    model = ConcreteModel()
+    
+    _initialize_base_model(model, state_task_network, planning_horizon)
+    
     return model
 
 
 def create_model_f1(state_task_network: dict, planning_horizon: int) -> ConcreteModel:
+    """
+    Creates the enhanced MILP model with EST calculations and additional constraints.
+    
+    Args:
+        - state_task_network (dict): a dictionary with the state-task network instance data.
+        - planning_horizon (int): planning horizon.
+
+    Returns:
+        - ConcreteModel: return a Pyomo model.
+    """
     
     model = ConcreteModel()
     
-    create_main_sets_parameters(model, state_task_network, planning_horizon)
-    create_variables(model)    
-    create_parameters(model, state_task_network, planning_horizon)
-    init_variables(model, planning_horizon)
-    create_constraints(model)
-    create_objective_function(model, state_task_network)    
+    _initialize_base_model(model, state_task_network, planning_horizon)    
     compute_est(model, state_task_network)
     compute_upper_bound_x(model, state_task_network)
     compute_upper_bound_x_unit(model, state_task_network)
