@@ -31,7 +31,7 @@ def run_instance(network: str, case: str, planning_horizon: int, tau_factor: int
     """    
     
     # Spet 0: Initialize results dict
-    result = initialize_results_dict(network, case, planning_horizon, tau_factor, beta_factor)
+    result = initialize_results_dict(network, case, planning_horizon, tau_factor, beta_factor, formulation_name = "")
     
     try:
         
@@ -44,28 +44,23 @@ def run_instance(network: str, case: str, planning_horizon: int, tau_factor: int
         solver = define_solver()
         
         # Step 3: Build, configure and solve the MILP model        
-        model_milp = create_model_f0(state_task_network, planning_horizon)
+        model_milp, formulation_name = create_model_f0(state_task_network, planning_horizon)
         results_milp, stats_milp, results_lp = solve_and_analyze_model(solver, model_milp)
             
-        # Step 4: Build, configure and solve the MILP+est model
-        model_milp_est = create_model_f1(state_task_network, planning_horizon)
-        results_milp_est, stats_milp_est, results_est_lp = solve_and_analyze_model(solver, model_milp_est)
+        # Step 4: Create result dictionary
+        result = create_dict_result(result, stats_milp, results_milp, results_lp, formulation_name)
         
-        # Step 5: Create result dictionary
-        result = create_dict_result(result, stats_milp, results_milp, results_lp, stats_milp_est, results_milp_est, results_est_lp)
-        
-        # Step 6: Analyze and visualize the solution    
+        # Step 5: Analyze and visualize the solution    
         #plot_gantt_chart_X(planning_horizon, model_milp_est) 
         
         logging.info(
-            f"Models were solved. MILP Objective: {round(results_milp.problem.lower_bound, 2)}." 
-            f"MILP + EST Objective: {round(results_milp_est.problem.lower_bound, 2)}"
+            f"Models were solved. Formulation: {formulation_name}. MILP Objective: {round(results_milp.problem.lower_bound, 2)}." 
         )            
             
     except Exception as e:
         
         logging.error(
-            f"Error while solving instance {network}, {case}, horizon = {planning_horizon}, tau_factor = {tau_factor}, beta_factor = {beta_factor}."
+            f"Error while solving instance {network}, {case}, horizon = {planning_horizon}, tau_factor = {tau_factor}, beta_factor = {beta_factor}, formulation = {formulation_name}"
         )
         logging.exception(e)
         

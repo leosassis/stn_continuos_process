@@ -1,16 +1,27 @@
-from src.utils.utils import compute_num_variables_constraints
 from pyomo.environ import *
 
 
-def initialize_results_dict(network: str, case: str, H: int, tau_factor: int, beta_factor: int) -> dict:
-    """ 
-    Initializes the dictionary that receives the results of each instance.
+def initialize_results_dict(network: str, case: str, planning_horizon: int, tau_factor: int, beta_factor: int, formulation_name: str) -> dict[str, Any]:
+    """
+    Initializes a dictionary to store results from a single optimization instance.
+
+    Args:
+        - network (str): name of the network.
+        - case (str): network configuration (e.g., 'uniform', 'fast_upstream').
+        - planning_horizon (int): planning horizon.
+        - tau_factor (int): multiplicative factor for tau parameters.
+        - beta_factor (int): multiplicative factor for beta parameters.
+        - formulation_name (str): name of the model formulation.
+
+    Returns:
+        dict[str, Any]: Initialized dictionary with placeholders for results.
     """
     
-    instance_name = f"{network}_{case}_{H}_{tau_factor}_{beta_factor}"
+    instance_name = f"{network}_{case}_{planning_horizon}_{tau_factor}_{beta_factor}"
     
     return {
             "Instance": instance_name,
+            "Formulation Name": None,
             "MILP Objective": None,
             "Upper Bound": None,
             "MILP Time": None,
@@ -19,26 +30,27 @@ def initialize_results_dict(network: str, case: str, H: int, tau_factor: int, be
             "LP Relaxation": None,
             "Num. Binary Var.": None,
             "Total Num. Var.": None,
-            "Num. Constraints": None,
-            
-            "MILP+est Objective": None,
-            "Upper Bound est": None,
-            "MILP+est Time": None,
-            "MILP+est Status": None,
-            "MILP+est Term. Condition": None,
-            "LP+est Relaxation": None,
-            "Num. Binary Var. est": None,
-            "Total Num. Var. est": None,
-            "Num. Constraints est": None,
-            }
+            "Num. Constraints": None,}
     
-def create_dict_result(result: dict, model_analytics_milp: list, results_milp: Any, results_lp: ConcreteModel, model_analytics_milp_est: list, results_milp_est: Any, results_est_lp: ConcreteModel) -> dict:
-    """ 
-    Retrives information from results and saves them into a specific key in the dictionary.
+    
+def create_dict_result(result: dict, model_analytics_milp: list, results_milp: Any, results_lp: ConcreteModel, formulation_name: str) -> dict[str, Any]:
+    """
+    Updates the result dictionary with actual values from MILP and LP results if results are feasible.
+
+    Args:
+        - result (dict[str, Any]): initialized result dictionary.
+        - model_analytics_milp (list): [total vars, binary vars, constraints].
+        - results_milp (Any): Pyomo solver results object for the MILP model.
+        - results_lp (Any): Pyomo solver results object for the LP relaxation.
+        - formulation_name (str): Name of the model formulation.
+
+    Returns:
+        dict[str, Any]: Updated dictionary with extracted results.
     """
     
-    if results_milp.solver.termination_condition != TerminationCondition.infeasible and results_milp_est.solver.termination_condition != TerminationCondition.infeasible:  
+    if results_milp.solver.termination_condition != TerminationCondition.infeasible:  
     
+        result["Formulation Name"] = formulation_name
         result['MILP Objective'] = round(results_milp.problem.lower_bound, 2)
         result['Upper Bound'] = round(results_milp.problem.upper_bound, 2)
         result['MILP Time'] = round(results_milp.solver.time, 2)
@@ -48,15 +60,5 @@ def create_dict_result(result: dict, model_analytics_milp: list, results_milp: A
         result['Num. Binary Var.'] = model_analytics_milp[1]
         result['Total Num. Var.'] = model_analytics_milp[0]
         result['Num. Constraints'] = model_analytics_milp[2]
-        
-        result['MILP+est Objective'] = round(results_milp_est.problem.lower_bound, 2)
-        result['Upper Bound est'] = round(results_milp_est.problem.upper_bound, 2)
-        result['MILP+est Time'] = round(results_milp_est.solver.time, 2)
-        result['MILP+est Status'] = str(results_milp_est.solver.status)
-        result['MILP+est Term. Condition'] = str(results_milp_est.solver.termination_condition)
-        result['LP+est Relaxation'] = round(results_est_lp.problem.lower_bound, 2)
-        result['Num. Binary Var. est'] = model_analytics_milp_est[1]
-        result['Total Num. Var. est'] = model_analytics_milp_est[0]
-        result['Num. Constraints est'] = model_analytics_milp_est[2]
     
     return result

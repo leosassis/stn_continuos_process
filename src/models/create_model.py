@@ -31,7 +31,7 @@ def _initialize_base_model(model: ConcreteModel, state_task_network: dict, plann
     create_objective_function(model, state_task_network)
     
 
-def create_model_f0(state_task_network: dict, planning_horizon: int) -> ConcreteModel:
+def create_model_f0(state_task_network: dict, planning_horizon: int) -> tuple[ConcreteModel, str]:
     """
     Creates the base MILP model.
     
@@ -46,11 +46,12 @@ def create_model_f0(state_task_network: dict, planning_horizon: int) -> Concrete
     model = ConcreteModel()
     
     _initialize_base_model(model, state_task_network, planning_horizon)
+    formulation_name = "F0"
     
-    return model
+    return model, formulation_name
 
 
-def create_model_f1(state_task_network: dict, planning_horizon: int) -> ConcreteModel:
+def create_model_f1(state_task_network: dict, planning_horizon: int) -> tuple[ConcreteModel, str]:
     """
     Creates the enhanced MILP model with EST calculations and additional constraints.
     
@@ -70,5 +71,6 @@ def create_model_f1(state_task_network: dict, planning_horizon: int) -> Concrete
     compute_upper_bound_x_unit(model, state_task_network)
     create_est_parameters(model, state_task_network)
     create_constraints_est(model)
+    formulation_name = "F2"
         
-    return model
+    return model, formulation_name
