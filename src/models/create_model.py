@@ -8,6 +8,7 @@ from src.models.constraints_est import create_constraints_est
 from src.methods.est import compute_est
 from src.methods.upper_bound_x import compute_upper_bound_x, compute_upper_bound_x_unit
 from src.utils.utils import print_model_constraints
+from src.methods.upper_bound_ys import compute_upper_bound_ys_unit
 
 
 def _initialize_base_model(model: ConcreteModel, state_task_network: dict, planning_horizon: int) -> None:
@@ -69,8 +70,9 @@ def create_model_f1(state_task_network: dict, planning_horizon: int) -> tuple[Co
     compute_est(model, state_task_network)
     compute_upper_bound_x(model, state_task_network)
     compute_upper_bound_x_unit(model, state_task_network)
+    compute_upper_bound_ys_unit(model, state_task_network)
     create_est_parameters(model, state_task_network)
     create_constraints_est(model)
-    formulation_name = "F2"
+    formulation_name = "F1"
         
     return model, formulation_name

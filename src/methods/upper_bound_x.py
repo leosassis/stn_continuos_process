@@ -45,32 +45,32 @@ def compute_upper_bound_x(model: ConcreteModel, stn: dict) -> None:
     stn['UPPER_BOUND_X'] = upper_bound_x
         
 
-def knapsack_constraint(model_max_runs: ConcreteModel, number_time_points_for_x: int, tau_end: int) -> Constraint:
+def knapsack_constraint(model_max_production_time_points: ConcreteModel, number_time_points_for_x: int, tau_end: int) -> Constraint:
     """
     Defines the knapsack constraint weigthed by run_length + tau_end (number of time points necessary for each run_length) and limited by the number of possible production time points. 
     
     Args:
-        - model_max_runs (ConcreteModel): Pyomo model instance.
+        - model_max_production_time_points (ConcreteModel): Pyomo model instance.
         - number_time_points_for_x (int): number of available production time points.
         - tau_end (int): number of idle periods between two consecutives runs.
     
     Returns: A Pyomo constraint.
     """
     
-    return sum((run_length + tau_end) * model_max_runs.V_Number_Runs[run_length] for run_length in model_max_runs.S_Run_Lenghts) <= number_time_points_for_x
+    return sum((run_length + tau_end) * model_max_production_time_points.V_Number_Runs[run_length] for run_length in model_max_production_time_points.S_Run_Lenghts) <= number_time_points_for_x
 
 
-def define_objective(model_max_runs: ConcreteModel) -> Objective:
+def define_objective(model_max_production_time_points: ConcreteModel) -> Objective:
     """
     Defines the objective function to maximize the number of production time points. 
     
     Args:
-        - model_max_runs (ConcreteModel): Pyomo model instance.
+        - model_max_production_time_points (ConcreteModel): Pyomo model instance.
     
     Returns: A Pyomo objective.
     """
     
-    return sum((run_length) * model_max_runs.V_Number_Runs[run_length] for run_length in model_max_runs.S_Run_Lenghts)
+    return sum((run_length) * model_max_production_time_points.V_Number_Runs[run_length] for run_length in model_max_production_time_points.S_Run_Lenghts)
 
 
 def compute_upper_bound_x(model: ConcreteModel, stn: dict) -> None:
@@ -97,47 +97,47 @@ def compute_upper_bound_x(model: ConcreteModel, stn: dict) -> None:
         tau_end = model.P_Tau_End_Task[i]
         number_time_points_for_x = num_periods + ADD_TIME_PERIOD - est[j,i]
         
-        model_max_runs = ConcreteModel()        
+        model_max_production_time_points = ConcreteModel()        
         
-        model_max_runs.S_Run_Lenghts = RangeSet(tau_min, tau_max)
-        model_max_runs.V_Number_Runs = Var(model_max_runs.S_Run_Lenghts, domain = NonNegativeIntegers)
-        model_max_runs.C_Knapsack_Constraint = Constraint(rule = knapsack_constraint(model_max_runs, number_time_points_for_x, tau_end))
-        model_max_runs.C_Objective = Objective(expr = define_objective(model_max_runs), sense = maximize)
+        model_max_production_time_points.S_Run_Lenghts = RangeSet(tau_min, tau_max)
+        model_max_production_time_points.V_Number_Runs = Var(model_max_production_time_points.S_Run_Lenghts, domain = NonNegativeIntegers)
+        model_max_production_time_points.C_Knapsack_Constraint = Constraint(rule = knapsack_constraint(model_max_production_time_points, number_time_points_for_x, tau_end))
+        model_max_production_time_points.C_Objective = Objective(expr = define_objective(model_max_production_time_points), sense = maximize)
         
         solver = define_solver()
-        solver.solve(model_max_runs, tee = False)
+        solver.solve(model_max_production_time_points, tee = False)
         
-        upper_bound_x[j,i] = sum(run_length * model_max_runs.V_Number_Runs[run_length].value for run_length in model_max_runs.S_Run_Lenghts)
+        upper_bound_x[j,i] = sum(run_length * model_max_production_time_points.V_Number_Runs[run_length].value for run_length in model_max_production_time_points.S_Run_Lenghts)
              
     stn['UPPER_BOUND_X'] = upper_bound_x   
     
     
-def knapsack_constraint_unit(model_max_runs_unit: ConcreteModel, number_time_points_for_x_unit: int, tau_end_unit: int) -> Constraint:
+def knapsack_constraint_unit(model_max_production_time_points_unit: ConcreteModel, number_time_points_for_x_unit: int, tau_end_unit: int) -> Constraint:
     """
     Defines the knapsack constraint weigthed by run_length_unit + tau_end_unit (number of time points necessary for each run_length_unit) and limited by the number of possible production time points. 
     
     Args:
-        - model_max_runs_unit (ConcreteModel): Pyomo model instance.
+        - model_max_production_time_points_unit (ConcreteModel): Pyomo model instance.
         - number_time_points_for_x_unit (int): number of available production time points in a unit.
         - tau_end_unit (int): number of idle periods between two consecutives runs in a unit.
     
     Returns: A Pyomo constraint.
     """
     
-    return sum((run_length_unit + tau_end_unit) * model_max_runs_unit.V_Number_Runs_Unit[run_length_unit] for run_length_unit in model_max_runs_unit.S_Run_Lenghts_Unit) <= number_time_points_for_x_unit
+    return sum((run_length_unit + tau_end_unit) * model_max_production_time_points_unit.V_Number_Runs_Unit[run_length_unit] for run_length_unit in model_max_production_time_points_unit.S_Run_Lenghts_Unit) <= number_time_points_for_x_unit
 
 
-def define_objective_unit(model_max_runs_unit: ConcreteModel) -> Objective:
+def define_objective_unit(model_max_production_time_points_unit: ConcreteModel) -> Objective:
     """
     Defines the objective function to maximize the number of production time points. 
     
     Args:
-        - model_max_runs_unit (ConcreteModel): Pyomo model instance.
+        - model_max_production_time_points_unit (ConcreteModel): Pyomo model instance.
     
     Returns: A Pyomo objective.
     """
     
-    return sum((run_length_unit) * model_max_runs_unit.V_Number_Runs_Unit[run_length_unit] for run_length_unit in model_max_runs_unit.S_Run_Lenghts_Unit)    
+    return sum((run_length_unit) * model_max_production_time_points_unit.V_Number_Runs_Unit[run_length_unit] for run_length_unit in model_max_production_time_points_unit.S_Run_Lenghts_Unit)    
     
         
 def compute_upper_bound_x_unit(model: ConcreteModel, stn: dict) -> None:
@@ -164,16 +164,16 @@ def compute_upper_bound_x_unit(model: ConcreteModel, stn: dict) -> None:
         tau_end_unit = TAU_END_UNIT
         number_time_points_for_x_unit = num_periods + ADD_TIME_PERIOD - min(est[j,i] for i in model.S_I_In_J[j])
         
-        model_max_runs_unit = ConcreteModel()        
+        model_max_production_time_points_unit = ConcreteModel()        
         
-        model_max_runs_unit.S_Run_Lenghts_Unit = RangeSet(tau_min_unit, tau_max_unit)
-        model_max_runs_unit.V_Number_Runs_Unit = Var(model_max_runs_unit.S_Run_Lenghts_Unit, domain = NonNegativeIntegers)
-        model_max_runs_unit.C_Knapsack_Constraint_Unit = Constraint(rule = knapsack_constraint_unit(model_max_runs_unit, number_time_points_for_x_unit, tau_end_unit))
-        model_max_runs_unit.C_Objective_Unit = Objective(expr = define_objective_unit(model_max_runs_unit), sense = maximize)
+        model_max_production_time_points_unit.S_Run_Lenghts_Unit = RangeSet(tau_min_unit, tau_max_unit)
+        model_max_production_time_points_unit.V_Number_Runs_Unit = Var(model_max_production_time_points_unit.S_Run_Lenghts_Unit, domain = NonNegativeIntegers)
+        model_max_production_time_points_unit.C_Knapsack_Constraint_Unit = Constraint(rule = knapsack_constraint_unit(model_max_production_time_points_unit, number_time_points_for_x_unit, tau_end_unit))
+        model_max_production_time_points_unit.C_Objective_Unit = Objective(expr = define_objective_unit(model_max_production_time_points_unit), sense = maximize)
         
         solver = define_solver()
-        solver.solve(model_max_runs_unit, tee = False)
+        solver.solve(model_max_production_time_points_unit, tee = False)
         
-        upper_bound_x_unit[j] = sum(run_length_unit * model_max_runs_unit.V_Number_Runs_Unit[run_length_unit].value for run_length_unit in model_max_runs_unit.S_Run_Lenghts_Unit)
+        upper_bound_x_unit[j] = sum(run_length_unit * model_max_production_time_points_unit.V_Number_Runs_Unit[run_length_unit].value for run_length_unit in model_max_production_time_points_unit.S_Run_Lenghts_Unit)
                
     stn['UPPER_BOUND_X_UNIT'] = upper_bound_x_unit    

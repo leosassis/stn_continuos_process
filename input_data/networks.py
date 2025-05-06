@@ -78,7 +78,7 @@ def define_stn_network_1(case, tau_factor, beta_factor) -> dict:
             
             ('UA3', 'TB1') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
             ('UA4', 'TB2') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TB3') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA5', 'TB3') : {'tau_min': 3, 'tau_max': 6, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
             ('UA5', 'TB4') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
             
             ('UA6', 'TC1') : {'tau_min': int(ceil(5/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 5*beta_factor, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},

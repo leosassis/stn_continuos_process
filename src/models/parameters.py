@@ -68,19 +68,28 @@ def upper_bound_x_unit_initialization(upper_bound_x_unit: dict) -> dict:
     return dict_upper_bound_x_unit
 
 
-def create_parameters(model: ConcreteModel, STN: dict, H: int) -> None:
+def upper_bound_ys_initialization(model: ConcreteModel, i: Any, j: Any):
+    if (i in model.S_I_Production_Tasks) and (j in model.S_J_Executing_I[i]) and ((i,j) in model.P_Task_Unit_Network):
+        return floor((max(model.S_Time) + 1 - model.P_EST[i,j])/(model.P_Tau_Min[i,j] + model.P_Tau_End_Task[i]))
+
+
+def upper_bound_ys_unit_initialization(upper_bound_ys_unit: dict) -> dict:
+    dict_upper_bound_ys_unit =  {j: upper_bound_ys_unit[j] for j in upper_bound_ys_unit}
+    return dict_upper_bound_ys_unit
+
+
+def create_parameters(model: ConcreteModel, stn: dict, planning_horizon: int) -> None:
     
-    states = STN['STATES']
-    states_shipment = STN['STATES_SHIPMENT']
-    st_arcs = STN['ST_ARCS']
-    ts_arcs = STN['TS_ARCS']
-    unit_tasks = STN['UNIT_TASKS']
-    H = H
-    
+    states = stn['STATES']
+    states_shipment = stn['STATES_SHIPMENT']
+    st_arcs = stn['ST_ARCS']
+    ts_arcs = stn['TS_ARCS']
+    unit_tasks = stn['UNIT_TASKS']
+        
     model.P_Tau = Param(model.S_Tasks, model.S_Units, initialize = init_parameter_tau(unit_tasks))
     model.P_Init_Inventory_Material = Param(model.S_Materials, initialize = init_initial_inventory(states))
     model.P_Chi = Param(model.S_Materials, initialize = init_storage_limits(states))
-    model.P_Material_Demand = Param(model.S_Materials, model.S_Time, initialize = init_material_demand(states_shipment, H), default = 0)
+    model.P_Material_Demand = Param(model.S_Materials, model.S_Time, initialize = init_material_demand(states_shipment, planning_horizon), default = 0)
     model.P_Beta_Max = Param(model.S_Tasks, model.S_Units, initialize = init_beta_max(unit_tasks))
     model.P_Beta_Min = Param(model.S_Tasks, model.S_Units, initialize = init_beta_min(unit_tasks))
     model.P_Rho_Minus = Param(model.S_Tasks, model.S_Materials, initialize = init_conversion_rate_consuming(st_arcs))
@@ -97,12 +106,17 @@ def create_parameters(model: ConcreteModel, STN: dict, H: int) -> None:
    
 def create_est_parameters(model: ConcreteModel, stn: dict) -> None:
     
-    est_stn = stn['EST']
+    est = stn['EST']
     upper_bound_x = stn['UPPER_BOUND_X']
     upper_bound_x_unit = stn['UPPER_BOUND_X_UNIT']
+    upper_bound_ys_unit = stn['UPPER_BOUND_Y_UNIT']
            
-    model.P_EST = Param(model.S_Tasks, model.S_Units, initialize = est_initialization(est_stn))
+    model.P_EST = Param(model.S_Tasks, model.S_Units, initialize = est_initialization(est))
     model.P_EST_Unit = Param(model.S_Units, initialize = est_unit_initialization)
+    
+    model.P_Upper_Bound_YS = Param(model.S_Tasks, model.S_Units, initialize = upper_bound_ys_initialization)
+    model.P_Upper_Bound_YS_Unit = Param(model.S_Units, initialize = upper_bound_ys_unit_initialization(upper_bound_ys_unit))
+    
     model.P_Upper_Bound_X = Param(model.S_Tasks, model.S_Units, initialize = upper_bound_x_initialization(upper_bound_x))
     model.P_Upper_Bound_X_Unit = Param(model.S_Units, initialize = upper_bound_x_unit_initialization(upper_bound_x_unit))
      
