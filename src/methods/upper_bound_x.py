@@ -7,7 +7,7 @@ ADD_TIME_PERIOD = 1  # Used for computing the number of time periods
 TAU_END_UNIT = 1  # Number of idle periods between two consecutive runs in a unit
 
 
-def compute_upper_bound_x(model: ConcreteModel, stn: dict) -> None:
+def compute_upper_bound_x_old(model: ConcreteModel, stn: dict) -> None:
     """ 
     Computes upper bounds on x variables based on its operational window and tau values.
     

@@ -1,42 +1,66 @@
 from numpy import floor, ceil
 
 
-def define_stn_network_1(case, tau_factor, beta_factor) -> dict:
+def define_stn_network_1(case: str, tau_factor: int, beta_factor: int) -> dict:
+    """
+    Create a process scheduling network (STN) based on the specified case.
     
-    STN = {
+    Args:
+        - case (str): defines which case to use for task/unit parameters (i.e., "fast_upstream", "slow_upstream", "uniform").
+        - tau_factor (int): factor used to scale tau parameters.
+        - beta_factor (int): factor used to scale beta parameters.
+
+    Returns:
+        dict: a dictionary defining the structure of the scheduling problem, including:
+              STATES, STATE-to-TASK arcs, TASK-to-STATE arcs, UNIT-TASK assignments, etc.
+    """
+    
+    # Helper function to construct a unit-task configuration dictionary
+    def _task_data(tau_min, tau_max, Bmin, Bmax, direction=1, Cost=4, vCost=1, sCost=25):
+        return {
+            'tau_min': tau_min,
+            'tau_max': tau_max,
+            'tau': 1,
+            'Bmin': Bmin,
+            'Bmax': Bmax,
+            'Cost': Cost,
+            'vCost': vCost,
+            'sCost': sCost,
+            'direction': direction,
+        }    
+    
+    stn = {
         
-        # states
+        # Define all states (raw materials, intermediates, and products)
         'STATES': {
-            'RM'     : {'capacity': 10000, 'initial': 10000, 'price': 0, 'isRM': True, 'isIntermed': False, 'isProd': False, 'order': 1,},
-            'IA1'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 2,},       
-            'IA2'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 3,},       
-            'IB1'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 4,},       
-            'IB2'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 5,},       
-            'IB3'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 6,},       
-            'IB4'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 7,},       
-            'P1'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 8,},       
-            'P2'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 9,},       
-            'P3'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 10,},       
-            'P4'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 11,},       
-            'P5'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 12,},       
-            'P6'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 13,},       
+            name: {
+                'capacity': 10000,
+                'initial': 10000 if name == 'RM' else 0,
+                'price': 0 if name.startswith(('RM', 'I')) else 10,
+                'isRM': name == 'RM',
+                'isIntermed': name.startswith('I') and name != 'RM',
+                'isProd': name.startswith('P'),
+                'order': idx,
+            }
+            for idx, name in enumerate(
+                ['RM', 'IA1', 'IA2', 'IB1', 'IB2', 'IB3', 'IB4', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6'],
+                start=1
+            )
         },
 
+        # Placeholder for shipment demands
         'STATES_SHIPMENT': { 
-            #('P4', 28) : {'demand':60},        
-            #('P6', 28) : {'demand':60},
+            # Example: ('P4', 28) : {'demand':60},        
         },
         
-        # state-to-task arcs indexed by (state, task)
+        # Define input arcs: which states feed which tasks (negative flow)
         'ST_ARCS': {
             ('RM', 'TA1') : {'rho': -1.0, 'direction': -1},          
-            ('RM', 'TA2') : {'rho': -1.0, 'direction': -1},
-           
+            ('RM', 'TA2') : {'rho': -1.0, 'direction': -1},           
             ('IA1', 'TB1')  : {'rho': -1.0, 'direction': -1},
             ('IA1', 'TB2')  : {'rho': -1.0, 'direction': -1},           
             ('IA2', 'TB3')  : {'rho': -1.0, 'direction': -1},        
-            ('IA2', 'TB4')  : {'rho': -1.0, 'direction': -1},        
-        
+            ('IA2', 'TB4')  : {'rho': -1.0, 'direction': -1},
             ('IB1', 'TC1')  : {'rho': -1.0, 'direction': -1},
             ('IB1', 'TC2')  : {'rho': -1.0, 'direction': -1},           
             ('IB2', 'TC3')  : {'rho': -1.0, 'direction': -1},
@@ -45,16 +69,14 @@ def define_stn_network_1(case, tau_factor, beta_factor) -> dict:
             ('IB4', 'TC6')  : {'rho': -1.0, 'direction': -1},
         },
         
-        # task-to-state arcs indexed by (task, state)
+        # Define output arcs: which tasks generate which states (positive flow)
         'TS_ARCS': {
             ('TA1', 'IA1')  : {'rho': 1.0, 'direction': 1},            
-            ('TA2', 'IA2')  : {'rho': 1.0, 'direction': 1},
-            
+            ('TA2', 'IA2')  : {'rho': 1.0, 'direction': 1},            
             ('TB1', 'IB1')  : {'rho': 1.0, 'direction': 1},            
             ('TB2', 'IB2')  : {'rho': 1.0, 'direction': 1},            
             ('TB3', 'IB3')  : {'rho': 1.0, 'direction': 1},            
-            ('TB4', 'IB4')  : {'rho': 1.0, 'direction': 1},
-                       
+            ('TB4', 'IB4')  : {'rho': 1.0, 'direction': 1},                       
             ('TC1', 'P1')  : {'rho': 1.0, 'direction': 1},            
             ('TC2', 'P2')  : {'rho': 1.0, 'direction': 1},            
             ('TC3', 'P3')  : {'rho': 1.0, 'direction': 1},            
@@ -63,69 +85,63 @@ def define_stn_network_1(case, tau_factor, beta_factor) -> dict:
             ('TC6', 'P6')  : {'rho': 1.0, 'direction': 1},
         },
         
-        # Tasks and their corresponding transition. 
-        # Transition-To-Task = 1. Task-To-Transition = -1.
-        # Equivalent to parameter ipits(i, ii) in the GAMS code.
+        # Optional mapping of startup/shutdown transitions between tasks
         'TASKS_TRANSITION_TASKS': { 
+            # Example: ('TC3', 'ITC3')   : {'isSU': True, 'isSD': False, 'isDirect': False, 'direction': 1},
             },      
     }
     
-    # unit data indexed by (unit, task)
+    # Define task-unit assignments and parameters per case
     if case == "fast_upstream":
         UNIT_TASKS = {
-            ('UA1', 'TA1') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA2', 'TA2') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            
-            ('UA3', 'TB1') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA4', 'TB2') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TB3') : {'tau_min': 3, 'tau_max': 6, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TB4') : {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            
-            ('UA6', 'TC1') : {'tau_min': int(ceil(5/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 5*beta_factor, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA6', 'TC2') : {'tau_min': int(ceil(5/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 5*beta_factor, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC3') : {'tau_min': int(ceil(5/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 5*beta_factor, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC4') : {'tau_min': int(ceil(5/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 5*beta_factor, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA8', 'TC5') : {'tau_min': int(ceil(5/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 5*beta_factor, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA8', 'TC6') : {'tau_min': int(ceil(5/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 5*beta_factor, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA1', 'TA1'): _task_data(4, 6, 25, 30),
+            ('UA2', 'TA2'): _task_data(4, 6, 25, 30),
+            ('UA3', 'TB1'): _task_data(5, 7, 15, 20),
+            ('UA4', 'TB2'): _task_data(5, 7, 15, 20),
+            ('UA5', 'TB3'): _task_data(3, 6, 15, 20),
+            ('UA5', 'TB4'): _task_data(5, 7, 15, 20),
+            ('UA6', 'TC1'): _task_data(int(ceil(5 / tau_factor)), int(ceil(7 * tau_factor)), 5 * beta_factor, 6 * beta_factor),
+            ('UA6', 'TC2'): _task_data(int(ceil(5 / tau_factor)), int(ceil(7 * tau_factor)), 5 * beta_factor, 6 * beta_factor),
+            ('UA7', 'TC3'): _task_data(int(ceil(5 / tau_factor)), int(ceil(7 * tau_factor)), 5 * beta_factor, 6 * beta_factor),
+            ('UA7', 'TC4'): _task_data(int(ceil(5 / tau_factor)), int(ceil(7 * tau_factor)), 5 * beta_factor, 6 * beta_factor),
+            ('UA8', 'TC5'): _task_data(int(ceil(5 / tau_factor)), int(ceil(7 * tau_factor)), 5 * beta_factor, 6 * beta_factor),
+            ('UA8', 'TC6'): _task_data(int(ceil(5 / tau_factor)), int(ceil(7 * tau_factor)), 5 * beta_factor, 6 * beta_factor),
         }
     elif case == "slow_upstream":    
         UNIT_TASKS = {
-            ('UA1', 'TA1') : {'tau_min': int(ceil(5/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 5, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA2', 'TA2') : {'tau_min': int(ceil(5/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 5, 'Bmax': 6*beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            
-            ('UA3', 'TB1') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA4', 'TB2') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TB3') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TB4') : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            
-            ('UA6', 'TC1') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA6', 'TC2') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC3') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC4') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA8', 'TC5') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA8', 'TC6') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA1', 'TA1'): _task_data(int(ceil(5 / tau_factor)), int(ceil(7 * tau_factor)), 5, 6 * beta_factor),
+            ('UA2', 'TA2'): _task_data(int(ceil(5 / tau_factor)), int(ceil(7 * tau_factor)), 5, 6 * beta_factor),
+            ('UA3', 'TB1'): _task_data(4, 6, 15, 20),
+            ('UA4', 'TB2'): _task_data(4, 6, 15, 20),
+            ('UA5', 'TB3'): _task_data(4, 6, 15, 20),
+            ('UA5', 'TB4'): _task_data(4, 6, 15, 20),
+            ('UA6', 'TC1'): _task_data(5, 6, 25, 30),
+            ('UA6', 'TC2'): _task_data(5, 6, 25, 30),
+            ('UA7', 'TC3'): _task_data(5, 6, 25, 30),
+            ('UA7', 'TC4'): _task_data(5, 6, 25, 30),
+            ('UA8', 'TC5'): _task_data(5, 6, 25, 30),
+            ('UA8', 'TC6'): _task_data(5, 6, 25, 30),
         }
     elif case == "uniform":    
         UNIT_TASKS = {
-            ('UA1', 'TA1') : {'tau_min': int(floor(4/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 25/beta_factor, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA2', 'TA2') : {'tau_min': int(floor(4/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 25/beta_factor, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            
-            ('UA3', 'TB1') : {'tau_min': int(floor(4/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 25/beta_factor, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA4', 'TB2') : {'tau_min': int(floor(4/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 25/beta_factor, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TB3') : {'tau_min': int(floor(4/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 25/beta_factor, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TB4') : {'tau_min': int(floor(4/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 25/beta_factor, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            
-            ('UA6', 'TC1') : {'tau_min': int(floor(4/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 25/beta_factor, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA6', 'TC2') : {'tau_min': int(floor(4/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 25/beta_factor, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC3') : {'tau_min': int(floor(4/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 25/beta_factor, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC4') : {'tau_min': int(floor(4/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 25/beta_factor, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA8', 'TC5') : {'tau_min': int(floor(4/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 25/beta_factor, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA8', 'TC6') : {'tau_min': int(floor(4/tau_factor)), 'tau_max': int(ceil(7*tau_factor)), 'tau': 1, 'Bmin': 25/beta_factor, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-        }
+            ('UA1', 'TA1') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
+            ('UA2', 'TA2') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),            
+            ('UA3', 'TB1') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
+            ('UA4', 'TB2') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
+            ('UA5', 'TB3') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
+            ('UA5', 'TB4') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),          
+            ('UA6', 'TC1') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
+            ('UA6', 'TC2') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
+            ('UA7', 'TC3') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
+            ('UA7', 'TC4') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
+            ('UA8', 'TC5') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
+            ('UA8', 'TC6') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
+        }               
         
-    STN['UNIT_TASKS'] = UNIT_TASKS    
-    
-    return STN
+    # Assign unit-task parameters to stn    
+    stn['UNIT_TASKS'] = UNIT_TASKS  
+        
+    return stn
 
 
 def define_stn_network_2(case, tau_factor, beta_factor) -> dict:
