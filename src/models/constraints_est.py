@@ -1,56 +1,277 @@
 from pyomo.environ import *
 
 
-def constraint_set_x_to_zero_est(model: ConcreteModel, i: Any, j: Any) -> Constraint:
-    if (i in model.S_I_Production_Tasks) and (j in model.S_J_Executing_I[i]) and ((i,j) in model.P_Task_Unit_Network) and (model.P_EST[i,j] > 0):
-        return sum(model.V_X[i,j,n] for n in model.S_Time if (n >= 0 and n <= (model.P_EST[i,j] - 1))) == 0
+def _constraint_set_x_to_zero_est(model: ConcreteModel, i: Any, j: Any) -> Constraint:
+    """
+    Sets to 0 variable X[i,j,n] from n = 0 to n = est[i,j] - 1.
+
+    Args:
+        - model (ConcreteModel): a Pyomo model instance.
+        - i (Any): task index (should belong to production tasks set).
+        - j (Any): unit index (should be capable of executing task i).
+
+    Returns:
+        Constraint: a constraint enforcing X[i,j,n] = 0 for time points before est[i,j} or Constraint.Skip if conditions are not met.
+    """
+    
+    if (
+        i in model.S_I_Production_Tasks and 
+        j in model.S_J_Executing_I[i] and 
+        (i,j) in model.P_Task_Unit_Network and 
+        model.P_EST[i,j] > 0
+    ):
+        return sum(
+            model.V_X[i,j,n] 
+            for n in model.S_Time 
+            if 0 <= n <= (model.P_EST[i,j] - 1)
+        ) == 0
     else:
         return Constraint.Skip
 
 
-def constraint_set_y_to_zero_est(model: ConcreteModel, i: Any, j: Any) -> Constraint:
-    if (i in model.S_I_Production_Tasks) and (j in model.S_J_Executing_I[i]) and ((i,j) in model.P_Task_Unit_Network) and (model.P_EST[i,j] > 0):
-        return sum(model.V_Y_Start[i,j,n] for n in model.S_Time if (n >= 0 and n <= (model.P_EST[i,j] - 1))) == 0
+def _constraint_set_y_to_zero_est(model: ConcreteModel, i: Any, j: Any) -> Constraint:
+    """
+    Sets to 0 variable Y_S[i,j,n] from n = 0 to n = est[i,j] - 1.
+
+    Args:
+        - model (ConcreteModel): a Pyomo model instance.
+        - i (Any): task index (should belong to production tasks set).
+        - j (Any): unit index (should be capable of executing task i).
+
+    Returns:
+        Constraint: a constraint enforcing Y_S[i,j,n] = 0 for time points before est[i,j} or Constraint.Skip if conditions are not met.
+    """
+    
+    if (
+        i in model.S_I_Production_Tasks and 
+        j in model.S_J_Executing_I[i] and 
+        (i,j) in model.P_Task_Unit_Network and 
+        model.P_EST[i,j] > 0
+    ):
+        return sum(
+            model.V_Y_Start[i,j,n] 
+            for n in model.S_Time 
+            if 0 <= n <= (model.P_EST[i,j] - 1)
+        ) == 0
     else:
         return Constraint.Skip
 
 
-def constraint_upper_bound_ys(model: ConcreteModel, i: Any, j: Any) -> Constraint:
-    if (i in model.S_I_Production_Tasks) and (j in model.S_J_Executing_I[i]) and ((i,j) in model.P_Task_Unit_Network):
-        return sum(model.V_Y_Start[i,j,n] for n in model.S_Time if n >= model.P_EST[i,j]) <= model.P_Upper_Bound_YS[i,j]
+def _constraint_ppc_upper_bound_ys(model: ConcreteModel, i: Any, j: Any) -> Constraint:
+    """
+    Defines an upper bound on the number of runs task i can start (var Y_S[i,j,n]). 
+    Here we consider (max(model.S_Time) - model.P_EST[i,j] - model.P_Tau_Min[i,j] + 1) instead of (max(model.S_Time) + 1 - model.P_EST[i,j]).
+    This is done because the last model.P_Tau_Min[i,j] + 1 time points cannot start a run.
+
+    Args:
+        - model (ConcreteModel): a Pyomo model instance.
+        - i (Any): task index (should belong to production tasks set).
+        - j (Any): unit index (should be capable of executing task i).
+
+    Returns:
+        Constraint: a constraint upper bounding Y_S[i,j,n] or Constraint.Skip if conditions are not met.
+    """
+    
+    if (
+        i in model.S_I_Production_Tasks and 
+        j in model.S_J_Executing_I[i] and 
+        (i,j) in model.P_Task_Unit_Network and
+        model.P_EST[i,j] > 0
+    ):
+        return sum(
+            model.V_Y_Start[i,j,n] 
+            for n in model.S_Time 
+            if n >= model.P_EST[i,j]
+        ) <= floor( ( max(model.S_Time) - model.P_EST[i,j] - model.P_Tau_Min[i,j] + 1 )  / ( model.P_Tau_Min[i,j] +  model.P_Tau_End_Task[i] ) )
     else:
         return Constraint.Skip    
 
 
-def constraint_upper_bound_ys_unit(model: ConcreteModel, j: Any) -> Constraint:
-    return sum(model.V_Y_Start[i,j,n] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network for n in model.S_Time if n >= model.P_EST_Unit[j]) <= model.P_Upper_Bound_YS_Unit[j]
+def _constraint_ppc_upper_bound_ys_unit(model: ConcreteModel, j: Any) -> Constraint:
+    """
+    Defines an upper bound on the number of runs that can start in a unit (var Y_S[i,j,n]). 
+    Here we consider (max(model.S_Time) - model.P_EST_Unit[j] - min(model.P_Tau_Min[i,j]) + 1) instead of (max(model.S_Time) + 1 - model.P_EST_Unit[j]).
+    This is done because the last model.P_Tau_Min[i,j] + 1 time points cannot start a run.
+
+    Args:
+        - model (ConcreteModel): a Pyomo model instance.
+        - j (Any): unit index (should be capable of executing task i).
+
+    Returns:
+        Constraint: a constraint bounding Y_S[i,j,n] in a unit or Constraint.Skip if conditions are not met.
+    """
+    
+    if (
+        j in model.S_Units and 
+        model.P_EST_Unit[j] > 0
+    ):
+        return sum(
+            model.V_Y_Start[i,j,n] 
+            for n in model.S_Time 
+            if n >= model.P_EST[j]    
+            for i in model.S_I_Production_Tasks 
+            if (i,j) in model.P_Task_Unit_Network                    
+        ) <= floor( ( max(model.S_Time) - model.P_EST_Unit[j] - min( model.P_Tau_Min[i,j] for i in model.S_I_In_J[j] ) + 1 ) / ( min( model.P_Tau_Min[i,j] for i in model.S_I_In_J[j] ) + model.P_Tau_End_Unit[j] ) )
+    else:
+        return Constraint.Skip   
+    
+
+def _constraint_ppc_upper_bound_x(model: ConcreteModel, i: Any, j: Any) -> Constraint:
+    """
+    Defines an upper bound for X[i,j,n]. 
+    Based on the remaining time points in a unit, we compute how many runs are possible considering model.P_Tau_Max[i,j] (less number of Tau_Ends) and then multiply the result by model.P_Tau_Max[i,j].
+    
+    Args:
+        - model (ConcreteModel): a Pyomo model instance.
+        - i (Any): task index (should belong to production tasks set).
+        - j (Any): unit index (should be capable of executing task i).
+
+    Returns:
+        Constraint: a constraint bounding X[i,j,n] or Constraint.Skip if conditions are not met.
+    """
+    
+    if (
+        i in model.S_I_Production_Tasks and 
+        j in model.S_J_Executing_I[i] and 
+        (i,j) in model.P_Task_Unit_Network and
+        model.P_EST[i,j] > 0
+    ):
+        return sum(
+            model.V_X[i,j,n] 
+            for n in model.S_Time 
+            if n >= model.P_EST[i,j]
+        ) <= floor( ( model.P_Tau_Max[i,j] * ( max(model.S_Time) + 1 - model.P_EST[i,j] ) ) / ( model.P_Tau_Max[i,j] + model.P_Tau_End_Task[i] )  )
+    else:
+        return Constraint.Skip
+        
+        
+def _constraint_ppc_upper_bound_x_unit(model: ConcreteModel, j: Any) -> Constraint:
+    """
+    Defines an upper bound for X[i,j,n] in a unit. 
+    Based on the remaining time points in a unit, we compute how many runs are possible considering the max(model.P_Tau_Max[i,j]) in the unit (less number of Tau_Ends) and then multiply the result by max(model.P_Tau_Max[i,j]).
+    
+    Args:
+        - model (ConcreteModel): a Pyomo model instance.
+        - j (Any): unit index (should be capable of executing task i).
+
+    Returns:
+        Constraint: a constraint bounding X[i,j,n] in a unit or Constraint.Skip if conditions are not met.
+    """
+    
+    if (
+        j in model.S_Units and
+        model.P_EST_Unit[j] > 0
+    ):
+        return sum(
+            model.V_X[i,j,n] 
+            for n in model.S_Time 
+            if n >= model.P_EST[i,j]
+            for i in model.S_I_Production_Tasks 
+            if (i,j) in model.P_Task_Unit_Network
+        ) <= floor( ( max( model.P_Tau_Max[i,j] for i in model.S_I_In_J[j] ) * ( max(model.S_Time) + 1 - model.P_EST_Unit[j] ) ) / ( max( model.P_Tau_Max[i,j] for i in model.S_I_In_J[j] ) + model.P_Tau_End_Unit[j] )  )
+    else:
+        return Constraint.Skip
+    
+
+def _constraint_opt_upper_bound_ys_unit(model: ConcreteModel, j: Any) -> Constraint:
+    """
+    Defines an upper bound on the number of runs that can start in a unit (var Y_S[i,j,n]). 
+    model.P_Upper_Bound_YS_Unit[j] is calculated by solving a knapsack problem.
+
+    Args:
+        - model (ConcreteModel): a Pyomo model instance.
+        - j (Any): unit index (should be capable of executing task i).
+
+    Returns:
+        Constraint: a constraint bounding Y_S[i,j,n] in a unit or Constraint.Skip if conditions are not met.
+    """
+    
+    return sum(
+        model.V_Y_Start[i,j,n] 
+        for i in model.S_I_Production_Tasks 
+        if (i,j) in model.P_Task_Unit_Network 
+        for n in model.S_Time 
+        if n >= model.P_EST_Unit[j]
+    ) <= model.P_Upper_Bound_YS_Unit[j]
      
 
-def constraint_upper_bound_x(model: ConcreteModel, i: Any, j: Any) -> Constraint:
-    if (i in model.S_I_Production_Tasks) and (j in model.S_J_Executing_I[i]) and ((i,j) in model.P_Task_Unit_Network):
-        return sum(model.V_X[i,j,n] for n in model.S_Time if n >= model.P_EST[i,j]) <= model.P_Upper_Bound_X[i,j]
+def _constraint_opt_upper_bound_x(model: ConcreteModel, i: Any, j: Any) -> Constraint:
+    """
+    Defines an upper bound for X[i,j,n]. 
+    model.P_Upper_Bound_X[i,j] is calculated by solving a knapsack problem. 
+    This is done because is not straightforward to compute the best combination of taus (ranging from tau_min to tau_max) that will generate the best bound for X[i,j,n].
+    
+    Args:
+        - model (ConcreteModel): a Pyomo model instance.
+        - i (Any): task index (should belong to production tasks set).
+        - j (Any): unit index (should be capable of executing task i).
+
+    Returns:
+        Constraint: a constraint bounding X[i,j,n] or Constraint.Skip if conditions are not met.
+    """
+    
+    if (
+        i in model.S_I_Production_Tasks and 
+        j in model.S_J_Executing_I[i] and 
+        (i,j) in model.P_Task_Unit_Network
+    ):
+        return sum(
+            model.V_X[i,j,n] 
+            for n in model.S_Time 
+            if n >= model.P_EST[i,j]
+        ) <= model.P_Upper_Bound_X[i,j]
     else:
         return Constraint.Skip
         
         
-def constraint_upper_bound_x_unit(model: ConcreteModel, j: Any) -> Constraint:
-    return sum(model.V_X[i,j,n] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network for n in model.S_Time if n >= model.P_EST_Unit[j]) <= model.P_Upper_Bound_X_Unit[j]
+def _constraint_opt_upper_bound_x_unit(model: ConcreteModel, j: Any) -> Constraint:
+    """
+    Defines an upper bound for X[i,j,n] in a unit. 
+    model.P_Upper_Bound_X_Unit[j] is calculated by solving a knapsack problem. 
+    This is done because is not straightforward to compute the best combination of taus (ranging from tau_min to tau_max) that will generate the best bound for X[i,j,n] in a unit.
+    
+    Args:
+        - model (ConcreteModel): a Pyomo model instance.
+        - i (Any): task index (should belong to production tasks set).
+        - j (Any): unit index (should be capable of executing task i).
+
+    Returns:
+        Constraint: a constraint bounding X[i,j,n] or Constraint.Skip if conditions are not met.
+    """
+    
+    return sum(
+        model.V_X[i,j,n] 
+        for i in model.S_I_Production_Tasks 
+        if (i,j) in model.P_Task_Unit_Network 
+        for n in model.S_Time 
+        if n >= model.P_EST_Unit[j]
+    ) <= model.P_Upper_Bound_X_Unit[j]
     
     
-def constraint_upper_bound_b(model: ConcreteModel, i: Any) -> Constraint:
-    if (i in model.S_I_Production_Tasks): 
-        return sum(model.V_B[i,j,n] for n in model.S_Time for j in model.S_J_Executing_I[i] if (i,j) in model.P_Task_Unit_Network) <= sum(model.P_Beta_Max[i,j] * model.P_Upper_Bound_X[i,j] for j in model.S_J_Executing_I[i] if (i,j) in model.P_Task_Unit_Network)        
-    else:
-        return Constraint.Skip
-       
-     
-def create_constraints_est(model: ConcreteModel) -> None:
+def create_constraints_est_f1(model: ConcreteModel) -> None:
     
-    model.C_EST_X_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = constraint_set_x_to_zero_est)
-    model.C_EST_Y_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = constraint_set_y_to_zero_est)
-    model.C_EST_Upper_Bound_YS = Constraint(model.S_Tasks, model.S_Units, rule = constraint_upper_bound_ys)
-    model.C_EST_Upper_Bound_YS_Unit = Constraint(model.S_Units, rule = constraint_upper_bound_ys_unit)
-    model.C_Upper_Bound_X = Constraint(model.S_Tasks, model.S_Units, rule = constraint_upper_bound_x)
-    model.C_Upper_Bound_X_Unit = Constraint(model.S_Units, rule = constraint_upper_bound_x_unit)
-    model.C_Upper_Bound_B = Constraint(model.S_Tasks, rule = constraint_upper_bound_b)
+    model.C_EST_X_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_x_to_zero_est)
+    model.C_EST_Y_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_y_to_zero_est)
+    model.C_EST_PPC_Upper_Bound_YS = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ppc_upper_bound_ys)
+    model.C_EST_PPC_Upper_Bound_YS_Unit = Constraint(model.S_Units, rule = _constraint_ppc_upper_bound_ys_unit)
+    model.C_Upper_PPC_Bound_X = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ppc_upper_bound_x)
+    model.C_Upper_PPC_Bound_X_Unit = Constraint(model.S_Units, rule = _constraint_ppc_upper_bound_x_unit)
+    
+
+def create_constraints_est_f2(model: ConcreteModel) -> None:
+    pass
+
+
+def create_constraints_est_f3(model: ConcreteModel) -> None:
+    
+    model.C_EST_X_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_x_to_zero_est)
+    model.C_EST_Y_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_y_to_zero_est)
+    model.C_EST_PPC_Upper_Bound_YS = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ppc_upper_bound_ys)
+    model.C_EST_OPT_Upper_Bound_YS_Unit = Constraint(model.S_Units, rule = _constraint_opt_upper_bound_ys_unit)
+    model.C_Upper_OPT_Bound_X = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_opt_upper_bound_x)
+    model.C_Upper_OPT_Bound_X_Unit = Constraint(model.S_Units, rule = _constraint_opt_upper_bound_x_unit)
+    
+
+def create_constraints_est_f4(model: ConcreteModel) -> None:
+    pass
     

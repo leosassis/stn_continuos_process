@@ -1,5 +1,6 @@
 from pyomo.environ import *
 
+
 def init_parameter_tau(UNIT_TASKS):
     P_TAU = {(i,j): UNIT_TASKS[(j,i)]['tau'] for (j,i) in UNIT_TASKS}
     return P_TAU
@@ -68,11 +69,6 @@ def upper_bound_x_unit_initialization(upper_bound_x_unit: dict) -> dict:
     return dict_upper_bound_x_unit
 
 
-def upper_bound_ys_initialization(model: ConcreteModel, i: Any, j: Any):
-    if (i in model.S_I_Production_Tasks) and (j in model.S_J_Executing_I[i]) and ((i,j) in model.P_Task_Unit_Network):
-        return floor((max(model.S_Time) + 1 - model.P_EST[i,j])/(model.P_Tau_Min[i,j] + model.P_Tau_End_Task[i]))
-
-
 def upper_bound_ys_unit_initialization(upper_bound_ys_unit: dict) -> dict:
     dict_upper_bound_ys_unit =  {j: upper_bound_ys_unit[j] for j in upper_bound_ys_unit}
     return dict_upper_bound_ys_unit
@@ -104,19 +100,20 @@ def create_parameters(model: ConcreteModel, stn: dict, planning_horizon: int) ->
     model.P_Tau_End_Unit = Param(model.S_Units, default = 1)
     
    
-def create_est_parameters(model: ConcreteModel, stn: dict) -> None:
+def create_ppc_parameters(model: ConcreteModel, stn: dict) -> None:
     
     est = stn['EST']
+           
+    model.P_EST = Param(model.S_Tasks, model.S_Units, initialize = est_initialization(est))
+    model.P_EST_Unit = Param(model.S_Units, initialize = est_unit_initialization)    
+    
+
+def create_opt_parameters(model: ConcreteModel, stn: dict) -> None:
+    
     upper_bound_x = stn['UPPER_BOUND_X']
     upper_bound_x_unit = stn['UPPER_BOUND_X_UNIT']
     upper_bound_ys_unit = stn['UPPER_BOUND_Y_UNIT']
            
-    model.P_EST = Param(model.S_Tasks, model.S_Units, initialize = est_initialization(est))
-    model.P_EST_Unit = Param(model.S_Units, initialize = est_unit_initialization)
-    
-    model.P_Upper_Bound_YS = Param(model.S_Tasks, model.S_Units, initialize = upper_bound_ys_initialization)
-    model.P_Upper_Bound_YS_Unit = Param(model.S_Units, initialize = upper_bound_ys_unit_initialization(upper_bound_ys_unit))
-    
+    model.P_Upper_Bound_YS_Unit = Param(model.S_Units, initialize = upper_bound_ys_unit_initialization(upper_bound_ys_unit))    
     model.P_Upper_Bound_X = Param(model.S_Tasks, model.S_Units, initialize = upper_bound_x_initialization(upper_bound_x))
-    model.P_Upper_Bound_X_Unit = Param(model.S_Units, initialize = upper_bound_x_unit_initialization(upper_bound_x_unit))
-     
+    model.P_Upper_Bound_X_Unit = Param(model.S_Units, initialize = upper_bound_x_unit_initialization(upper_bound_x_unit))     
