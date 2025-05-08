@@ -1,10 +1,10 @@
 from pyomo.environ import *
 from src.models.sets import create_main_sets_parameters
 from src.models.variables import create_variables, init_variables 
-from src.models.parameters import create_parameters, create_est_parameters
+from src.models.parameters import create_parameters, create_ppc_parameters, create_opt_parameters
 from src.models.constraints import create_constraints
 from src.models.objective import create_objective_function
-from src.models.constraints_est import create_constraints_est
+from src.models.constraints_est import create_constraints_est_f1, create_constraints_est_f2, create_constraints_est_f3, create_constraints_est_f4 
 from src.methods.est import compute_est
 from src.methods.upper_bound_x import compute_upper_bound_x, compute_upper_bound_x_unit
 from src.utils.utils import print_model_constraints
@@ -41,7 +41,7 @@ def create_model_f0(state_task_network: dict, planning_horizon: int) -> tuple[Co
         - planning_horizon (int): planning horizon.
 
     Returns:
-        - ConcreteModel: return a Pyomo model.
+        - ConcreteModel: returns a Pyomo model.
     """
     
     model = ConcreteModel()
@@ -61,7 +61,30 @@ def create_model_f1(state_task_network: dict, planning_horizon: int) -> tuple[Co
         - planning_horizon (int): planning horizon.
 
     Returns:
-        - ConcreteModel: return a Pyomo model.
+        - ConcreteModel: returns a Pyomo model.
+    """
+    
+    model = ConcreteModel()
+    
+    _initialize_base_model(model, state_task_network, planning_horizon)    
+    compute_est(model, state_task_network)
+    create_ppc_parameters(model, state_task_network)
+    create_constraints_est_f1(model)
+    formulation_name = "F1"
+        
+    return model, formulation_name
+
+
+def create_model_f3(state_task_network: dict, planning_horizon: int) -> tuple[ConcreteModel, str]:
+    """
+    Creates the enhanced MILP model with EST calculations and additional constraints based on solving knapsack problems.
+    
+    Args:
+        - state_task_network (dict): a dictionary with the state-task network instance data.
+        - planning_horizon (int): planning horizon.
+
+    Returns:
+        - ConcreteModel: returns a Pyomo model.
     """
     
     model = ConcreteModel()
@@ -71,8 +94,9 @@ def create_model_f1(state_task_network: dict, planning_horizon: int) -> tuple[Co
     compute_upper_bound_x(model, state_task_network)
     compute_upper_bound_x_unit(model, state_task_network)
     compute_upper_bound_ys_unit(model, state_task_network)
-    create_est_parameters(model, state_task_network)
-    create_constraints_est(model)
-    formulation_name = "F1"
+    create_ppc_parameters(model, state_task_network)
+    create_opt_parameters(model, state_task_network)
+    create_constraints_est_f3(model)
+    formulation_name = "F3"
         
     return model, formulation_name
