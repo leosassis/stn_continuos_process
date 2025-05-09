@@ -60,9 +60,7 @@ def _constraint_set_y_to_zero_est(model: ConcreteModel, i: Any, j: Any) -> Const
 def _constraint_ppc_upper_bound_ys(model: ConcreteModel, i: Any, j: Any) -> Constraint:
     """
     Defines an upper bound on the number of runs task i can start (var Y_S[i,j,n]). 
-    Here we consider (max(model.S_Time) - model.P_EST[i,j] - model.P_Tau_Min[i,j] + 1) instead of (max(model.S_Time) + 1 - model.P_EST[i,j]).
-    This is done because the last model.P_Tau_Min[i,j] + 1 time points cannot start a run.
-
+    
     Args:
         - model (ConcreteModel): a Pyomo model instance.
         - i (Any): task index (should belong to production tasks set).
@@ -76,13 +74,13 @@ def _constraint_ppc_upper_bound_ys(model: ConcreteModel, i: Any, j: Any) -> Cons
         i in model.S_I_Production_Tasks and 
         j in model.S_J_Executing_I[i] and 
         (i,j) in model.P_Task_Unit_Network and
-        model.P_EST[i,j] > 0
+        model.P_EST[i,j] >= 0
     ):
         return sum(
             model.V_Y_Start[i,j,n] 
             for n in model.S_Time 
             if n >= model.P_EST[i,j]
-        ) <= floor( ( max(model.S_Time) - model.P_EST[i,j] - model.P_Tau_Min[i,j] + 1 )  / ( model.P_Tau_Min[i,j] +  model.P_Tau_End_Task[i] ) )
+        ) <= floor( ( max(model.S_Time) + 1 - model.P_EST[i,j] )  / ( model.P_Tau_Min[i,j] +  model.P_Tau_End_Task[i] ) )
     else:
         return Constraint.Skip    
 
@@ -90,9 +88,7 @@ def _constraint_ppc_upper_bound_ys(model: ConcreteModel, i: Any, j: Any) -> Cons
 def _constraint_ppc_upper_bound_ys_unit(model: ConcreteModel, j: Any) -> Constraint:
     """
     Defines an upper bound on the number of runs that can start in a unit (var Y_S[i,j,n]). 
-    Here we consider (max(model.S_Time) - model.P_EST_Unit[j] - min(model.P_Tau_Min[i,j]) + 1) instead of (max(model.S_Time) + 1 - model.P_EST_Unit[j]).
-    This is done because the last model.P_Tau_Min[i,j] + 1 time points cannot start a run.
-
+    
     Args:
         - model (ConcreteModel): a Pyomo model instance.
         - j (Any): unit index (should be capable of executing task i).
@@ -108,10 +104,10 @@ def _constraint_ppc_upper_bound_ys_unit(model: ConcreteModel, j: Any) -> Constra
         return sum(
             model.V_Y_Start[i,j,n] 
             for n in model.S_Time 
-            if n >= model.P_EST[j]    
+            if n >= model.P_EST_Unit[j]    
             for i in model.S_I_Production_Tasks 
             if (i,j) in model.P_Task_Unit_Network                    
-        ) <= floor( ( max(model.S_Time) - model.P_EST_Unit[j] - min( model.P_Tau_Min[i,j] for i in model.S_I_In_J[j] ) + 1 ) / ( min( model.P_Tau_Min[i,j] for i in model.S_I_In_J[j] ) + model.P_Tau_End_Unit[j] ) )
+        ) <= floor( ( max(model.S_Time) + 1 - model.P_EST_Unit[j] ) / ( min( model.P_Tau_Min[i,j] for i in model.S_I_In_J[j] ) + model.P_Tau_End_Unit[j] ) )
     else:
         return Constraint.Skip   
     
@@ -165,7 +161,7 @@ def _constraint_ppc_upper_bound_x_unit(model: ConcreteModel, j: Any) -> Constrai
         return sum(
             model.V_X[i,j,n] 
             for n in model.S_Time 
-            if n >= model.P_EST[i,j]
+            if n >= model.P_EST_Unit[j]
             for i in model.S_I_Production_Tasks 
             if (i,j) in model.P_Task_Unit_Network
         ) <= floor( ( max( model.P_Tau_Max[i,j] for i in model.S_I_In_J[j] ) * ( max(model.S_Time) + 1 - model.P_EST_Unit[j] ) ) / ( max( model.P_Tau_Max[i,j] for i in model.S_I_In_J[j] ) + model.P_Tau_End_Unit[j] )  )

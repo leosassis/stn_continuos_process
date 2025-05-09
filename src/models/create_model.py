@@ -7,7 +7,6 @@ from src.models.objective import create_objective_function
 from src.models.constraints_est import create_constraints_est_f1, create_constraints_est_f2, create_constraints_est_f3, create_constraints_est_f4 
 from src.methods.est import compute_est
 from src.methods.upper_bound_x import compute_upper_bound_x, compute_upper_bound_x_unit
-from src.utils.utils import print_model_constraints
 from src.methods.upper_bound_ys import compute_upper_bound_ys_unit
 
 

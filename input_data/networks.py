@@ -98,7 +98,7 @@ def define_stn_network_1(case: str, tau_factor: int, beta_factor: int) -> dict:
             ('UA2', 'TA2'): _task_data(4, 6, 25, 30),
             ('UA3', 'TB1'): _task_data(5, 7, 15, 20),
             ('UA4', 'TB2'): _task_data(5, 7, 15, 20),
-            ('UA5', 'TB3'): _task_data(3, 6, 15, 20),
+            ('UA5', 'TB3'): _task_data(5, 7, 15, 20),
             ('UA5', 'TB4'): _task_data(5, 7, 15, 20),
             ('UA6', 'TC1'): _task_data(int(ceil(5 / tau_factor)), int(ceil(7 * tau_factor)), 5 * beta_factor, 6 * beta_factor),
             ('UA6', 'TC2'): _task_data(int(ceil(5 / tau_factor)), int(ceil(7 * tau_factor)), 5 * beta_factor, 6 * beta_factor),
