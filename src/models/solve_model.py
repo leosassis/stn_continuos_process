@@ -41,7 +41,8 @@ def solve_and_analyze_model(solver: Any, milp_model: ConcreteModel) -> tuple[Sol
     set_solver_options_milp(solver)
     results_milp: SolverResults = solve_model(solver, milp_model)   
     model_analytics_milp = compute_num_variables_constraints(milp_model)     
-    activate_model_lp_relaxation(milp_model)
-    results_lp: SolverResults = solve_model(solver, milp_model)
+    #activate_model_lp_relaxation(milp_model)
+    #results_lp: SolverResults = solve_model(solver, milp_model)
     
-    return results_milp, model_analytics_milp, results_lp
+    #return results_milp, model_analytics_milp, results_lp
+    return results_milp, model_analytics_milp
