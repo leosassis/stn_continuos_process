@@ -1,6 +1,8 @@
 from pyomo.environ import *
 from itertools import product
 from numpy import ceil
+from collections import defaultdict
+
 
 INITIAL_SHIFT = 1  # Initial shift of a consuming task in case the methods calculates that it should start before the start of the producing task
 SHIFT_TO_END_RUN = 1  # Shift to reach the end of a consuming task run
@@ -52,7 +54,7 @@ def _get_est(model: ConcreteModel, i_producing: Any, j_producing: Any, ii_consum
     return max(est_prod_task + INITIAL_SHIFT, est_prod_task + num_periods + SHIFT_TO_END_RUN - tau_min_consuming_task)
 
 
-def compute_est(model: ConcreteModel, stn: dict) -> None:
+def compute_est_subsequent_tasks(model: ConcreteModel, stn: dict) -> None:
     """ 
     Computes the est for all tasks in the stn network.
     The while loop goes through the ordered set of intermediate materials and computes the est of the consuming task, assuming as 0 the est of tasks connected to raw materials. 
@@ -83,68 +85,87 @@ def compute_est(model: ConcreteModel, stn: dict) -> None:
     
     stn['EST'] = est_task    
     
+
+def _return_set_of_units_consuming_material(model: ConcreteModel, material: Any) -> int:
+    # Creates a set with all units executing the consuming tasks
     
-def compute_est_tasks_competing_material(model: ConcreteModel, stn: dict):
+    set_consuming_units = set()
+    
+    for i_consuming in model.S_I_Consuming_K[[material]]:
+                
+        j_consuming = next(iter(model.S_J_Executing_I[i_consuming]))    
+                
+        set_consuming_units.add(j_consuming)
+        
+    return len(set_consuming_units)
+
+
+def _compute_group_production_relationship(model: ConcreteModel, i_producing: Any, j_producing, material: Any) -> int:
+    
+    numerator = sum(model.P_Tau_Min[ii_consuming,jj_consuming] * model.P_Beta_Min[ii_consuming,jj_consuming] for ii_consuming in model.S_I_Consuming_K[material] for jj_consuming in model.S_J_Executing_I[ii_consuming])
+    denominator = model.P_Tau_Max[i_producing, j_producing] * model.P_Beta_Max[i_producing, j_producing]
+                
+    return numerator/denominator
+        
+        
+def _compute_group_number_periods(model: ConcreteModel, i_producing: Any, j_producing: Any, rel_group: int) -> int:
+    
+    tau_max = model.P_Tau_Max[i_producing,j_producing]
+    tau_end = model.P_Tau_End_Task[i_producing]
+    
+    return ceil(rel_group * tau_max) + ceil(rel_group * tau_end) - tau_end
+
+
+def _compute_est_group(model: ConcreteModel, est_task: dict, j_producing: Any, i_producing: Any, material, number_periods_group: int) -> dict:
+    
+    est_task_group = {}
+   
+    for ii_consuming in model.S_I_Consuming_K[[material]]:
+                    
+        jj_consuming = next(iter(model.S_J_Executing_I[ii_consuming]))
+                    
+        est_prod_task = est_task[j_producing, i_producing]
+        tau_min_consuming_task = model.P_Tau_Min[ii_consuming, jj_consuming]
+    
+        est_task_group[material, jj_consuming, ii_consuming] = max(est_prod_task + INITIAL_SHIFT, est_prod_task + number_periods_group + SHIFT_TO_END_RUN - tau_min_consuming_task) 
+    
+    return est_task_group
+
+        
+def compute_est_group_tasks(model: ConcreteModel, stn: dict):
         
     unit_task = stn['UNIT_TASKS']
     states = stn['STATES']
     materials_to_explore = _materials_to_be_explored(stn)
-    set_material_consuming_units = set()
-    est_task_group = {(k,j,i): 0 for (j,i) in unit_task for k in states} 
+    est_task = stn['EST']
+    
+    est_each_task_group = {(k,j,i): 0 for (j,i) in unit_task for k in states} 
+    est_group = {(k): 0 for k in states} 
         
     while materials_to_explore:
             
         first_material_list = materials_to_explore.pop(0)
-        material_producing_tasks = len(model.S_I_Producing_K[first_material_list])
-        material_consuming_tasks = len(model.S_I_Consuming_K[first_material_list])
-            
-        if material_producing_tasks == 1 and material_consuming_tasks > 1:            
-            
-            for i_consuming in model.S_I_Consuming_K[[first_material_list]]:
-                
-                j_consuming = next(iter(model.S_J_Executing_I[i_consuming]))    
-                
-                set_material_consuming_units.add(j_consuming)               
-            
-            if len(set_material_consuming_units) == material_consuming_tasks:
-                
-                print(first_material_list)
-                print(model.S_I_Consuming_K[[first_material_list]].data())
-                print(set_material_consuming_units)
-                
-                i_producing = next(iter(model.S_I_Producing_K[first_material_list]))
-                j_producing = next(iter(model.S_J_Executing_I[i_producing])) 
-                
-                numerator = sum(model.P_Tau_Min[ii_consuming,jj_consuming] * model.P_Beta_Min[ii_consuming,jj_consuming] for ii_consuming in model.S_I_Consuming_K[first_material_list] for jj_consuming in model.S_J_Executing_I[ii_consuming])
-                denominator = model.P_Tau_Max[i_producing, j_producing] * model.P_Beta_Max[i_producing, j_producing]
-                
-                rel_group = numerator/denominator
-                
-                print(rel_group)
-                
-                tau_max = model.P_Tau_Max[i_producing,j_producing]
-                tau_end = model.P_Tau_End_Task[i_producing]
-    
-                number_periods_group = ceil(rel_group * tau_max) + ceil(rel_group * tau_end) - tau_end
-                
-                print(number_periods_group)
-                
-                for ii_consuming in model.S_I_Consuming_K[[first_material_list]]:
-                    
-                    jj_consuming = next(iter(model.S_J_Executing_I[ii_consuming]))
-                    
-                    est_prod_task = est_task_group[first_material_list, j_producing, i_producing]
-                    tau_min_consuming_task = model.P_Tau_Min[ii_consuming, jj_consuming]
-    
-                    est_task_group[first_material_list, jj_consuming, ii_consuming] = max(est_prod_task + INITIAL_SHIFT, est_prod_task + number_periods_group + SHIFT_TO_END_RUN - tau_min_consuming_task)
-    
-    print(est_task_group)
-                
-                
-            
-            
-                    
-       
+        number_material_producing_tasks = len(model.S_I_Producing_K[first_material_list])
+        number_material_consuming_tasks = len(model.S_I_Consuming_K[first_material_list])
+        number_material_consuming_units = _return_set_of_units_consuming_material(model, first_material_list)    
         
-        
-        
+        if (number_material_producing_tasks == 1 and 
+            number_material_consuming_tasks > 1 and            
+            number_material_consuming_units == number_material_consuming_tasks):
+                
+            i_producing = next(iter(model.S_I_Producing_K[first_material_list]))
+            j_producing = next(iter(model.S_J_Executing_I[i_producing])) 
+                
+            rel_group = _compute_group_production_relationship(model, i_producing, j_producing, first_material_list) 
+            number_periods_group = _compute_group_number_periods(model, i_producing, j_producing, rel_group)
+            est_each_task_group = _compute_est_group(model, est_task, j_producing, i_producing, first_material_list, number_periods_group)
+                        
+            max_est_group = defaultdict(lambda: float('-inf'))
+            
+            for (first_material_list, jj_consuming, ii_consuming), value in est_each_task_group.items():
+                max_est_group[first_material_list] = max(max_est_group[first_material_list], value)
+            
+            est_group[first_material_list] = dict(max_est_group)[first_material_list]
+    
+    stn['EST_GROUP'] = est_group 
+    print(est_group)

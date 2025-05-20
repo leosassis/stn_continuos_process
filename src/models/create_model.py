@@ -4,8 +4,8 @@ from src.models.variables import create_variables, init_variables
 from src.models.parameters import create_parameters, create_ppc_parameters, create_opt_parameters
 from src.models.constraints import create_constraints
 from src.models.objective import create_objective_function
-from src.models.constraints_est import create_constraints_est_f1, create_constraints_est_f2, create_constraints_est_f3, create_constraints_est_f4 
-from src.methods.est import compute_est
+from src.models.constraints_est import create_constraints_est_f1, create_constraints_est_f3 
+from src.methods.est import compute_est_subsequent_tasks, compute_est_group_tasks
 from src.methods.upper_bound_x import compute_upper_bound_x, compute_upper_bound_x_unit
 from src.methods.upper_bound_ys import compute_upper_bound_ys_unit
 
@@ -66,7 +66,8 @@ def create_model_f1(state_task_network: dict, planning_horizon: int) -> tuple[Co
     model = ConcreteModel()
     
     _initialize_base_model(model, state_task_network, planning_horizon)    
-    compute_est(model, state_task_network)
+    compute_est_subsequent_tasks(model, state_task_network)
+    compute_est_group_tasks(model, state_task_network)
     create_ppc_parameters(model, state_task_network)
     create_constraints_est_f1(model)
     formulation_name = "F1"
@@ -89,7 +90,7 @@ def create_model_f3(state_task_network: dict, planning_horizon: int) -> tuple[Co
     model = ConcreteModel()
     
     _initialize_base_model(model, state_task_network, planning_horizon)    
-    compute_est(model, state_task_network)
+    compute_est_subsequent_tasks(model, state_task_network)
     compute_upper_bound_x(model, state_task_network)
     compute_upper_bound_x_unit(model, state_task_network)
     compute_upper_bound_ys_unit(model, state_task_network)

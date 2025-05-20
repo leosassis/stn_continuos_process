@@ -74,6 +74,11 @@ def upper_bound_ys_unit_initialization(upper_bound_ys_unit: dict) -> dict:
     return dict_upper_bound_ys_unit
 
 
+def est_group_initialization(est_group: dict) -> dict:
+    dict_est_group = {k: est_group[k] for k in est_group}
+    return dict_est_group
+
+
 def create_parameters(model: ConcreteModel, stn: dict, planning_horizon: int) -> None:
     
     states = stn['STATES']
@@ -103,9 +108,14 @@ def create_parameters(model: ConcreteModel, stn: dict, planning_horizon: int) ->
 def create_ppc_parameters(model: ConcreteModel, stn: dict) -> None:
     
     est = stn['EST']
+    est_group = stn['EST_GROUP']
            
     model.P_EST = Param(model.S_Tasks, model.S_Units, initialize = est_initialization(est))
     model.P_EST_Unit = Param(model.S_Units, initialize = est_unit_initialization)    
+    model.P_EST_Group = Param(model.S_Materials, initialize = est_group_initialization(est_group))
+    
+    model.P_EST_Unit.pprint()
+    model.P_EST_Group.pprint()
     
 
 def create_opt_parameters(model: ConcreteModel, stn: dict) -> None:

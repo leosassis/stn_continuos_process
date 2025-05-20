@@ -136,7 +136,7 @@ def _constraint_ppc_upper_bound_x(model: ConcreteModel, i: Any, j: Any) -> Const
             model.V_X[i,j,n] 
             for n in model.S_Time 
             if n >= model.P_EST[i,j]
-        ) <= floor( ( model.P_Tau_Max[i,j] * ( max(model.S_Time) + 1 - model.P_EST[i,j] ) ) / ( model.P_Tau_Max[i,j] + model.P_Tau_End_Task[i] )  )
+        ) <= floor( ( model.P_Tau_Max[i,j] * ( max(model.S_Time) + 1 - model.P_EST[i,j] ) ) / ( model.P_Tau_Max[i,j] + model.P_Tau_End_Task[i] ) )
     else:
         return Constraint.Skip
         
@@ -243,8 +243,48 @@ def _constraint_opt_upper_bound_x_unit(model: ConcreteModel, j: Any) -> Constrai
         if n >= model.P_EST_Unit[j]
     ) <= model.P_Upper_Bound_X_Unit[j]
     
+
+def _constraint_limit_operations_group(model: ConcreteModel, k: Any) -> Constraint:
+    
+    if (model.P_EST_Group[k] > 0):
+        return sum(
+            model.V_X[i,j,n]
+            for i in (model.S_I_Production_Tasks & model.S_I_Consuming_K[k]) 
+            for j in model.S_J_Executing_I[i]
+            for n in model.S_Time 
+            if 0 <= n <= (model.P_EST_Group[k] - 1)             
+        ) <= len(model.S_I_Consuming_K[k]) - 1
+    else:
+        return Constraint.Skip
+        
+        
+def _constraint_limit_startups_group(model: ConcreteModel, k: Any) -> Constraint:
+    
+    if (model.P_EST_Group[k] > 0):
+        return sum(
+            model.V_Y_Start[i,j,n]
+            for i in (model.S_I_Production_Tasks & model.S_I_Consuming_K[k]) 
+            for j in model.S_J_Executing_I[i]
+            for n in model.S_Time 
+            if 0 <= n <= (model.P_EST_Group[k] - 1)             
+        ) <= len(model.S_I_Consuming_K[k]) - 1
+    else:
+        return Constraint.Skip
+    
+def _constraint_upper_bound_ys_unit(model: ConcreteModel, j: Any) -> Constraint:
+    return sum(
+        (model.P_Tau_Max[i,j] + 1) * model.V_Y_Start[i,j,n]
+        for i in model.S_I_Production_Tasks 
+        if (i,j) in model.P_Task_Unit_Network 
+        for n in model.S_Time 
+        if n >= model.P_EST_Unit[j]
+    ) <= max(model.S_Time) + 1 - model.P_EST_Unit[j] - 10
+
+
+
     
 def create_constraints_est_f1(model: ConcreteModel) -> None:
+    
     
     model.C_EST_X_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_x_to_zero_est)
     model.C_EST_Y_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_y_to_zero_est)
@@ -252,22 +292,17 @@ def create_constraints_est_f1(model: ConcreteModel) -> None:
     model.C_EST_PPC_Upper_Bound_YS_Unit = Constraint(model.S_Units, rule = _constraint_ppc_upper_bound_ys_unit)
     model.C_Upper_PPC_Bound_X = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ppc_upper_bound_x)
     model.C_Upper_PPC_Bound_X_Unit = Constraint(model.S_Units, rule = _constraint_ppc_upper_bound_x_unit)
+    model.C_Limit_Operations_Group = Constraint(model.S_Materials, rule = _constraint_limit_operations_group)
+    model.C_Limit_Startups_Group = Constraint(model.S_Materials, rule = _constraint_limit_startups_group)
+    model.C_Upper_Bound_YS_Unit = Constraint(model.S_Units, rule = _constraint_upper_bound_ys_unit)
     
 
-def create_constraints_est_f2(model: ConcreteModel) -> None:
-    pass
-
-
 def create_constraints_est_f3(model: ConcreteModel) -> None:
+    
     
     model.C_EST_X_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_x_to_zero_est)
     model.C_EST_Y_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_y_to_zero_est)
     model.C_EST_PPC_Upper_Bound_YS = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ppc_upper_bound_ys)
     model.C_EST_OPT_Upper_Bound_YS_Unit = Constraint(model.S_Units, rule = _constraint_opt_upper_bound_ys_unit)
     model.C_Upper_OPT_Bound_X = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_opt_upper_bound_x)
-    model.C_Upper_OPT_Bound_X_Unit = Constraint(model.S_Units, rule = _constraint_opt_upper_bound_x_unit)
-    
-
-def create_constraints_est_f4(model: ConcreteModel) -> None:
-    pass
-    
+    model.C_Upper_OPT_Bound_X_Unit = Constraint(model.S_Units, rule = _constraint_opt_upper_bound_x_unit)    
