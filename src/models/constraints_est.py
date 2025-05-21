@@ -18,7 +18,8 @@ def _constraint_set_x_to_zero_est(model: ConcreteModel, i: Any, j: Any) -> Const
         i in model.S_I_Production_Tasks and 
         j in model.S_J_Executing_I[i] and 
         (i,j) in model.P_Task_Unit_Network and 
-        model.P_EST[i,j] > 0
+        model.P_EST[i,j] > 0 and
+        model.P_EST[i,j] <= len(model.S_Time)
     ):
         return sum(
             model.V_X[i,j,n] 
@@ -46,7 +47,8 @@ def _constraint_set_y_to_zero_est(model: ConcreteModel, i: Any, j: Any) -> Const
         i in model.S_I_Production_Tasks and 
         j in model.S_J_Executing_I[i] and 
         (i,j) in model.P_Task_Unit_Network and 
-        model.P_EST[i,j] > 0
+        model.P_EST[i,j] > 0 and
+        model.P_EST[i,j] <= len(model.S_Time)
     ):
         return sum(
             model.V_Y_Start[i,j,n] 
@@ -74,7 +76,8 @@ def _constraint_ppc_upper_bound_ys(model: ConcreteModel, i: Any, j: Any) -> Cons
         i in model.S_I_Production_Tasks and 
         j in model.S_J_Executing_I[i] and 
         (i,j) in model.P_Task_Unit_Network and
-        model.P_EST[i,j] >= 0
+        model.P_EST[i,j] >= 0 and
+        model.P_EST[i,j] <= len(model.S_Time)
     ):
         return sum(
             model.V_Y_Start[i,j,n] 
@@ -99,7 +102,8 @@ def _constraint_ppc_upper_bound_ys_unit(model: ConcreteModel, j: Any) -> Constra
     
     if (
         j in model.S_Units and 
-        model.P_EST_Unit[j] > 0
+        model.P_EST_Unit[j] > 0 and
+        model.P_EST_Unit[j] <= len(model.S_Time)
     ):
         return sum(
             model.V_Y_Start[i,j,n] 
@@ -130,7 +134,8 @@ def _constraint_ppc_upper_bound_x(model: ConcreteModel, i: Any, j: Any) -> Const
         i in model.S_I_Production_Tasks and 
         j in model.S_J_Executing_I[i] and 
         (i,j) in model.P_Task_Unit_Network and
-        model.P_EST[i,j] > 0
+        model.P_EST[i,j] > 0 and
+        model.P_EST[i,j] <= len(model.S_Time)
     ):
         return sum(
             model.V_X[i,j,n] 
@@ -156,7 +161,8 @@ def _constraint_ppc_upper_bound_x_unit(model: ConcreteModel, j: Any) -> Constrai
     
     if (
         j in model.S_Units and
-        model.P_EST_Unit[j] > 0
+        model.P_EST_Unit[j] > 0 and
+        model.P_EST_Unit[j] <= len(model.S_Time)
     ):
         return sum(
             model.V_X[i,j,n] 
@@ -181,14 +187,19 @@ def _constraint_opt_upper_bound_ys_unit(model: ConcreteModel, j: Any) -> Constra
     Returns:
         Constraint: a constraint bounding Y_S[i,j,n] in a unit or Constraint.Skip if conditions are not met.
     """
-    
-    return sum(
-        model.V_Y_Start[i,j,n] 
-        for i in model.S_I_Production_Tasks 
-        if (i,j) in model.P_Task_Unit_Network 
-        for n in model.S_Time 
-        if n >= model.P_EST_Unit[j]
-    ) <= model.P_Upper_Bound_YS_Unit[j]
+    if (
+        model.P_EST_Unit[j] <= len(model.S_Time)
+    ):
+        
+        return sum(
+            model.V_Y_Start[i,j,n] 
+            for i in model.S_I_Production_Tasks 
+            if (i,j) in model.P_Task_Unit_Network 
+            for n in model.S_Time 
+            if n >= model.P_EST_Unit[j]
+        ) <= model.P_Upper_Bound_YS_Unit[j]
+    else:
+        return Constraint.Skip
      
 
 def _constraint_opt_upper_bound_x(model: ConcreteModel, i: Any, j: Any) -> Constraint:
@@ -209,7 +220,8 @@ def _constraint_opt_upper_bound_x(model: ConcreteModel, i: Any, j: Any) -> Const
     if (
         i in model.S_I_Production_Tasks and 
         j in model.S_J_Executing_I[i] and 
-        (i,j) in model.P_Task_Unit_Network
+        (i,j) in model.P_Task_Unit_Network and
+        model.P_EST[i,j] <= len(model.S_Time)
     ):
         return sum(
             model.V_X[i,j,n] 
@@ -235,54 +247,68 @@ def _constraint_opt_upper_bound_x_unit(model: ConcreteModel, j: Any) -> Constrai
         Constraint: a constraint bounding X[i,j,n] or Constraint.Skip if conditions are not met.
     """
     
-    return sum(
-        model.V_X[i,j,n] 
-        for i in model.S_I_Production_Tasks 
-        if (i,j) in model.P_Task_Unit_Network 
-        for n in model.S_Time 
-        if n >= model.P_EST_Unit[j]
-    ) <= model.P_Upper_Bound_X_Unit[j]
-    
+    if (
+        model.P_EST_Unit[j] <= len(model.S_Time)
+    ):
+        
+        return sum(
+            model.V_X[i,j,n] 
+            for i in model.S_I_Production_Tasks 
+            if (i,j) in model.P_Task_Unit_Network 
+            for n in model.S_Time 
+            if n >= model.P_EST_Unit[j]
+        ) <= model.P_Upper_Bound_X_Unit[j]
+    else:
+        return Constraint.Skip
+        
 
-def _constraint_limit_operations_group(model: ConcreteModel, k: Any) -> Constraint:
+def _constraint_limit_operations_group(model: ConcreteModel, k: Any, n: Any) -> Constraint:
     
-    if (model.P_EST_Group[k] > 0):
+    if (model.P_EST_Group[k] > 0 and
+        model.P_EST_Group[k] <= len(model.S_Time) and
+        0 <= n <= (model.P_EST_Group[k] - 1)
+    ):
         return sum(
             model.V_X[i,j,n]
             for i in (model.S_I_Production_Tasks & model.S_I_Consuming_K[k]) 
-            for j in model.S_J_Executing_I[i]
-            for n in model.S_Time 
-            if 0 <= n <= (model.P_EST_Group[k] - 1)             
+            for j in model.S_J_Executing_I[i]                        
         ) <= len(model.S_I_Consuming_K[k]) - 1
     else:
         return Constraint.Skip
         
         
-def _constraint_limit_startups_group(model: ConcreteModel, k: Any) -> Constraint:
+def _constraint_limit_startups_group(model: ConcreteModel, k: Any, n: Any) -> Constraint:
     
-    if (model.P_EST_Group[k] > 0):
+    if (model.P_EST_Group[k] > 0 and
+        model.P_EST_Group[k] <= len(model.S_Time) and
+        0 <= n <= (model.P_EST_Group[k] - 1)
+    ):
         return sum(
             model.V_Y_Start[i,j,n]
             for i in (model.S_I_Production_Tasks & model.S_I_Consuming_K[k]) 
-            for j in model.S_J_Executing_I[i]
-            for n in model.S_Time 
-            if 0 <= n <= (model.P_EST_Group[k] - 1)             
+            for j in model.S_J_Executing_I[i]                         
         ) <= len(model.S_I_Consuming_K[k]) - 1
     else:
         return Constraint.Skip
+ 
     
 def _constraint_upper_bound_ys_unit(model: ConcreteModel, j: Any) -> Constraint:
-    return sum(
-        (model.P_Tau_Max[i,j] + 1) * model.V_Y_Start[i,j,n]
-        for i in model.S_I_Production_Tasks 
-        if (i,j) in model.P_Task_Unit_Network 
-        for n in model.S_Time 
-        if n >= model.P_EST_Unit[j]
-    ) <= max(model.S_Time) + 1 - model.P_EST_Unit[j] - 10
-
-
-
     
+    if (
+        model.P_EST_Unit[j] <= len(model.S_Time)
+    ):
+        
+        return sum(
+            (model.P_Tau_Min[i,j] + 1) * model.V_Y_Start[i,j,n]
+            for i in model.S_I_Production_Tasks 
+            if (i,j) in model.P_Task_Unit_Network 
+            for n in model.S_Time 
+            if n >= model.P_EST_Unit[j]
+        ) <= max(model.S_Time) + 1 - model.P_EST_Unit[j]
+    else:
+        return Constraint.Skip
+    
+   
 def create_constraints_est_f1(model: ConcreteModel) -> None:
     
     
@@ -292,8 +318,8 @@ def create_constraints_est_f1(model: ConcreteModel) -> None:
     model.C_EST_PPC_Upper_Bound_YS_Unit = Constraint(model.S_Units, rule = _constraint_ppc_upper_bound_ys_unit)
     model.C_Upper_PPC_Bound_X = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ppc_upper_bound_x)
     model.C_Upper_PPC_Bound_X_Unit = Constraint(model.S_Units, rule = _constraint_ppc_upper_bound_x_unit)
-    model.C_Limit_Operations_Group = Constraint(model.S_Materials, rule = _constraint_limit_operations_group)
-    model.C_Limit_Startups_Group = Constraint(model.S_Materials, rule = _constraint_limit_startups_group)
+    model.C_Limit_Operations_Group = Constraint(model.S_Materials, model.S_Time, rule = _constraint_limit_operations_group)
+    model.C_Limit_Startups_Group = Constraint(model.S_Materials, model.S_Time, rule = _constraint_limit_startups_group)
     model.C_Upper_Bound_YS_Unit = Constraint(model.S_Units, rule = _constraint_upper_bound_ys_unit)
     
 

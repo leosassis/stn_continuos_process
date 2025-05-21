@@ -91,6 +91,7 @@ def create_model_f3(state_task_network: dict, planning_horizon: int) -> tuple[Co
     
     _initialize_base_model(model, state_task_network, planning_horizon)    
     compute_est_subsequent_tasks(model, state_task_network)
+    compute_est_group_tasks(model, state_task_network)
     compute_upper_bound_x(model, state_task_network)
     compute_upper_bound_x_unit(model, state_task_network)
     compute_upper_bound_ys_unit(model, state_task_network)
