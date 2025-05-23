@@ -4,7 +4,7 @@ from src.models.variables import create_variables, init_variables
 from src.models.parameters import create_parameters, create_ppc_parameters, create_opt_parameters
 from src.models.constraints import create_constraints
 from src.models.objective import create_objective_function
-from src.models.constraints_est import create_constraints_est_f1, create_constraints_est_f3 
+from src.models.constraints_est import create_constraints_est_f1, create_constraints_est_f2 
 from src.methods.est import compute_est_subsequent_tasks, compute_est_group_tasks
 from src.methods.upper_bound_x import compute_upper_bound_x, compute_upper_bound_x_unit
 from src.methods.upper_bound_ys import compute_upper_bound_ys_unit
@@ -75,7 +75,7 @@ def create_model_f1(state_task_network: dict, planning_horizon: int) -> tuple[Co
     return model, formulation_name
 
 
-def create_model_f3(state_task_network: dict, planning_horizon: int) -> tuple[ConcreteModel, str]:
+def create_model_f2(state_task_network: dict, planning_horizon: int) -> tuple[ConcreteModel, str]:
     """
     Creates the enhanced MILP model with EST calculations and additional constraints based on solving knapsack problems.
     
@@ -97,7 +97,7 @@ def create_model_f3(state_task_network: dict, planning_horizon: int) -> tuple[Co
     compute_upper_bound_ys_unit(model, state_task_network)
     create_ppc_parameters(model, state_task_network)
     create_opt_parameters(model, state_task_network)
-    create_constraints_est_f3(model)
-    formulation_name = "F3"
+    create_constraints_est_f2(model)
+    formulation_name = "F2"
         
     return model, formulation_name

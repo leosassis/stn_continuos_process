@@ -72,4 +72,4 @@ def compute_upper_bound_ys_unit(model: ConcreteModel, state_task_network: dict) 
         
         upper_bound_y_unit[j] = sum(model_max_runs_unit.V_Number_Runs_Unit[run_length_unit].value for run_length_unit in model_max_runs_unit.S_Run_Lenghts_Unit)
         
-    state_task_network['UPPER_BOUND_Y_UNIT'] = upper_bound_y_unit   
+    state_task_network['UPPER_BOUND_Y_UNIT'] = upper_bound_y_unit  

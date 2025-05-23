@@ -49,13 +49,13 @@ def start_up_cost(UNIT_TASKS):
     P_StarUp_Cost = {(j,i): UNIT_TASKS[(j,i)]['sCost'] for (j,i) in UNIT_TASKS}
     return P_StarUp_Cost
 
-def est_initialization(EST: dict) -> dict:
+def est_task_initialization(EST: dict) -> dict:
     est = {(i,j): EST[(j,i)] for (j,i) in EST}
     return est
 
 
 def est_unit_initialization(model: ConcreteModel, j: Any) -> dict:
-    est_unit = min(model.P_EST[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
+    est_unit = min(model.P_EST_Task[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
     return est_unit
 
 
@@ -77,6 +77,27 @@ def upper_bound_ys_unit_initialization(upper_bound_ys_unit: dict) -> dict:
 def est_group_initialization(est_group: dict) -> dict:
     dict_est_group = {k: est_group[k] for k in est_group}
     return dict_est_group
+
+def ub_ys_task_initialization(model: ConcreteModel) -> dict:
+    dict_ys_task = {(i,j): floor( ( max(model.S_Time) + 1 - model.P_EST_Task[i,j] )  / ( model.P_Tau_Min[i,j] +  model.P_Tau_End_Task[i] ) ) for (i,j) in model.P_EST_Task}
+    return dict_ys_task   
+        
+def ub_ys_unit_initialization(model: ConcreteModel) -> dict:
+    dict_ys_unit = {j: floor( ( max(model.S_Time) + 1 - model.P_EST_Unit[j] ) / ( min( model.P_Tau_Min[i,j] for i in model.S_I_In_J[j] ) + model.P_Tau_End_Unit[j] ) ) for j in model.P_EST_Unit}
+    
+    return dict_ys_unit
+    
+def ub_new_ys_unit_initialization(model: ConcreteModel) -> dict:
+    dict_new_ys_unit = {j: max(model.S_Time) + 1 - model.P_EST_Unit[j] for j in  model.P_EST_Unit}
+    return dict_new_ys_unit
+
+def ub_x_task_initialization(model: ConcreteModel) -> dict:
+    dict_x_task = {(i,j): floor( ( model.P_Tau_Max[i,j] * ( max(model.S_Time) + 1 - model.P_EST_Task[i,j] ) ) / ( model.P_Tau_Max[i,j] + model.P_Tau_End_Task[i] ) ) for (i,j) in model.P_EST_Task}
+    return dict_x_task
+
+def ub_x_unit_initialization(model: ConcreteModel) -> dict:
+    dict_x_unit = {j: floor( ( max( model.P_Tau_Max[i,j] for i in model.S_I_In_J[j] ) * ( max(model.S_Time) + 1 - model.P_EST_Unit[j] ) ) / ( max( model.P_Tau_Max[i,j] for i in model.S_I_In_J[j] ) + model.P_Tau_End_Unit[j] ) ) for j in model.P_EST_Unit}
+    return dict_x_unit
 
 
 def create_parameters(model: ConcreteModel, stn: dict, planning_horizon: int) -> None:
@@ -110,12 +131,23 @@ def create_ppc_parameters(model: ConcreteModel, stn: dict) -> None:
     est = stn['EST']
     est_group = stn['EST_GROUP']
            
-    model.P_EST = Param(model.S_Tasks, model.S_Units, initialize = est_initialization(est))
+    model.P_EST_Task = Param(model.S_Tasks, model.S_Units, initialize = est_task_initialization(est))
     model.P_EST_Unit = Param(model.S_Units, initialize = est_unit_initialization)    
-    model.P_EST_Group = Param(model.S_Materials, initialize = est_group_initialization(est_group))
+    model.P_EST_Group = Param(model.S_Materials, initialize = est_group_initialization(est_group))        
+    model.P_UB_YS_Task = Param(model.S_Tasks, model.S_Units, initialize = ub_ys_task_initialization(model))
+    model.P_UB_YS_Unit = Param(model.S_Units, initialize = ub_ys_unit_initialization(model))
+    model.P_New_UB_YS_Unit = Param(model.S_Units, initialize = ub_new_ys_unit_initialization(model))
+    model.P_UB_X_Task = Param(model.S_Tasks, model.S_Units, initialize = ub_x_task_initialization(model))
+    model.P_UB_X_Unit = Param(model.S_Units, initialize = ub_x_unit_initialization(model))  
     
+    model.P_EST_Task.pprint()
     model.P_EST_Unit.pprint()
     model.P_EST_Group.pprint()
+    model.P_UB_YS_Task.pprint()
+    model.P_UB_YS_Unit.pprint()
+    model.P_New_UB_YS_Unit.pprint()
+    model.P_UB_X_Task.pprint()
+    model.P_UB_X_Unit.pprint()    
     
 
 def create_opt_parameters(model: ConcreteModel, stn: dict) -> None:
