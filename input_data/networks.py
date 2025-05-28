@@ -51,12 +51,12 @@ def define_stn_network_1(case: str, tau_factor: int, beta_factor: int) -> dict:
         # Placeholder for shipment demands
         'STATES_SHIPMENT': { 
             # Example: ('P4', 28) : {'demand':60},
-            ('P1', 25) : {'demand':25},
-            ('P2', 25) : {'demand':25},
-            ('P3', 25) : {'demand':25},
-            ('P4', 25) : {'demand':25},
-            ('P5', 25) : {'demand':25},
-            ('P6', 25) : {'demand':25},       
+            #('P1', 25) : {'demand':25},
+            #('P2', 25) : {'demand':25},
+            #('P3', 25) : {'demand':25},
+            #('P4', 25) : {'demand':25},
+            #('P5', 25) : {'demand':25},
+            #('P6', 25) : {'demand':25},       
         },
         
         # Define input arcs: which states feed which tasks (negative flow)

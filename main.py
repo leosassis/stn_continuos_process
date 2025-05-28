@@ -2,7 +2,7 @@ import pandas as pd
 import logging
 from itertools import product
 from src.models.optimization_config import define_solver
-from src.models.create_model import create_model_f0, create_model_f1, create_model_f3
+from src.models.create_model import create_model_f0, create_model_f1, create_model_f2
 from src.data.instance_generation import load_network, instance_factors_network
 from src.data.postprocessing import initialize_results_dict, create_dict_result
 from src.models.solve_model import solve_and_analyze_model 
@@ -31,7 +31,7 @@ def run_instance(network: str, case: str, planning_horizon: int, tau_factor: int
         - dict: a dictionary of results for excel logging.
     """    
     
-    # Spet 0: Initialize results dict
+    # Step 0: Initialize results dict
     result = initialize_results_dict(network, case, planning_horizon, tau_factor, beta_factor, formulation_name = "")
     
     try:
