@@ -6,8 +6,8 @@ from src.models.constraints import load_basic_model_constraints
 from src.models.objective import create_objective_function
 from src.models.constraints_est import create_constraints_est_f1, create_constraints_est_f2 
 from src.methods.est import compute_est_subsequent_tasks, compute_est_group_tasks
-from src.methods.upper_bound_x import compute_upper_bound_x, compute_upper_bound_x_unit
-from src.methods.upper_bound_ys import compute_upper_bound_ys_unit
+from methods.upper_bound_x_task_opt import compute_upper_bound_x, compute_upper_bound_x_unit
+from methods.upper_bound_ys_x_unit_opt import compute_upper_bound_ys_unit
 
 
 def _initialize_base_model(model: ConcreteModel, state_task_network: dict, planning_horizon: int) -> None:
