@@ -1,28 +1,30 @@
 from pyomo.environ import *
 
 
-def define_objective(model: ConcreteModel, STN: dict) -> Any:
-   """ 
-   Define profit maximization as the objective function.
+def _define_objective(model: ConcreteModel, stn_data: dict) -> Any:
+   """
+   Internal helper function to define the objective function.
+   Maximizes the profit: revenue - fixed cost - variable cost.
    """
    
-   STATES = STN['STATES']
-   UNIT_TASKS = STN['UNIT_TASKS']
+   
+   states = stn_data['STATES']
+   unit_tasks = stn_data['UNIT_TASKS']
    
    fix_operational_cost = sum(
-      UNIT_TASKS[(j,i)]['Cost']*model.V_X[i,j,n] 
+      unit_tasks[(j,i)]['Cost'] * model.V_X[i,j,n] 
       for (i,j) in model.P_Task_Unit_Network 
       for n in model.S_Time
    )
    
    variable_operational_cost = sum(
-      UNIT_TASKS[(j,i)]['vCost']*model.V_B[i,j,n] 
+      unit_tasks[(j,i)]['vCost'] * model.V_B[i,j,n] 
       for (i,j) in model.P_Task_Unit_Network 
       for n in model.S_Time
    )
    
    production_revenue = sum(
-      STATES[k]['price']*model.V_B[i,j,n] 
+      states[k]['price'] * model.V_B[i,j,n] 
       for k in model.S_Materials 
       for i in model.S_I_Producing_K[k] 
       for j in model.S_J_Executing_I[i] 
@@ -31,23 +33,41 @@ def define_objective(model: ConcreteModel, STN: dict) -> Any:
    )
    
    makespan = sum(
-      n*model.V_X[i,j,n] 
+      n * model.V_X[i,j,n] 
       for (i,j) in model.P_Task_Unit_Network 
       for n in model.S_Time
    )
    
    lateness = sum(
-      n*model.V_X[i,j,n] 
+      n * model.V_X[i,j,n] 
       for (i,j) in model.P_Task_Unit_Network 
       for n in model.S_Time
    )
    
-   return production_revenue - fix_operational_cost - variable_operational_cost
+   startups = sum(
+      model.V_Y_Start[i,j,n] 
+      for (i,j) in model.P_Task_Unit_Network
+      for n in model.S_Time
+   )
+   
+   production_operations = sum(
+      model.V_X[i,j,n] 
+      for (i,j) in model.P_Task_Unit_Network 
+      for n in model.S_Time      
+   )
+      
+   profit = production_revenue - fix_operational_cost - variable_operational_cost
+   
+   return profit
    
    
-def create_objective_function(model: ConcreteModel, STN: dict) -> None:
-   """ 
-   Attaches the objective function to the model.
+def create_objective_function(model: ConcreteModel, stn_data: dict) -> None:
+   """
+   Attaches a profit-maximizing objective function to the Pyomo model.
+    
+   Args:
+      - model: a Pyomo ConcreteModel object.
+      - stn_data: dictionary containing STN data (STATES, UNIT_TASKS, etc.).
    """
     
-   model.C_Objective = Objective(expr = define_objective(model, STN), sense = maximize)
+   model.C_Objective = Objective(expr = _define_objective(model, stn_data), sense = maximize)

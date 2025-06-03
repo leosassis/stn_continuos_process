@@ -2,7 +2,7 @@ from pyomo.environ import *
 from src.models.sets import create_main_sets_parameters
 from src.models.variables import create_variables, init_variables 
 from src.models.parameters import create_parameters, create_ppc_parameters, create_opt_parameters
-from src.models.constraints import create_constraints
+from src.models.constraints import load_basic_model_constraints
 from src.models.objective import create_objective_function
 from src.models.constraints_est import create_constraints_est_f1, create_constraints_est_f2 
 from src.methods.est import compute_est_subsequent_tasks, compute_est_group_tasks
@@ -27,7 +27,7 @@ def _initialize_base_model(model: ConcreteModel, state_task_network: dict, plann
     create_variables(model)    
     create_parameters(model, state_task_network, planning_horizon)
     init_variables(model, planning_horizon)
-    create_constraints(model)
+    load_basic_model_constraints(model)
     create_objective_function(model, state_task_network)
     
 

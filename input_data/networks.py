@@ -448,3 +448,96 @@ def define_stn_network_2(case, tau_factor, beta_factor) -> dict:
             
     return STN
 
+
+def define_stn_network_tasks_competing(case, tau_factor, beta_factor) -> dict:
+    
+    STN = {
+    # states
+    'STATES': {
+        'RM'     : {'capacity': 10000, 'initial': 10000, 'price':  0, 'isRM': True, 'isIntermed': False, 'isProd': False, 'order': 1,},
+        'I1'     : {'capacity': 10000, 'initial': 0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 2,},                
+        'P1'     : {'capacity': 10000, 'initial': 0, 'price': 1000, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 3,},       
+        'P2'     : {'capacity': 10000, 'initial': 0, 'price': 1000, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 4,},       
+    },
+
+    'STATES_SHIPMENT': {
+        #('P1', 12) : {'demand':75},        
+        #('P2', 12) : {'demand':160},        
+    },
+    
+    # state-to-task arcs indexed by (state, task)
+    'ST_ARCS': {
+        ('RM', 'T0')  : {'rho': -1.0, 'direction': -1},
+        ('I1', 'T1')  : {'rho': -1.0, 'direction': -1},
+        ('I1', 'T2')  : {'rho': -1.0, 'direction': -1},
+    },
+    
+    # task-to-state arcs indexed by (task, state)
+    'TS_ARCS': {
+        ('T0', 'I1')  : {'rho': 1.0, 'direction': 1},      
+        ('T1', 'P1')  : {'rho': 1.0, 'direction': 1},      
+        ('T2', 'P2')  : {'rho': 1.0, 'direction': 1},      
+    },
+    
+    # Tasks and their corresponding transition. 
+    # Transition-To-Task = 1. Task-To-Transition = -1.
+    # Equivalent to parameter ipits(i, ii) in the GAMS code.
+    'TASKS_TRANSITION_TASKS': {         
+    },
+    
+    # unit data indexed by (unit, task)
+    'UNIT_TASKS': {
+        ('U0', 'T0') : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 35, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 30, 'direction': 1,},
+        ('U1', 'T1') : {'tau_min': 3, 'tau_max': 6, 'tau': 1, 'Bmin': 18, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 30, 'direction': 1,},              
+        ('U2', 'T2') : {'tau_min': 3, 'tau_max': 6, 'tau': 1, 'Bmin': 18, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 30, 'direction': 1,},       
+    },
+}
+    
+    return STN
+
+
+def define_stn_network_upper_bounds(case, tau_factor, beta_factor) -> dict:
+    
+    STN = {
+    # states
+    'STATES': {
+        'RM'     : {'capacity': 10000, 'initial': 10000, 'price':  0, 'isRM': True, 'isIntermed': False, 'isProd': False, 'order': 1,},
+        'I1'     : {'capacity': 10000, 'initial': 0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 2,},                
+        'P1'     : {'capacity': 10000, 'initial': 0, 'price': 1000, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 3,},       
+        'P2'     : {'capacity': 10000, 'initial': 0, 'price': 1000, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 4,},       
+    },
+
+    'STATES_SHIPMENT': {
+        #('P1', 12) : {'demand':75},        
+        #('P2', 12) : {'demand':160},        
+    },
+    
+    # state-to-task arcs indexed by (state, task)
+    'ST_ARCS': {
+        ('RM', 'T0')  : {'rho': -1.0, 'direction': -1},
+        ('I1', 'T1')  : {'rho': -1.0, 'direction': -1},
+        ('I1', 'T2')  : {'rho': -1.0, 'direction': -1},
+    },
+    
+    # task-to-state arcs indexed by (task, state)
+    'TS_ARCS': {
+        ('T0', 'I1')  : {'rho': 1.0, 'direction': 1},      
+        ('T1', 'P1')  : {'rho': 1.0, 'direction': 1},      
+        ('T2', 'P2')  : {'rho': 1.0, 'direction': 1},      
+    },
+    
+    # Tasks and their corresponding transition. 
+    # Transition-To-Task = 1. Task-To-Transition = -1.
+    # Equivalent to parameter ipits(i, ii) in the GAMS code.
+    'TASKS_TRANSITION_TASKS': {         
+    },
+    
+    # unit data indexed by (unit, task)
+    'UNIT_TASKS': {
+        ('U0', 'T0') : {'tau_min': 3, 'tau_max': 5, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 30, 'direction': 1,},
+        ('U1', 'T1') : {'tau_min': 2, 'tau_max': 3, 'tau': 1, 'Bmin': 120, 'Bmax': 130, 'Cost': 4, 'vCost': 1, 'sCost': 30, 'direction': 1,},              
+        ('U1', 'T2') : {'tau_min': 5, 'tau_max': 6, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 30, 'direction': 1,},       
+    },
+}
+    
+    return STN
