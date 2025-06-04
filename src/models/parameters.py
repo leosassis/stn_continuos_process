@@ -152,7 +152,7 @@ def create_ppc_parameters(model: ConcreteModel, stn: dict) -> None:
 
 def create_opt_parameters(model: ConcreteModel, stn: dict) -> None:
     
-    upper_bound_x = stn['UPPER_BOUND_X']
+    upper_bound_x = stn['UPPER_BOUND_X_TASK']
     upper_bound_x_unit = stn['UPPER_BOUND_X_UNIT']
     upper_bound_ys_unit = stn['UPPER_BOUND_Y_UNIT']
            

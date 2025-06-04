@@ -1,10 +1,15 @@
 from pyomo.environ import *
 
 
-def _define_objective(model: ConcreteModel, stn_data: dict) -> Any:
+def _define_objective(model: ConcreteModel, stn_data: dict, model_type: str) -> Any:
    """
    Internal helper function to define the objective function.
    Maximizes the profit: revenue - fixed cost - variable cost.
+   
+   Args:
+      - model: a Pyomo ConcreteModel object.
+      - stn_data: dictionary containing STN data (STATES, UNIT_TASKS, etc.).
+      - model_type: a string indicating what to maximize (e.g., 'base_model', 'bound_production_operations', 'bound_startups').
    """
    
    
@@ -56,18 +61,28 @@ def _define_objective(model: ConcreteModel, stn_data: dict) -> Any:
       for n in model.S_Time      
    )
       
-   profit = production_revenue - fix_operational_cost - variable_operational_cost
+   if model_type == 'base_model':
    
-   return profit
+      return production_revenue - fix_operational_cost - variable_operational_cost
    
+   elif model_type == 'bound_production_operations':
    
-def create_objective_function(model: ConcreteModel, stn_data: dict) -> None:
+      return production_operations
+   
+   elif model_type == 'bound_startups':
+   
+      return startups      
+      
+   
+def create_objective_function(model: ConcreteModel, stn_data: dict, model_type: str) -> None:
    """
    Attaches a profit-maximizing objective function to the Pyomo model.
     
    Args:
       - model: a Pyomo ConcreteModel object.
       - stn_data: dictionary containing STN data (STATES, UNIT_TASKS, etc.).
+      - model_type: a string indicating what to maximize (e.g., 'base_model', 'bound_production_operations', 'bound_startups').
    """
     
-   model.C_Objective = Objective(expr = _define_objective(model, stn_data), sense = maximize)
+    
+   model.C_Objective = Objective(expr = _define_objective(model, stn_data, model_type), sense = maximize)

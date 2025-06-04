@@ -313,7 +313,7 @@ def load_basic_model_constraints(model: ConcreteModel) -> None:
     #model.C_Track_Start_Production_Task_After_Transition_Eq20 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_production_task_after_transition_eq20)
 
 
-def load_constraints_bounds_X_Y_units(model: ConcreteModel) -> None:
+def load_constraints_bounds_x_y_units(model: ConcreteModel) -> None:
    
     model.C_Track_Start_End_Run_Task_Eq16 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq16)
     model.C_Track_Start_End_Run_Task_Eq17 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq17)

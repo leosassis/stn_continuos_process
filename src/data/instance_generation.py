@@ -1,5 +1,6 @@
 from input_data.networks import define_stn_network_1, define_stn_network_2, define_stn_network_tasks_competing, define_stn_network_upper_bounds
 
+
 def load_network(network_name: str, case: str, tau_factor: int, beta_factor: int) -> dict:
     """ 
     Loads and returns a dictionary of network data.
@@ -30,7 +31,7 @@ def instance_factors_network() -> tuple[list[str], list[str], list[int], int, in
     """ 
     Defines the configuration parameters for generating instances.
     
-    Returns:s
+    Returns:
         tuple:
             - list of networks (list of str).
             - list of cases (list of str).
@@ -47,7 +48,7 @@ def instance_factors_network() -> tuple[list[str], list[str], list[int], int, in
     
     NETWORKS = ["network_upper_bounds"]
     CASES = [""]
-    PLANNING_HORIZON_ARRAY = [50]
+    PLANNING_HORIZON_ARRAY = [12]
     TAU_FACTOR_MAX = 2
     BETA_FACTOR_MAX = 2
     

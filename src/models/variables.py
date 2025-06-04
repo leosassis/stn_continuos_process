@@ -4,6 +4,9 @@ from pyomo.environ import *
 def create_variables(model: ConcreteModel) -> None:
     """ 
     Creates model variables.
+    
+    Args:
+        model: a Pyomo ConcreteModel object.
     """
     
     # Binary: V_X[i,j,n] = 1 if unit j processes (sub)task i at time point n.
@@ -28,21 +31,21 @@ def create_variables(model: ConcreteModel) -> None:
     model.V_X_Hat_Idle = Var(model.S_Units, model.S_Time, bounds = (0, 1), domain = Binary)
     
     
-def init_variables(model: ConcreteModel, H: int) -> None:
+def init_variables(model: ConcreteModel, planning_horizon: int) -> None:
     """
     Fix initial values for selected decision variables.
     
     Args:
         - model: a Pyomo ConcreteModel object.
-        - H: planning horizon.
+        - planning_horizon: planning horizon.
     """
     
     
-    # Fix task mode to zero before time point H
-    [model.V_X_Hat[i,j,n].fix(0) for i in model.S_Tasks for j in model.S_Units for n in model.S_Time if n < H] 
+    # Fix task mode to zero before time point planning_horizon
+    [model.V_X_Hat[i,j,n].fix(0) for i in model.S_Tasks for j in model.S_Units for n in model.S_Time if n < planning_horizon] 
     
     # The last time point n is reserved for Y_End = 1.
-    [model.V_X[i,j,n].fix(0) for i in (model.S_Tasks - model.S_I_Shutdown_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n >= H - model.P_Tau[i,j] + 1] 
+    [model.V_X[i,j,n].fix(0) for i in (model.S_Tasks - model.S_I_Shutdown_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n >= planning_horizon - model.P_Tau[i,j] + 1] 
         
     # OPTIONAL INITIALIZATION LOGIC (Uncomment as needed):    
         
@@ -53,7 +56,7 @@ def init_variables(model: ConcreteModel, H: int) -> None:
     #[model.V_Y_End[i,j,n].fix(0) for i in model.S_I_Production_Tasks for j in model.S_J_Executing_I[i] for n in model.S_Time if n < model.P_Tau_Min[i,j]] 
     
     # Prevent task start in last tau_min periods
-    #[model.V_Y_Start[i,j,n].fix(0) for i in model.S_I_Production_Tasks for j in model.S_J_Executing_I[i] for n in model.S_Time if n > H - model.P_Tau_Min[i,j]] 
+    #[model.V_Y_Start[i,j,n].fix(0) for i in model.S_I_Production_Tasks for j in model.S_J_Executing_I[i] for n in model.S_Time if n > planning_horizon - model.P_Tau_Min[i,j]] 
     
     # Prevent production operations during the last tau periods related to transitions
-    #[model.V_X[i,j,n].fix(0) for i in (model.S_I_Shutdown_Tasks | model.S_I_Direct_Transition_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n >= H - model.P_Tau[i,j]] 
+    #[model.V_X[i,j,n].fix(0) for i in (model.S_I_Shutdown_Tasks | model.S_I_Direct_Transition_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n >= planning_horizon - model.P_Tau[i,j]] 

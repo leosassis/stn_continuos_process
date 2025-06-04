@@ -73,7 +73,7 @@ def define_objective(model_max_production_time_points: ConcreteModel) -> Objecti
     return sum((run_length) * model_max_production_time_points.V_Number_Runs[run_length] for run_length in model_max_production_time_points.S_Run_Lenghts)
 
 
-def compute_upper_bound_x(model: ConcreteModel, stn: dict) -> None:
+def compute_upper_bound_x_task(model: ConcreteModel, stn: dict) -> None:
     """ 
     The optimization problem defines the combination of different run lenghts that maximizes the number of production time points for each task.
     Result is saved in stn['UPPER_BOUND_X'].
@@ -96,7 +96,7 @@ def compute_upper_bound_x(model: ConcreteModel, stn: dict) -> None:
         tau_min = model.P_Tau_Min[i,j]
         tau_end = model.P_Tau_End_Task[i]
         number_time_points_for_x = num_periods + ADD_TIME_PERIOD - est[j,i]
-        
+        print(f'Unit: {j}, task: {i}, est[{i},{j}] = {est[j,i]}, number of time points = {number_time_points_for_x}')
         model_max_production_time_points = ConcreteModel()        
         
         model_max_production_time_points.S_Run_Lenghts = RangeSet(tau_min, tau_max)
@@ -108,72 +108,7 @@ def compute_upper_bound_x(model: ConcreteModel, stn: dict) -> None:
         solver.solve(model_max_production_time_points, tee = False)
         
         upper_bound_x[j,i] = sum(run_length * model_max_production_time_points.V_Number_Runs[run_length].value for run_length in model_max_production_time_points.S_Run_Lenghts)
-             
-    stn['UPPER_BOUND_X'] = upper_bound_x   
-    
-    
-def knapsack_constraint_unit(model_max_production_time_points_unit: ConcreteModel, number_time_points_for_x_unit: int, tau_end_unit: int) -> Constraint:
-    """
-    Defines the knapsack constraint weigthed by run_length_unit + tau_end_unit (number of time points necessary for each run_length_unit) and limited by the number of possible production time points. 
-    
-    Args:
-        - model_max_production_time_points_unit (ConcreteModel): Pyomo model instance.
-        - number_time_points_for_x_unit (int): number of available production time points in a unit.
-        - tau_end_unit (int): number of idle periods between two consecutives runs in a unit.
-    
-    Returns: A Pyomo constraint.
-    """
-    
-    return sum((run_length_unit + tau_end_unit) * model_max_production_time_points_unit.V_Number_Runs_Unit[run_length_unit] for run_length_unit in model_max_production_time_points_unit.S_Run_Lenghts_Unit) <= number_time_points_for_x_unit
-
-
-def define_objective_unit(model_max_production_time_points_unit: ConcreteModel) -> Objective:
-    """
-    Defines the objective function to maximize the number of production time points. 
-    
-    Args:
-        - model_max_production_time_points_unit (ConcreteModel): Pyomo model instance.
-    
-    Returns: A Pyomo objective.
-    """
-    
-    return sum((run_length_unit) * model_max_production_time_points_unit.V_Number_Runs_Unit[run_length_unit] for run_length_unit in model_max_production_time_points_unit.S_Run_Lenghts_Unit)    
-    
-        
-def compute_upper_bound_x_unit(model: ConcreteModel, stn: dict) -> None:
-    """ 
-    The optimization problem defines the combination of different run lenghts that maximizes the number of production time points in a unit.
-    Result is saved in stn['UPPER_BOUND_X_UNIT'].
-        
-    Args:
-        - model (ConcreteModel): Pyomo model instance.
-        - stn (dict): a dictionary containing the network data.
-    
-    Returns: none.
-    """
-        
-    est = stn['EST']
-    num_periods = max(model.S_Time)
-    
-    upper_bound_x_unit = {}
-    
-    for (j) in model.S_Units:
-        
-        tau_max_unit = max(model.P_Tau_Max[i,j] for i in model.S_I_In_J[j] if (j,i) in est)
-        tau_min_unit = min(model.P_Tau_Min[i,j] for i in model.S_I_In_J[j] if (j,i) in est)
-        tau_end_unit = TAU_END_UNIT
-        number_time_points_for_x_unit = num_periods + ADD_TIME_PERIOD - min(est[j,i] for i in model.S_I_In_J[j])
-        
-        model_max_production_time_points_unit = ConcreteModel()        
-        
-        model_max_production_time_points_unit.S_Run_Lenghts_Unit = RangeSet(tau_min_unit, tau_max_unit)
-        model_max_production_time_points_unit.V_Number_Runs_Unit = Var(model_max_production_time_points_unit.S_Run_Lenghts_Unit, domain = NonNegativeIntegers)
-        model_max_production_time_points_unit.C_Knapsack_Constraint_Unit = Constraint(rule = knapsack_constraint_unit(model_max_production_time_points_unit, number_time_points_for_x_unit, tau_end_unit))
-        model_max_production_time_points_unit.C_Objective_Unit = Objective(expr = define_objective_unit(model_max_production_time_points_unit), sense = maximize)
-        
-        solver = define_solver()
-        solver.solve(model_max_production_time_points_unit, tee = False)
-        
-        upper_bound_x_unit[j] = sum(run_length_unit * model_max_production_time_points_unit.V_Number_Runs_Unit[run_length_unit].value for run_length_unit in model_max_production_time_points_unit.S_Run_Lenghts_Unit)
-               
-    stn['UPPER_BOUND_X_UNIT'] = upper_bound_x_unit    
+        model_max_production_time_points.V_Number_Runs.display() 
+                
+    stn['UPPER_BOUND_X_TASK'] = upper_bound_x   
+    print(f'Upper bound on X for each task considering its EST: {stn['UPPER_BOUND_X_TASK']}')
