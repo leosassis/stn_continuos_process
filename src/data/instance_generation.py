@@ -48,7 +48,7 @@ def instance_factors_network() -> tuple[list[str], list[str], list[int], int, in
     
     NETWORKS = ["network_upper_bounds"]
     CASES = [""]
-    PLANNING_HORIZON_ARRAY = [12]
+    PLANNING_HORIZON_ARRAY = [13]
     TAU_FACTOR_MAX = 2
     BETA_FACTOR_MAX = 2
     

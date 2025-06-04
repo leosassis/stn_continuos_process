@@ -133,7 +133,7 @@ def create_ppc_parameters(model: ConcreteModel, stn: dict) -> None:
            
     model.P_EST_Task = Param(model.S_Tasks, model.S_Units, initialize = est_task_initialization(est))
     model.P_EST_Unit = Param(model.S_Units, initialize = est_unit_initialization)    
-    model.P_EST_Group = Param(model.S_Materials, initialize = est_group_initialization(est_group))        
+    """ model.P_EST_Group = Param(model.S_Materials, initialize = est_group_initialization(est_group))        
     model.P_UB_YS_Task = Param(model.S_Tasks, model.S_Units, initialize = ub_ys_task_initialization(model))
     model.P_UB_YS_Unit = Param(model.S_Units, initialize = ub_ys_unit_initialization(model))
     model.P_New_UB_YS_Unit = Param(model.S_Units, initialize = ub_new_ys_unit_initialization(model))
@@ -147,15 +147,15 @@ def create_ppc_parameters(model: ConcreteModel, stn: dict) -> None:
     model.P_UB_YS_Unit.pprint()
     model.P_New_UB_YS_Unit.pprint()
     model.P_UB_X_Task.pprint()
-    model.P_UB_X_Unit.pprint()    
+    model.P_UB_X_Unit.pprint()  """   
     
 
 def create_opt_parameters(model: ConcreteModel, stn: dict) -> None:
     
-    upper_bound_x = stn['UPPER_BOUND_X_TASK']
+    upper_bound_x_task = stn['UPPER_BOUND_X_TASK']
     upper_bound_x_unit = stn['UPPER_BOUND_X_UNIT']
     upper_bound_ys_unit = stn['UPPER_BOUND_Y_UNIT']
            
     model.P_Upper_Bound_YS_Unit = Param(model.S_Units, initialize = upper_bound_ys_unit_initialization(upper_bound_ys_unit))    
-    model.P_Upper_Bound_X = Param(model.S_Tasks, model.S_Units, initialize = upper_bound_x_initialization(upper_bound_x))
+    model.P_Upper_Bound_X = Param(model.S_Tasks, model.S_Units, initialize = upper_bound_x_initialization(upper_bound_x_task))
     model.P_Upper_Bound_X_Unit = Param(model.S_Units, initialize = upper_bound_x_unit_initialization(upper_bound_x_unit))     

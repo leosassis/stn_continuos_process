@@ -2,10 +2,10 @@ import pandas as pd
 import logging
 from itertools import product
 from src.models.optimization_config import define_solver
-from src.models.create_model import create_model_f0, create_model_f1, create_model_f2
+from src.models.model_build import create_model_f0, create_model_f1, create_model_f2, create_model_f3
 from src.data.instance_generation import load_network, instance_factors_network
 from src.data.postprocessing import initialize_results_dict, create_dict_result
-from src.models.solve_model import solve_and_analyze_model 
+from src.models.model_solve import solve_and_analyze_model 
 from src.utils.utils import print_model_constraints
 
 
@@ -46,7 +46,10 @@ def run_instance(network: str, case: str, planning_horizon: int, tau_factor: int
         
         # Step 3: Build, configure and solve the MILP model        
         model_milp, formulation_name = create_model_f2(state_task_network, planning_horizon)
-        #results_milp, stats_milp, results_lp = solve_and_analyze_model(solver, model_milp, planning_horizon)
+        results_milp, stats_milp, results_lp = solve_and_analyze_model(solver, model_milp, planning_horizon)
+        
+        model_milp, formulation_name = create_model_f3(state_task_network, planning_horizon)
+        results_milp, stats_milp, results_lp = solve_and_analyze_model(solver, model_milp, planning_horizon)
             
         # Step 4: Create result dictionary
         #result = create_dict_result(result, stats_milp, results_milp, results_lp, formulation_name)

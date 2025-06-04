@@ -8,12 +8,12 @@ INITIAL_SHIFT = 1  # Initial shift of a consuming task in case the methods calcu
 SHIFT_TO_END_RUN = 1  # Shift to reach the end of a consuming task run
 
 
-def _materials_to_be_explored(stn: dict) -> list:
+def _materials_to_be_explored(stn_data: dict) -> list:
     """ 
     Returns an ordered list of materials to be explored.
     """
     
-    states = stn['STATES']
+    states = stn_data['STATES']
     intermediate_materials = {k: v for k, v in states.items() if v['isIntermed']}
         
     return sorted(intermediate_materials.keys(), key=lambda k: intermediate_materials[k]['order'])
@@ -54,15 +54,15 @@ def _get_est(model: ConcreteModel, i_producing: Any, j_producing: Any, ii_consum
     return max(est_prod_task + INITIAL_SHIFT, est_prod_task + num_periods + SHIFT_TO_END_RUN - tau_min_consuming_task)
 
 
-def compute_est_subsequent_tasks(model: ConcreteModel, stn: dict) -> None:
+def compute_est_subsequent_tasks(model: ConcreteModel, stn_data: dict) -> None:
     """ 
-    Computes the est for all tasks in the stn network.
+    Computes the est for all tasks in the stn_data network.
     The while loop goes through the ordered set of intermediate materials and computes the est of the consuming task, assuming as 0 the est of tasks connected to raw materials. 
-    Updates the stn dictionary with 'EST_ST', a mapping of (j,i) -> est value.
+    Updates the stn_data dictionary with 'EST_ST', a mapping of (j,i) -> est value.
     """
     
-    unit_task = stn['UNIT_TASKS']
-    materials_to_explore = _materials_to_be_explored(stn)
+    unit_task = stn_data['UNIT_TASKS']
+    materials_to_explore = _materials_to_be_explored(stn_data)
     
     production_relationship = {}
     number_periods = {}
@@ -83,5 +83,5 @@ def compute_est_subsequent_tasks(model: ConcreteModel, stn: dict) -> None:
             number_periods[key] = _get_number_periods(model, *key, production_relationship) 
             est_task[jj_consuming, ii_consuming] = _get_est(model, *key, number_periods, est_task) 
     
-    stn['EST'] = est_task 
-    print(f'EST: {stn['EST']}')   
+    stn_data['EST'] = est_task 
+    print(f'EST: {stn_data['EST']}')   

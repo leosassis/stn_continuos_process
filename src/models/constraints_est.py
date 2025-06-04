@@ -308,12 +308,17 @@ def _constraint_upper_bound_ys_unit(model: ConcreteModel, j: Any) -> Constraint:
     else:
         return Constraint.Skip
     
+
+def create_constraints_set_to_zero_x_ys_est(model: ConcreteModel) -> None:
+    
+   
+   model.C_EST_X_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_x_to_zero_est)
+   model.C_EST_Y_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_y_to_zero_est)
+    
    
 def create_constraints_est_f1(model: ConcreteModel) -> None:
     
     
-    model.C_EST_X_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_x_to_zero_est)
-    model.C_EST_Y_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_y_to_zero_est)
     model.C_EST_PPC_Upper_Bound_YS_Task = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ppc_upper_bound_ys_task)
     model.C_EST_PPC_Upper_Bound_YS_Unit = Constraint(model.S_Units, rule = _constraint_ppc_upper_bound_ys_unit)
     model.C_Upper_PPC_Bound_X_Task = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ppc_upper_bound_x_task)
