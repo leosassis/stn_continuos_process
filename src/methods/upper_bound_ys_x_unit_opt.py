@@ -34,19 +34,19 @@ def define_objective_unit(model_max_runs_unit: ConcreteModel) -> Objective:
     return sum(model_max_runs_unit.V_Number_Runs_Unit[run_length_unit] for run_length_unit in model_max_runs_unit.S_Run_Lenghts_Unit)
 
 
-def compute_upper_bound_ys_unit(model: ConcreteModel, state_task_network: dict) -> None:
+def compute_upper_bound_ys_unit(model: ConcreteModel, stn_data: dict) -> None:
     """ 
     The optimization problem defines the combination of different run lenghts that maximizes the number of production time points for each task.
     Result is saved in stn['UPPER_BOUND_X'].
     
     Args:
         - model (ConcreteModel): Pyomo model instance.
-        - state_task_network (dict): a dictionary containing the network data.
+        - stn_data (dict): a dictionary containing the network data.
     
     Returns: none.
     """
         
-    est = state_task_network['EST']
+    est = stn_data['EST']
     num_periods = max(model.S_Time)
     
     print(est)
@@ -72,6 +72,6 @@ def compute_upper_bound_ys_unit(model: ConcreteModel, state_task_network: dict) 
         
         upper_bound_y_unit[j] = sum(model_max_runs_unit.V_Number_Runs_Unit[run_length_unit].value for run_length_unit in model_max_runs_unit.S_Run_Lenghts_Unit)
         
-    state_task_network['UPPER_BOUND_Y_UNIT'] = upper_bound_y_unit  
+    stn_data['UPPER_BOUND_Y_UNIT'] = upper_bound_y_unit  
     
  

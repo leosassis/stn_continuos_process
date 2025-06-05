@@ -20,7 +20,7 @@ def compute_upper_bound_x_old(model: ConcreteModel, stn: dict) -> None:
     
     est = stn['EST']
     number_ys = {}
-    upper_bound_x = {}
+    upper_bound_x_task = {}
     number_remaining_periods_for_x = {}
     
     S_Time = model.S_Time
@@ -33,16 +33,16 @@ def compute_upper_bound_x_old(model: ConcreteModel, stn: dict) -> None:
         max_time_points = max(S_Time) + 1 - est[j,i]
         
         number_ys[j,i] = floor((max_time_points)/(tau_max + tau_end))
-        upper_bound_x[j,i] = number_ys[j,i]*tau_max
+        upper_bound_x_task[j,i] = number_ys[j,i]*tau_max
         number_remaining_periods_for_x[j,i] = max(0, max(S_Time) - est[j,i] - number_ys[j,i]*(tau_max + tau_end))    
 
         # Try to fit a shorter task in the remaining time
         for tau in range(int(tau_max) - 1, int(tau_min) - 1, - 1):
             if tau <= number_remaining_periods_for_x[j,i]:
-                upper_bound_x[j,i] += tau
+                upper_bound_x_task[j,i] += tau
                 break        
     
-    stn['UPPER_BOUND_X'] = upper_bound_x
+    stn['UPPER_BOUND_X'] = upper_bound_x_task
         
 
 def knapsack_constraint(model_max_production_time_points: ConcreteModel, number_time_points_for_x: int, tau_end: int) -> Constraint:
@@ -88,7 +88,7 @@ def compute_upper_bound_x_task(model: ConcreteModel, stn: dict) -> None:
     est = stn['EST']
     num_periods = max(model.S_Time)
     
-    upper_bound_x = {}
+    upper_bound_x_task = {}
     
     for (j,i) in est:
         
@@ -107,8 +107,8 @@ def compute_upper_bound_x_task(model: ConcreteModel, stn: dict) -> None:
         solver = define_solver()
         solver.solve(model_max_production_time_points, tee = False)
         
-        upper_bound_x[j,i] = sum(run_length * model_max_production_time_points.V_Number_Runs[run_length].value for run_length in model_max_production_time_points.S_Run_Lenghts)
+        upper_bound_x_task[j,i] = sum(run_length * model_max_production_time_points.V_Number_Runs[run_length].value for run_length in model_max_production_time_points.S_Run_Lenghts)
         model_max_production_time_points.V_Number_Runs.display() 
                 
-    stn['UPPER_BOUND_X_TASK'] = upper_bound_x   
+    stn['UPPER_BOUND_X_TASK'] = upper_bound_x_task   
     print(f'Upper bound on X for each task considering its EST: {stn['UPPER_BOUND_X_TASK']}')

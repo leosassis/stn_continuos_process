@@ -331,37 +331,7 @@ def create_constraints_est_f1(model: ConcreteModel) -> None:
 def create_constraints_est_f2(model: ConcreteModel) -> None:
     
     
-    model.C_EST_X_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_x_to_zero_est)
-    model.C_EST_Y_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_y_to_zero_est)
-    model.C_EST_PPC_Upper_Bound_YS = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ppc_upper_bound_ys_task)
+    model.C_EST_PPC_Upper_Bound_YS_Task = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ppc_upper_bound_ys_task)
     model.C_EST_OPT_Upper_Bound_YS_Unit = Constraint(model.S_Units, rule = _constraint_opt_upper_bound_ys_unit)
     model.C_Upper_OPT_Bound_X = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_opt_upper_bound_x)
     model.C_Upper_OPT_Bound_X_Unit = Constraint(model.S_Units, rule = _constraint_opt_upper_bound_x_unit)    
-
-
-def if_start_end(model: ConcreteModel, i: Any, j: Any, n: Any) -> Constraint:
-    if (i in model.S_I_Production_Tasks) and j in model.S_J_Executing_I[i] and (n <= (len(model.S_Time) - 1) - model.P_Tau_Max[i,j]):
-        return sum(model.V_Y_End[i,j,nprime] for nprime in model.S_Time if nprime >= n + model.P_Tau_Min[i,j] and nprime <= n + model.P_Tau_Max[i,j]) >= model.V_Y_Start[i,j,n]
-    else:
-        return Constraint.Skip
-
-
-def max_lenght_run_eq19_reformulation_YS(model: ConcreteModel, i: Any, j: Any, n: Any) -> Constraint:
-    if (i,j) in model.P_Task_Unit_Network and i in model.S_I_Production_Tasks:
-        return model.V_X[i,j,n] <= sum(model.V_Y_Start[i,j,nprime] for nprime in model.S_Time if ( (nprime >= n - model.P_Tau_Max[i,j] + 1) and (nprime <= n) )) 
-    else:
-        return Constraint.Skip
-
-
-def max_lenght_run_eq19_reformulation_YE(model: ConcreteModel, i: Any, j: Any, n: Any) -> Constraint:
-    if (i,j) in model.P_Task_Unit_Network and i in model.S_I_Production_Tasks:
-        return model.V_X[i,j,n] <= sum(model.V_Y_End[i,j,nprime] for nprime in model.S_Time if ( (nprime >= n + 1) and (nprime <= n + model.P_Tau_Max[i,j]) )) 
-    else:
-        return Constraint.Skip
-    
-    
-def create_constraints_test(model: ConcreteModel) -> None:
-   
-    model.If_Start_End = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = if_start_end)
-    model.C_Max_Lenght_Run_Reformulation_YS_Eq19 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19_reformulation_YS) 
-    model.C_Max_Lenght_Run_Reformulation_YE_Eq19 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19_reformulation_YE)     

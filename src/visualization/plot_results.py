@@ -3,6 +3,15 @@ from pyomo.environ import *
 
 
 def plot_gantt_chart(planning_horizon: int, model: ConcreteModel, var: str) -> None:
+    """
+    Prints differents variables in a Gannt chart. 
+    
+    Args:
+        - planning_horizon (int): planning horizon.
+        - model (ConcreteModel): a Pyomo model instance.
+        - var (str): defined which variable to print (e.g., X, Y, B)
+    """
+    
     
     plt.figure(figsize=(12,6))
     gap = (planning_horizon+1)/500
@@ -15,8 +24,7 @@ def plot_gantt_chart(planning_horizon: int, model: ConcreteModel, var: str) -> N
             idx -= 1
             ticks.append(idx)
             lbls.append("{0:s} -> {1:s}".format(j,i))
-            plt.plot([0,planning_horizon+5],[idx,idx],lw=20,alpha=.3,color='y')
-            
+            plt.plot([0,planning_horizon+5],[idx,idx],lw=20,alpha=.3,color='y')            
             if var == "X":
                 for t in model.S_Time:
                     if model.V_X[i,j,t]() > 0.0001:
@@ -45,21 +53,5 @@ def plot_gantt_chart(planning_horizon: int, model: ConcreteModel, var: str) -> N
     plt.xlim(0,planning_horizon+1)
     plt.gca().set_yticks(ticks)
     plt.gca().set_yticklabels(lbls) 
-    plt.tight_layout()
-    plt.show(block=True) 
-
-    
-def plot_inventory_chart(H, model):
-    
-    plt.figure(figsize=(10,6))
-    for (k,idx) in list(zip(model.S_Materials, range(len(model.S_Materials)))):
-        plt.subplot(ceil(len(model.S_Materials)/3),3,idx+1)
-        tlast,ylast = 0, model.P_Init_Inventory_Material[k]
-        for (t,y) in zip(list(model.S_Time),[model.V_S[k,t]() for t in model.S_Time]):
-            plt.plot([tlast,t,t],[ylast,ylast,y],'b')
-            tlast,ylast = t,y
-        plt.ylim(0,1.1*model.P_Chi[k])
-        plt.plot([0,H],[model.P_Chi[k],model.P_Chi[k]],'r--')
-        plt.title(k)
     plt.tight_layout()
     plt.show(block=True) 

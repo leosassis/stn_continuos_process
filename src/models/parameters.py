@@ -125,36 +125,33 @@ def create_parameters(model: ConcreteModel, stn: dict, planning_horizon: int) ->
     model.P_Tau_End_Task = Param(model.S_Tasks, default = 1)
     model.P_Tau_End_Unit = Param(model.S_Units, default = 1)
     
-   
-def create_ppc_parameters(model: ConcreteModel, stn: dict) -> None:
+
+def create_base_parameters(model: ConcreteModel, stn_data: dict) -> None:
     
-    est = stn['EST']
-    est_group = stn['EST_GROUP']
+    est = stn_data['EST']    
            
     model.P_EST_Task = Param(model.S_Tasks, model.S_Units, initialize = est_task_initialization(est))
+    
+    
+
+def create_ppc_parameters(model: ConcreteModel, stn_data: dict) -> None:
+    
+    est_group = stn_data['EST_GROUP']
+    
+    model.P_EST_Group = Param(model.S_Materials, initialize = est_group_initialization(est_group))              
     model.P_EST_Unit = Param(model.S_Units, initialize = est_unit_initialization)    
-    """ model.P_EST_Group = Param(model.S_Materials, initialize = est_group_initialization(est_group))        
     model.P_UB_YS_Task = Param(model.S_Tasks, model.S_Units, initialize = ub_ys_task_initialization(model))
     model.P_UB_YS_Unit = Param(model.S_Units, initialize = ub_ys_unit_initialization(model))
     model.P_New_UB_YS_Unit = Param(model.S_Units, initialize = ub_new_ys_unit_initialization(model))
     model.P_UB_X_Task = Param(model.S_Tasks, model.S_Units, initialize = ub_x_task_initialization(model))
     model.P_UB_X_Unit = Param(model.S_Units, initialize = ub_x_unit_initialization(model))  
     
-    model.P_EST_Task.pprint()
-    model.P_EST_Unit.pprint()
-    model.P_EST_Group.pprint()
-    model.P_UB_YS_Task.pprint()
-    model.P_UB_YS_Unit.pprint()
-    model.P_New_UB_YS_Unit.pprint()
-    model.P_UB_X_Task.pprint()
-    model.P_UB_X_Unit.pprint()  """   
-    
 
-def create_opt_parameters(model: ConcreteModel, stn: dict) -> None:
+def create_opt_parameters(model: ConcreteModel, stn_data: dict) -> None:
     
-    upper_bound_x_task = stn['UPPER_BOUND_X_TASK']
-    upper_bound_x_unit = stn['UPPER_BOUND_X_UNIT']
-    upper_bound_ys_unit = stn['UPPER_BOUND_Y_UNIT']
+    upper_bound_x_task = stn_data['UPPER_BOUND_X_TASK']
+    upper_bound_x_unit = stn_data['UPPER_BOUND_X_UNIT']
+    upper_bound_ys_unit = stn_data['UPPER_BOUND_Y_UNIT']
            
     model.P_Upper_Bound_YS_Unit = Param(model.S_Units, initialize = upper_bound_ys_unit_initialization(upper_bound_ys_unit))    
     model.P_Upper_Bound_X = Param(model.S_Tasks, model.S_Units, initialize = upper_bound_x_initialization(upper_bound_x_task))
