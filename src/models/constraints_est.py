@@ -202,7 +202,7 @@ def _constraint_opt_upper_bound_ys_unit(model: ConcreteModel, j: Any) -> Constra
         return Constraint.Skip
      
 
-def _constraint_opt_upper_bound_x(model: ConcreteModel, i: Any, j: Any) -> Constraint:
+def _constraint_opt_upper_bound_x_task(model: ConcreteModel, i: Any, j: Any) -> Constraint:
     """
     Defines an upper bound for X[i,j,n]. 
     model.P_Upper_Bound_X[i,j] is calculated by solving a knapsack problem. 
@@ -309,14 +309,14 @@ def _constraint_upper_bound_ys_unit(model: ConcreteModel, j: Any) -> Constraint:
         return Constraint.Skip
     
 
-def create_constraints_set_to_zero_x_ys_est(model: ConcreteModel) -> None:
+def load_constraints_set_to_zero_x_ys_est(model: ConcreteModel) -> None:
     
    
    model.C_EST_X_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_x_to_zero_est)
    model.C_EST_Y_To_Zero = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_y_to_zero_est)
     
    
-def create_constraints_est_f1(model: ConcreteModel) -> None:
+def load_constraints_preprocessing(model: ConcreteModel) -> None:
     
     
     model.C_EST_PPC_Upper_Bound_YS_Task = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ppc_upper_bound_ys_task)
@@ -328,10 +328,10 @@ def create_constraints_est_f1(model: ConcreteModel) -> None:
     model.C_Upper_Bound_YS_Unit = Constraint(model.S_Units, rule = _constraint_upper_bound_ys_unit)
     
 
-def create_constraints_est_f2(model: ConcreteModel) -> None:
+def load_constraints_preprocessing_optimization(model: ConcreteModel) -> None:
     
     
     model.C_EST_PPC_Upper_Bound_YS_Task = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ppc_upper_bound_ys_task)
     model.C_EST_OPT_Upper_Bound_YS_Unit = Constraint(model.S_Units, rule = _constraint_opt_upper_bound_ys_unit)
-    model.C_Upper_OPT_Bound_X = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_opt_upper_bound_x)
+    model.C_Upper_OPT_Bound_X_Taks = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_opt_upper_bound_x_task)
     model.C_Upper_OPT_Bound_X_Unit = Constraint(model.S_Units, rule = _constraint_opt_upper_bound_x_unit)    

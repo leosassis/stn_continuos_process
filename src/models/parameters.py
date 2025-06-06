@@ -53,26 +53,21 @@ def est_task_initialization(EST: dict) -> dict:
     est = {(i,j): EST[(j,i)] for (j,i) in EST}
     return est
 
-
 def est_unit_initialization(model: ConcreteModel, j: Any) -> dict:
     est_unit = min(model.P_EST_Task[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
     return est_unit
-
 
 def upper_bound_x_initialization(upper_bound_x: dict) -> dict:
     dict_upper_bound_x = {(i,j): upper_bound_x[(j,i)] for (j,i) in upper_bound_x}
     return dict_upper_bound_x
 
-
 def upper_bound_x_unit_initialization(upper_bound_x_unit: dict) -> dict:
     dict_upper_bound_x_unit =  {j: upper_bound_x_unit[j] for j in upper_bound_x_unit}
     return dict_upper_bound_x_unit
 
-
 def upper_bound_ys_unit_initialization(upper_bound_ys_unit: dict) -> dict:
     dict_upper_bound_ys_unit =  {j: upper_bound_ys_unit[j] for j in upper_bound_ys_unit}
     return dict_upper_bound_ys_unit
-
 
 def est_group_initialization(est_group: dict) -> dict:
     dict_est_group = {k: est_group[k] for k in est_group}
@@ -100,7 +95,7 @@ def ub_x_unit_initialization(model: ConcreteModel) -> dict:
     return dict_x_unit
 
 
-def create_parameters(model: ConcreteModel, stn: dict, planning_horizon: int) -> None:
+def create_basic_parameters(model: ConcreteModel, stn: dict, planning_horizon: int) -> None:
     
     states = stn['STATES']
     states_shipment = stn['STATES_SHIPMENT']
@@ -126,14 +121,13 @@ def create_parameters(model: ConcreteModel, stn: dict, planning_horizon: int) ->
     model.P_Tau_End_Unit = Param(model.S_Units, default = 1)
     
 
-def create_base_parameters(model: ConcreteModel, stn_data: dict) -> None:
+def create_est_parameters(model: ConcreteModel, stn_data: dict) -> None:
     
     est = stn_data['EST']    
            
     model.P_EST_Task = Param(model.S_Tasks, model.S_Units, initialize = est_task_initialization(est))
     
     
-
 def create_ppc_parameters(model: ConcreteModel, stn_data: dict) -> None:
     
     est_group = stn_data['EST_GROUP']

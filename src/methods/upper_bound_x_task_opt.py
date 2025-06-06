@@ -1,7 +1,7 @@
 from pyomo.environ import *
 from numpy import floor
 from src.utils.utils import print_dict
-from src.models.optimization_config import define_solver
+from src.models.model_solve import define_solver
 
 
 ADD_TIME_PERIOD = 1  # Used for computing the number of time periods

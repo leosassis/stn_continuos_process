@@ -1,10 +1,59 @@
 from pyomo.environ import *
 from pyomo.opt import SolverResults
-from src.models.optimization_config import set_solver_options_milp, activate_model_lp_relaxation
-from src.utils.utils import compute_num_variables_constraints, print_model_constraints
+from src.utils.utils import compute_num_variables_constraints
 from src.visualization.plot_results import plot_gantt_chart
 
 
+def define_solver() -> Any:
+    """ 
+    Defines Gurobi as the solver.
+    
+    Args:
+        - none.
+    
+    Returns:
+        - solver (Any): Pyomo SolverFactory instance configured for Gurobi.
+    """
+    
+    return SolverFactory('gurobi')
+
+
+def set_solver_options_milp(solver: Any) -> None: 
+    """ 
+    Sets solver options for MILP optimization.
+    
+    Args:
+        - solver (Any): Pyomo solver instance (e.g., Gurobi).
+    
+    Returns:
+        - none.
+    """  
+    
+    #solver.options['MIPGap'] = 0.01  # Set MIP gap
+    solver.options['TimeLimit'] = 3600  # Set time limit
+
+
+def activate_model_lp_relaxation(model: ConcreteModel) -> None:    
+    """ 
+    Relaxes all binary and integer variables in the model to continuous variables.
+    
+    Args:
+        - model (ConcreteModel): Pyomo model instance.
+    
+    Returns:
+        - none.
+    """   
+    
+    for var in model.component_objects(Var, active=True):            
+        for index in var:                
+            if var[index].domain == Binary:
+                var[index].setlb(0)
+                var[index].setub(1)
+                var[index].domain = Reals                
+            elif var[index].domain == Integers:
+                var[index].domain = Reals     
+                
+                
 def solve_model(solver: Any, model: ConcreteModel) -> SolverResults:
     """
     Solves the given Pyomo model using the provided solver.
@@ -40,6 +89,7 @@ def solve_and_analyze_model(solver: Any, model_milp: ConcreteModel, planning_hor
             SolverResults: results from solving the LP relaxation
         ]
     """
+    
     
     set_solver_options_milp(solver)
     results_milp: SolverResults = solve_model(solver, model_milp)   

@@ -294,7 +294,7 @@ def unit_availability_eq21(model, j, n):
         + (model.V_X_Hat_Idle[j,n] if j in model.S_J_Units_With_Shutdown_Tasks else 0)) <= 1 """
 
     
-def load_basic_model_constraints(model: ConcreteModel) -> None:
+def load_constraints_basic_model(model: ConcreteModel) -> None:
    
     model.C_Unit_Capacity_LB_Eq2 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = unit_capacity_lb_eq2)
     model.C_Unit_Capacity_UB_Eq2 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = unit_capacity_ub_eq2)
@@ -313,7 +313,7 @@ def load_basic_model_constraints(model: ConcreteModel) -> None:
     #model.C_Track_Start_Production_Task_After_Transition_Eq20 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_production_task_after_transition_eq20)
 
 
-def load_constraints_bounds_x_y_units(model: ConcreteModel) -> None:
+def load_constraints_basic_model_for_operations_x_y(model: ConcreteModel) -> None:
    
     model.C_Track_Start_End_Run_Task_Eq16 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq16)
     model.C_Track_Start_End_Run_Task_Eq17 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq17)
