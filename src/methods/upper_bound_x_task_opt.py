@@ -1,24 +1,24 @@
 from pyomo.environ import *
 from numpy import floor
-from src.utils.utils import print_dict
 from src.models.model_solve import define_solver
-
+from src.models.model_build import load_model_sets_parameters_variables
+from src.methods.est import compute_est_subsequent_tasks
 
 ADD_TIME_PERIOD = 1  # Used for computing the number of time periods
 
 
-def compute_upper_bound_x_old(model: ConcreteModel, stn: dict) -> None:
+def compute_upper_bound_x_old(model: ConcreteModel, stn_data: dict) -> None:
     """ 
     Computes upper bounds on x variables based on its operational window and tau values.
     
     Args:
         - model (ConcreteModel): Pyomo model instance.
-        - stn (dict): a dictionary containing the network data.
+        - stn_data (dict): a dictionary containing the network data.
     
     Returns: none.
     """
     
-    est = stn['EST']
+    est = stn_data['EST']
     number_ys = {}
     upper_bound_x_task = {}
     number_remaining_periods_for_x = {}
@@ -42,7 +42,7 @@ def compute_upper_bound_x_old(model: ConcreteModel, stn: dict) -> None:
                 upper_bound_x_task[j,i] += tau
                 break        
     
-    stn['UPPER_BOUND_X'] = upper_bound_x_task
+    stn_data['UPPER_BOUND_X'] = upper_bound_x_task
         
 
 def knapsack_constraint(model_max_production_time_points: ConcreteModel, number_time_points_for_x: int, tau_end: int) -> Constraint:
@@ -73,28 +73,33 @@ def define_objective(model_max_production_time_points: ConcreteModel) -> Objecti
     return sum((run_length) * model_max_production_time_points.V_Number_Runs[run_length] for run_length in model_max_production_time_points.S_Run_Lenghts)
 
 
-def compute_upper_bound_x_task(model: ConcreteModel, stn: dict) -> None:
+def compute_upper_bound_x_task(stn_data: dict, planning_horizon: int) -> None:
     """ 
     The optimization problem defines the combination of different run lenghts that maximizes the number of production time points for each task.
     Result is saved in stn['UPPER_BOUND_X'].
     
     Args:
-        - model (ConcreteModel): Pyomo model instance.
-        - stn (dict): a dictionary containing the network data.
+        - model_init_max_production_task (ConcreteModel): Pyomo model instance.
+        - stn_data (dict): a dictionary containing the network data.
     
     Returns: none.
     """
+    
+    model_init_max_production_task = ConcreteModel()
+    
+    load_model_sets_parameters_variables(model_init_max_production_task, stn_data, planning_horizon)
+    compute_est_subsequent_tasks(model_init_max_production_task, stn_data)
         
-    est = stn['EST']
-    num_periods = max(model.S_Time)
+    est = stn_data['EST']
+    num_periods = max(model_init_max_production_task.S_Time)
     
     upper_bound_x_task = {}
     
     for (j,i) in est:
         
-        tau_max = model.P_Tau_Max[i,j]
-        tau_min = model.P_Tau_Min[i,j]
-        tau_end = model.P_Tau_End_Task[i]
+        tau_max = model_init_max_production_task.P_Tau_Max[i,j]
+        tau_min = model_init_max_production_task.P_Tau_Min[i,j]
+        tau_end = model_init_max_production_task.P_Tau_End_Task[i]
         number_time_points_for_x = num_periods + ADD_TIME_PERIOD - est[j,i]
         print(f'Unit: {j}, task: {i}, est[{i},{j}] = {est[j,i]}, number of time points = {number_time_points_for_x}')
         model_max_production_time_points = ConcreteModel()        
@@ -110,5 +115,5 @@ def compute_upper_bound_x_task(model: ConcreteModel, stn: dict) -> None:
         upper_bound_x_task[j,i] = sum(run_length * model_max_production_time_points.V_Number_Runs[run_length].value for run_length in model_max_production_time_points.S_Run_Lenghts)
         model_max_production_time_points.V_Number_Runs.display() 
                 
-    stn['UPPER_BOUND_X_TASK'] = upper_bound_x_task   
-    print(f'Upper bound on X for each task considering its EST: {stn['UPPER_BOUND_X_TASK']}')
+    stn_data['UPPER_BOUND_X_TASK'] = upper_bound_x_task   
+    print(f'Upper bound on X for each task considering its EST: {stn_data['UPPER_BOUND_X_TASK']}')

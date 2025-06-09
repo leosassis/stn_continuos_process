@@ -2,7 +2,7 @@ import pandas as pd
 import logging
 from itertools import product
 from src.models.model_solve import define_solver
-from src.models.model_build import create_model_f0_base_formulation, create_model_f1_basic_preprocessing_formulation, create_model_f2_basic_preprocessing_optimization_formulation
+from src.models.formulation_build import create_model_f0_base_formulation, create_model_f1_basic_preprocessing_formulation, create_model_f2_basic_preprocessing_optimization_formulation
 from src.data.instance_generation import load_network, instance_factors_network
 from src.data.postprocessing import initialize_results_dict, create_dict_result
 from src.models.model_solve import solve_and_analyze_model 
@@ -39,13 +39,13 @@ def run_instance(network: str, case: str, planning_horizon: int, tau_factor: int
         
         # Step 1: Load network            
         stn_data = load_network(network, case, tau_factor, beta_factor)
-
+        
         # Step 2: Define the solver
         solver = define_solver()
         
         # Step 3: Build, configure and solve the MILP model        
-        model_milp, formulation_name = create_model_f0_base_formulation(stn_data, planning_horizon)
-        #model_milp, formulation_name = create_model_f1_basic_preprocessing_formulation(stn_data, planning_horizon)
+        #model_milp, formulation_name = create_model_f0_base_formulation(stn_data, planning_horizon)
+        model_milp, formulation_name = create_model_f1_basic_preprocessing_formulation(stn_data, planning_horizon)
         results_milp, stats_milp, results_lp = solve_and_analyze_model(solver, model_milp, planning_horizon)
         
         # Step 4: Create result dictionary
@@ -53,7 +53,7 @@ def run_instance(network: str, case: str, planning_horizon: int, tau_factor: int
         
         logging.info(
             f"Models were solved. Formulation: {formulation_name}. MILP Objective: {round(results_milp.problem.lower_bound, 2)}." 
-        )               
+        )                
         
         create_model_f2_basic_preprocessing_optimization_formulation(stn_data, planning_horizon)
             
