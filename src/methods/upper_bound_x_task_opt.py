@@ -91,8 +91,7 @@ def compute_upper_bound_x_task(stn_data: dict, planning_horizon: int) -> None:
     compute_est_subsequent_tasks(model_init_max_production_task, stn_data)
         
     est = stn_data['EST']
-    num_periods = max(model_init_max_production_task.S_Time)
-    
+    num_periods = max(model_init_max_production_task.S_Time)    
     upper_bound_x_task = {}
     
     for (j,i) in est:
@@ -101,7 +100,7 @@ def compute_upper_bound_x_task(stn_data: dict, planning_horizon: int) -> None:
         tau_min = model_init_max_production_task.P_Tau_Min[i,j]
         tau_end = model_init_max_production_task.P_Tau_End_Task[i]
         number_time_points_for_x = num_periods + ADD_TIME_PERIOD - est[j,i]
-        print(f'Unit: {j}, task: {i}, est[{i},{j}] = {est[j,i]}, number of time points = {number_time_points_for_x}')
+        
         model_max_production_time_points = ConcreteModel()        
         
         model_max_production_time_points.S_Run_Lenghts = RangeSet(tau_min, tau_max)
@@ -116,4 +115,4 @@ def compute_upper_bound_x_task(stn_data: dict, planning_horizon: int) -> None:
         model_max_production_time_points.V_Number_Runs.display() 
                 
     stn_data['UPPER_BOUND_X_TASK'] = upper_bound_x_task   
-    print(f'Upper bound on X for each task considering its EST: {stn_data['UPPER_BOUND_X_TASK']}')
+    
