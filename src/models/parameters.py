@@ -158,7 +158,7 @@ def create_ppc_parameters(model: ConcreteModel, stn_data: dict) -> None:
     model.P_EST_Unit = Param(model.S_Units, initialize = est_unit_initialization)    
     model.P_UB_YS_Task_PPC = Param(model.S_Tasks, model.S_Units, initialize = ub_ys_task_initialization(model))
     model.P_UB_YS_Unit_PPC = Param(model.S_Units, initialize = ub_ys_unit_initialization(model))
-    model.P_New_UB_YS_Unit_PPC = Param(model.S_Units, initialize = ub_new_ys_unit_initialization(model))
+    model.P_UB_YS_Unit_PPC_New = Param(model.S_Units, initialize = ub_new_ys_unit_initialization(model))
     model.P_UB_X_Task_PPC = Param(model.S_Tasks, model.S_Units, initialize = ub_x_task_initialization(model))
     model.P_UB_X_Unit_PPC = Param(model.S_Units, initialize = ub_x_unit_initialization(model))  
     
