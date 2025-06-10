@@ -76,10 +76,6 @@ def create_model_f2_basic_preprocessing_optimization_formulation(stn_data: dict,
     compute_upper_bound_x_unit(stn_data, planning_horizon)
     compute_upper_bound_y_unit(stn_data, planning_horizon)
     
-    print(stn_data['UPPER_BOUND_X_TASK'])
-    print(stn_data['UPPER_BOUND_X_UNIT'])
-    print(stn_data['UPPER_BOUND_Y_UNIT'])    
-        
     model = ConcreteModel()
     
     load_model_sets_parameters_variables(model, stn_data, planning_horizon)
@@ -87,6 +83,11 @@ def create_model_f2_basic_preprocessing_optimization_formulation(stn_data: dict,
     compute_est_group_tasks(model, stn_data)                
     create_est_parameters(model, stn_data)
     create_opt_parameters(model, stn_data)
+    
+    print(f"UPPER_BOUND_X_TASK = {stn_data['UPPER_BOUND_X_TASK']}")
+    print(f"UPPER_BOUND_X_UNIT = {stn_data['UPPER_BOUND_X_UNIT']}")
+    print(f"UPPER_BOUND_Y_UNIT = {stn_data['UPPER_BOUND_Y_UNIT']}")   
+    
     load_constraints_set_to_zero_x_ys_est(model)
     load_constraints_preprocessing_optimization(model)
     

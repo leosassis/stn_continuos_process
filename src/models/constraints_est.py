@@ -83,7 +83,7 @@ def _constraint_ub_ys_task_ppc(model: ConcreteModel, i: Any, j: Any) -> Constrai
             model.V_Y_Start[i,j,n] 
             for n in model.S_Time 
             if n >= model.P_EST_Task[i,j]
-        ) <= model.P_UB_YS_Task[i,j]
+        ) <= model.P_UB_YS_Task_PPC[i,j]
     else:
         return Constraint.Skip    
 
@@ -111,7 +111,7 @@ def _constraint_ub_ys_unit_ppc(model: ConcreteModel, j: Any) -> Constraint:
             if n >= model.P_EST_Unit[j]    
             for i in model.S_I_Production_Tasks 
             if (i,j) in model.P_Task_Unit_Network                    
-        ) <= model.P_UB_YS_Unit[j]
+        ) <= model.P_UB_YS_Unit_PPC[j]
     else:
         return Constraint.Skip   
     
@@ -138,7 +138,7 @@ def _constraint_ub_ys_unit_ppc_new(model: ConcreteModel, j: Any) -> Constraint:
             if (i,j) in model.P_Task_Unit_Network 
             for n in model.S_Time 
             if n >= model.P_EST_Unit[j]
-        ) <= model.P_New_UB_YS_Unit[j]
+        ) <= model.P_UB_YS_Unit_PPC_New[j]
     else:
         return Constraint.Skip
     
@@ -168,7 +168,7 @@ def _constraint_ub_x_task_ppc(model: ConcreteModel, i: Any, j: Any) -> Constrain
             model.V_X[i,j,n] 
             for n in model.S_Time 
             if n >= model.P_EST_Task[i,j]
-        ) <= model.P_UB_X_Task[i,j]
+        ) <= model.P_UB_X_Task_PPC[i,j]
     else:
         return Constraint.Skip
         
@@ -187,7 +187,6 @@ def _constraint_ub_x_unit_ppc(model: ConcreteModel, j: Any) -> Constraint:
     """
     
     if (
-        j in model.S_Units and
         model.P_EST_Unit[j] > 0 and
         model.P_EST_Unit[j] <= len(model.S_Time)
     ):
@@ -197,7 +196,7 @@ def _constraint_ub_x_unit_ppc(model: ConcreteModel, j: Any) -> Constraint:
             if n >= model.P_EST_Unit[j]
             for i in model.S_I_Production_Tasks 
             if (i,j) in model.P_Task_Unit_Network
-        ) <= model.P_UB_X_Unit[j]
+        ) <= model.P_UB_X_Unit_PPC[j]
     else:
         return Constraint.Skip
     
@@ -205,7 +204,7 @@ def _constraint_ub_x_unit_ppc(model: ConcreteModel, j: Any) -> Constraint:
 def _constraint_ub_ys_unit_opt(model: ConcreteModel, j: Any) -> Constraint:
     """
     Defines an upper bound on the number of runs that can start in a unit (var Y_S[i,j,n]). 
-    model.P_Upper_Bound_YS_Unit[j] is calculated by solving a knapsack problem.
+    model.P_UB_YS_Unit_OPT[j] is calculated by solving a knapsack problem.
 
     Args:
         - model (ConcreteModel): a Pyomo model instance.
@@ -216,7 +215,8 @@ def _constraint_ub_ys_unit_opt(model: ConcreteModel, j: Any) -> Constraint:
     """
     
     if (
-        model.P_EST_Unit[j] <= len(model.S_Time)
+        model.P_EST_Unit[j] <= len(model.S_Time) and
+        model.P_EST_Unit[j] > 0
     ):
         
         return sum(
@@ -225,7 +225,7 @@ def _constraint_ub_ys_unit_opt(model: ConcreteModel, j: Any) -> Constraint:
             if (i,j) in model.P_Task_Unit_Network 
             for n in model.S_Time 
             if n >= model.P_EST_Unit[j]
-        ) <= model.P_Upper_Bound_YS_Unit[j]
+        ) <= model.P_UB_YS_Unit_OPT[j]
     else:
         return Constraint.Skip
      
@@ -255,7 +255,7 @@ def _constraint_ub_x_task_opt(model: ConcreteModel, i: Any, j: Any) -> Constrain
             model.V_X[i,j,n] 
             for n in model.S_Time 
             if n >= model.P_EST_Task[i,j]
-        ) <= model.P_Upper_Bound_X[i,j]
+        ) <= model.P_UB_X_Task_OPT[i,j]
     else:
         return Constraint.Skip
         
@@ -285,7 +285,7 @@ def _constraint_ub_x_unit_opt(model: ConcreteModel, j: Any) -> Constraint:
             if (i,j) in model.P_Task_Unit_Network 
             for n in model.S_Time 
             if n >= model.P_EST_Unit[j]
-        ) <= model.P_Upper_Bound_X_Unit[j]
+        ) <= model.P_UB_X_Unit_OPT[j]
     else:
         return Constraint.Skip
         
