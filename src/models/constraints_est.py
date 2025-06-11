@@ -76,7 +76,7 @@ def _constraint_ub_ys_task_ppc(model: ConcreteModel, i: Any, j: Any) -> Constrai
         i in model.S_I_Production_Tasks and 
         j in model.S_J_Executing_I[i] and 
         (i,j) in model.P_Task_Unit_Network and
-        model.P_EST_Task[i,j] >= 0 and
+        model.P_EST_Task[i,j] > 0 and
         model.P_EST_Task[i,j] <= len(model.S_Time)
     ):
         return sum(
@@ -224,7 +224,7 @@ def _constraint_ub_ys_unit_opt(model: ConcreteModel, j: Any) -> Constraint:
             for i in model.S_I_Production_Tasks 
             if (i,j) in model.P_Task_Unit_Network 
             for n in model.S_Time 
-            if n >= model.P_EST_Unit[j]
+            if n >= model.P_EST_Task[i,j]
         ) <= model.P_UB_YS_Unit_OPT[j]
     else:
         return Constraint.Skip
@@ -284,7 +284,7 @@ def _constraint_ub_x_unit_opt(model: ConcreteModel, j: Any) -> Constraint:
             for i in model.S_I_Production_Tasks 
             if (i,j) in model.P_Task_Unit_Network 
             for n in model.S_Time 
-            if n >= model.P_EST_Unit[j]
+            if n >= model.P_EST_Task[i,j]
         ) <= model.P_UB_X_Unit_OPT[j]
     else:
         return Constraint.Skip
