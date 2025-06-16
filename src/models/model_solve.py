@@ -29,7 +29,7 @@ def set_solver_options_milp(solver: Any) -> None:
         - none.
     """  
     
-    solver.options['MIPGap'] = 0.000001  # Set MIP gap
+    #solver.options['MIPGap'] = 0.0001  # Set MIP gap
     solver.options['TimeLimit'] = 3600  # Set time limit
 
 
@@ -94,7 +94,6 @@ def solve_and_analyze_model(solver: Any, model_milp: ConcreteModel, planning_hor
     set_solver_options_milp(solver)
     results_milp: SolverResults = solve_model(solver, model_milp)   
     model_analytics_milp = compute_num_variables_constraints(model_milp)
-    print_model_constraints(model_milp)
     plot_gantt_chart(planning_horizon, model_milp, "X")
     plot_gantt_chart(planning_horizon, model_milp, "Y")
     plot_gantt_chart(planning_horizon, model_milp, "B")

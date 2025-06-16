@@ -141,6 +141,7 @@ def create_est_parameters(model: ConcreteModel, stn_data: dict) -> None:
     est = stn_data['EST']    
            
     model.P_EST_Task = Param(model.S_Tasks, model.S_Units, initialize = est_task_initialization(est))
+    model.P_EST_Task.display()
     
     
 def create_ppc_parameters(model: ConcreteModel, stn_data: dict) -> None:
@@ -161,6 +162,14 @@ def create_ppc_parameters(model: ConcreteModel, stn_data: dict) -> None:
     model.P_UB_YS_Unit_PPC_New = Param(model.S_Units, initialize = ub_new_ys_unit_initialization(model))
     model.P_UB_X_Task_PPC = Param(model.S_Tasks, model.S_Units, initialize = ub_x_task_initialization(model))
     model.P_UB_X_Unit_PPC = Param(model.S_Units, initialize = ub_x_unit_initialization(model))  
+    
+    """ model.P_EST_Group.display()          
+    model.P_EST_Unit.display()
+    model.P_UB_YS_Task_PPC.display()
+    model.P_UB_YS_Unit_PPC.display()
+    model.P_UB_YS_Unit_PPC_New.display()
+    model.P_UB_X_Task_PPC.display()
+    model.P_UB_X_Unit_PPC.display() """
     
 
 def create_opt_parameters(model: ConcreteModel, stn_data: dict) -> None:
@@ -183,4 +192,11 @@ def create_opt_parameters(model: ConcreteModel, stn_data: dict) -> None:
     model.P_UB_YS_Task_PPC = Param(model.S_Tasks, model.S_Units, initialize = ub_ys_task_initialization(model))
     model.P_UB_X_Unit_OPT = Param(model.S_Units, initialize = upper_bound_x_unit_initialization(upper_bound_x_unit))     
     model.P_UB_X_Task_OPT = Param(model.S_Tasks, model.S_Units, initialize = upper_bound_x_initialization(upper_bound_x_task))
+    
+    """ model.P_EST_Unit.display()          
+    model.P_EST_Group.display()           
+    model.P_UB_YS_Unit_OPT.display()          
+    model.P_UB_YS_Task_PPC.display()          
+    model.P_UB_X_Unit_OPT.display()          
+    model.P_UB_X_Task_OPT.display()  """         
     

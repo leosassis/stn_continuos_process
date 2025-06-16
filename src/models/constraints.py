@@ -178,7 +178,7 @@ def track_transitions_unit_eq15(model, i, j, n):
 
 def track_start_end_run_task_eq16(model, i, j, n):
     """ 
-    Models the relationship between the start and end of a run (part 1).
+    Makes sure that if there is a start in time point n and an end in time point n', a run happen from n to n'-1.
     
     Input: set of tasks, units and time points.
     
@@ -193,7 +193,7 @@ def track_start_end_run_task_eq16(model, i, j, n):
 
 def track_start_end_run_task_eq17(model: ConcreteModel, i: Set, j: Set, n: Set) -> Constraint:
     """ 
-    Models the relationship between the start and end of a run by stating that start and end cannot happen happen at the (part 2).
+    Models the relationship between the start and end of a run by stating that start and end cannot happen happen at the same time point n (part 2).
     
     Input: set of tasks, units and time points.
     
@@ -317,7 +317,7 @@ def load_constraints_basic_model_for_operations_x_y(model: ConcreteModel) -> Non
    
     model.C_Track_Start_End_Run_Task_Eq16 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq16)
     model.C_Track_Start_End_Run_Task_Eq17 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq17)
-    model.C_Track_Start_End_Runs_Unit_Eq_22 = Constraint(model.S_Units, model.S_Time, rule = track_start_end_run_unit_eq22)
+    model.C_Track_Start_End_Runs_Unit_Eq22 = Constraint(model.S_Units, model.S_Time, rule = track_start_end_run_unit_eq22)
     model.C_Min_Lenght_Run_Eq18 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = min_lenght_run_eq18)
     model.C_Max_Lenght_Run_Eq19 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19)
     model.C_Unit_Availability_Eq21 = Constraint(model.S_Units, model.S_Time, rule = unit_availability_eq21)
