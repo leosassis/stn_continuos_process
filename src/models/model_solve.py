@@ -1,7 +1,7 @@
 from pyomo.environ import *
 from pyomo.opt import SolverResults
 from src.utils.utils import compute_num_variables_constraints
-from src.visualization.plot_results import plot_gantt_chart
+from src.visualization.plot_results import plot_gantt_chart, plot_gantt_chart_all
 from src.utils.utils import print_model_constraints
 
 def define_solver() -> Any:
@@ -29,7 +29,7 @@ def set_solver_options_milp(solver: Any) -> None:
         - none.
     """  
     
-    #solver.options['MIPGap'] = 0.0001  # Set MIP gap
+    #solver.options['MIPGap'] = 0.001  # Set MIP gap
     solver.options['TimeLimit'] = 3600  # Set time limit
 
 
@@ -94,7 +94,15 @@ def solve_and_analyze_model(solver: Any, model_milp: ConcreteModel, planning_hor
     set_solver_options_milp(solver)
     results_milp: SolverResults = solve_model(solver, model_milp)   
     model_analytics_milp = compute_num_variables_constraints(model_milp)
-    #plot_gantt_chart(planning_horizon, model_milp, "X")
+    #model_milp.pprint()
+    #print_model_constraints(model_milp)
+    model_milp.V_X.display()
+    model_milp.V_Y_End.display()    
+    model_milp.V_Y_Start.display()
+    model_milp.V_X_Hat.display() 
+    model_milp.V_X_Hat_Idle.display()
+    #plot_gantt_chart_all(planning_horizon, model_milp)
+    plot_gantt_chart(planning_horizon, model_milp, "X")
     #plot_gantt_chart(planning_horizon, model_milp, "Y")
     #plot_gantt_chart(planning_horizon, model_milp, "B")
     

@@ -1,4 +1,9 @@
-from input_data.networks import define_stn_network_1, define_stn_network_2, define_stn_network_tasks_competing, define_stn_network_upper_bound_YS,define_stn_network_upper_bound_X
+from input_data.networks import (define_stn_network_1, 
+                                define_stn_network_2, 
+                                define_stn_network_tasks_competing, 
+                                define_stn_network_upper_bound_YS, 
+                                define_stn_network_upper_bound_X, 
+                                define_stn_network_indirect_transitions)
 
 
 def load_network(network_name: str, case: str, tau_factor: int, beta_factor: int) -> dict:
@@ -25,6 +30,8 @@ def load_network(network_name: str, case: str, tau_factor: int, beta_factor: int
         return define_stn_network_upper_bound_YS(case, tau_factor, beta_factor)
     elif network_name == "network_upper_bound_X":
         return define_stn_network_upper_bound_X(case, tau_factor, beta_factor)
+    elif network_name == "network_indirect_transitions":
+        return define_stn_network_indirect_transitions(case, tau_factor, beta_factor)
     else:
         raise ValueError(f"Unsupported network name: {network_name}") 
     
@@ -48,10 +55,10 @@ def instance_factors_network() -> tuple[list[str], list[str], list[int], int, in
     #TAU_FACTOR_MAX = 3
     #BETA_FACTOR_MAX = 3
     
-    NETWORKS = ["network_1"]
-    CASES = ["fast_upstream_uniform"]
-    PLANNING_HORIZON_ARRAY = [25, 35]
-    TAU_FACTOR_MAX = 3
-    BETA_FACTOR_MAX = 3
+    NETWORKS = ["network_indirect_transitions"]
+    CASES = [""]
+    PLANNING_HORIZON_ARRAY = [50]
+    TAU_FACTOR_MAX = 2
+    BETA_FACTOR_MAX = 2
     
     return NETWORKS, CASES, PLANNING_HORIZON_ARRAY, TAU_FACTOR_MAX, BETA_FACTOR_MAX     

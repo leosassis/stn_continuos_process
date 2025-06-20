@@ -379,9 +379,9 @@ def load_constraints_preprocessing_optimization(model: ConcreteModel) -> None:
         model (ConcreteModel): a Pyomo model instance.
     """    
     
-    model.C_Upper_Bound_YS_Task_PPC = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ub_ys_task_ppc)    
-    model.C_Upper_Bound_YS_Unit_OPT = Constraint(model.S_Units, rule = _constraint_ub_ys_unit_opt)
-    model.C_Upper_Bound_X_Task_OPT = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ub_x_task_opt)
-    model.C_Upper_Bound_X_Unit_OPT = Constraint(model.S_Units, rule = _constraint_ub_x_unit_opt)        
+    #model.C_Upper_Bound_YS_Task_PPC = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ub_ys_task_ppc)    
+    #model.C_Upper_Bound_YS_Unit_OPT = Constraint(model.S_Units, rule = _constraint_ub_ys_unit_opt)
+    #model.C_Upper_Bound_X_Task_OPT = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ub_x_task_opt)
+    #model.C_Upper_Bound_X_Unit_OPT = Constraint(model.S_Units, rule = _constraint_ub_x_unit_opt)        
     model.C_Limit_Operations_Group_PPC = Constraint(model.S_Materials, model.S_Time, rule = _constraint_clique_x_group_ppc)
     model.C_Limit_Startups_Group_PPC = Constraint(model.S_Materials, model.S_Time, rule = _constraint_clique_ys_group_ppc)
