@@ -1,0 +1,7 @@
+{
+  "network": "network_1",
+  "case": "fast_upstream_slow_downstream_uniform_stages",
+  "planning_horizon": 35,
+  "tau_factor": 1,
+  "beta_factor": 1
+}

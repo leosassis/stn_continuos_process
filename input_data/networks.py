@@ -98,7 +98,7 @@ def define_stn_network_1(case: str, tau_factor: int, beta_factor: int) -> dict:
     }
     
     # Define task-unit assignments and parameters per case
-    if case == "fast_upstream_uniform":
+    if case == "fast_upstream_slow_downstream_uniform_stages":
         UNIT_TASKS = {
             ('UA1', 'TA1'): _task_data(4, 6, 25, 30),
             ('UA2', 'TA2'): _task_data(4, 6, 25, 30),
@@ -113,7 +113,7 @@ def define_stn_network_1(case: str, tau_factor: int, beta_factor: int) -> dict:
             ('UA8', 'TC5'): _task_data(int(ceil(5 / tau_factor)), int(ceil(7 * tau_factor)), 5 * beta_factor, 6 * beta_factor),
             ('UA8', 'TC6'): _task_data(int(ceil(5 / tau_factor)), int(ceil(7 * tau_factor)), 5 * beta_factor, 6 * beta_factor),
         }
-    elif case == "fast_upstream_nonuniform":
+    elif case == "fast_upstream_slow_downstream_nonuniform_stages":
         UNIT_TASKS = {
             ('UA1', 'TA1'): _task_data(4, 6, 25, 40),
             ('UA2', 'TA2'): _task_data(4, 6, 25, 60),
@@ -128,7 +128,7 @@ def define_stn_network_1(case: str, tau_factor: int, beta_factor: int) -> dict:
             ('UA8', 'TC5'): _task_data(int(ceil(5 / tau_factor)), int(ceil(7 * tau_factor)), 15 * beta_factor, 20 * beta_factor),
             ('UA9', 'TC6'): _task_data(int(ceil(2 / tau_factor)), int(ceil(3 * tau_factor)), 25 * beta_factor, 35 * beta_factor),
         }
-    elif case == "slow_upstream":    
+    elif case == "slow_upstream_fast_downstream_uniform_stages":    
         UNIT_TASKS = {
             ('UA1', 'TA1'): _task_data(int(ceil(5 / tau_factor)), int(ceil(7 * tau_factor)), 5, 6 * beta_factor),
             ('UA2', 'TA2'): _task_data(int(ceil(5 / tau_factor)), int(ceil(7 * tau_factor)), 5, 6 * beta_factor),
@@ -143,22 +143,7 @@ def define_stn_network_1(case: str, tau_factor: int, beta_factor: int) -> dict:
             ('UA8', 'TC5'): _task_data(5, 6, 25, 30),
             ('UA8', 'TC6'): _task_data(5, 6, 25, 30),
         }
-    elif case == "uniform":    
-        UNIT_TASKS = {
-            ('UA1', 'TA1') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
-            ('UA2', 'TA2') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),            
-            ('UA3', 'TB1') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
-            ('UA4', 'TB2') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
-            ('UA5', 'TB3') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
-            ('UA5', 'TB4') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),          
-            ('UA6', 'TC1') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
-            ('UA6', 'TC2') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
-            ('UA7', 'TC3') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
-            ('UA7', 'TC4') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
-            ('UA8', 'TC5') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
-            ('UA8', 'TC6') : _task_data(int(floor(4 / tau_factor)), int(ceil(7 * tau_factor)), 25 / beta_factor, 30),
-        }
-         
+             
     # Assign unit-task parameters to stn    
     stn['UNIT_TASKS'] = UNIT_TASKS  
         
