@@ -6,7 +6,13 @@ from src.models.formulation_build import create_model_f0_base_formulation, creat
 from src.data.instance_generation import load_network, instance_factors_network
 from src.data.postprocessing import initialize_results_dict, create_dict_result
 from src.models.model_solve import solve_and_analyze_model 
+import sys
+import json
 
+# Get the command line argument
+command_line_args = sys.argv[1:]
+assert len(command_line_args) == 1
+taskID = int(command_line_args[0])
 
 # Constant
 RESULTS_PATH = "src/results/model_results.xlsx"
@@ -15,7 +21,7 @@ RESULTS_PATH = "src/results/model_results.xlsx"
 logging.basicConfig(level = logging.INFO, format = '%(asctime)s - %(levelname)s - %(message)s')
 
 
-def run_instance(network: str, case: str, planning_horizon: int, tau_factor: int, beta_factor: int) -> dict:
+def run_instance(network: str, case: str, planning_horizon: int, tau_factor: int, beta_factor: int, formulation_number: int) -> dict:
     """ 
     Builds, solves, and analyze one optimization instance.    
     
@@ -43,10 +49,15 @@ def run_instance(network: str, case: str, planning_horizon: int, tau_factor: int
         # Step 2: Define the solver
         solver = define_solver()
         
-        # Step 3: Build, configure and solve the MILP model        
-        model_milp, formulation_name = create_model_f0_base_formulation(stn_data, planning_horizon)
-        #model_milp, formulation_name = create_model_f1_basic_preprocessing_formulation(stn_data, planning_horizon)
-        #model_milp, formulation_name = create_model_f2_basic_preprocessing_optimization_formulation(stn_data, planning_horizon)
+        # Step 3: Build, configure and solve the MILP model  
+        if formulation_number == 0:      
+            model_milp, formulation_name = create_model_f0_base_formulation(stn_data, planning_horizon)
+        elif formulation_number == 1:
+            model_milp, formulation_name = create_model_f1_basic_preprocessing_formulation(stn_data, planning_horizon)
+        elif formulation_number == 2:
+            model_milp, formulation_name = create_model_f2_basic_preprocessing_optimization_formulation(stn_data, planning_horizon)
+        else:
+            raise Exception(f"Fomrulation number {formulation_number} is not recognized.")
         results_milp, stats_milp, results_lp = solve_and_analyze_model(solver, model_milp, planning_horizon)
         
         # Step 4: Create result dictionary
@@ -66,29 +77,27 @@ def run_instance(network: str, case: str, planning_horizon: int, tau_factor: int
     return result
 
 
-def main() -> None:
+def main(taskID: int) -> None:
     """ 
     Main function to run multiple instances of the optimization problem.
     """
     
-    # Step 1: Load Data to create instances
-    networks, cases, planning_horizons, tau_factor_max, beta_factor_max = instance_factors_network()
+    runNumber = taskID
     
-    # Step 2: Create combinations of parameters to create instances
-    results_list = []
+    with open(f"input_data/datasets/run_{runNumber:03}.json", "r") as f:
+        dct = json.load(f)    
     
-    for network, case, planning_horizon, tau_factor, beta_factor in product(networks, cases, planning_horizons, range(1, tau_factor_max), range(1, beta_factor_max)):
-        
-        result = run_instance(network, case, planning_horizon, tau_factor, beta_factor)
-        results_list.append(result)
+    print(dct)
+    network, case, planning_horizon, tau_factor, beta_factor = dct["network"], dct["case"], dct["planning_horizon"], dct["tau_factor"], dct["beta_factor"]
+    #formulationNumber = taskID % 3
+    formulationNumber = 0
     
-    # Step 3: Create an Excel file with the list of results
-    df_results = pd.DataFrame(results_list)
-    df_results.to_excel(RESULTS_PATH, index = False)
+    result = run_instance(network, case, planning_horizon, tau_factor, beta_factor, formulationNumber)
     
-    logging.info(RESULTS_PATH)
+    with open(f"src/results/result_{taskID:03}.json", "w") as f:
+        json.dump(result, f)
                                 
     
 if __name__=="__main__":
     
-    main()      
+    main(taskID)      
