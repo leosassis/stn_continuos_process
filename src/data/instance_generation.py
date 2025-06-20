@@ -55,10 +55,11 @@ def instance_factors_network() -> tuple[list[str], list[str], list[int], int, in
     #TAU_FACTOR_MAX = 3
     #BETA_FACTOR_MAX = 3
     
-    NETWORKS = ["network_indirect_transitions"]
-    CASES = [""]
-    PLANNING_HORIZON_ARRAY = [50]
+    NETWORKS = ["network_1"]
+    CASES = ["fast_upstream_uniform"]
+    PLANNING_HORIZON_ARRAY = [25]
     TAU_FACTOR_MAX = 2
     BETA_FACTOR_MAX = 2
     
-    return NETWORKS, CASES, PLANNING_HORIZON_ARRAY, TAU_FACTOR_MAX, BETA_FACTOR_MAX     
+        
+    return NETWORKS, CASES, PLANNING_HORIZON_ARRAY, TAU_FACTOR_MAX, BETA_FACTOR_MAX 

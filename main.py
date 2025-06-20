@@ -15,7 +15,7 @@ RESULTS_PATH = "src/results/model_results.xlsx"
 logging.basicConfig(level = logging.INFO, format = '%(asctime)s - %(levelname)s - %(message)s')
 
 
-def run_instance(network: str, case: str, planning_horizon: int, tau_factor: int, beta_factor:int) -> dict:
+def run_instance(network: str, case: str, planning_horizon: int, tau_factor: int, beta_factor: int) -> dict:
     """ 
     Builds, solves, and analyze one optimization instance.    
     
