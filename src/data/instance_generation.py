@@ -63,14 +63,3 @@ def instance_factors_network() -> tuple[list[str], list[str], list[int], int, in
     
         
     return NETWORKS, CASES, PLANNING_HORIZON_ARRAY, TAU_FACTOR_MAX, BETA_FACTOR_MAX 
-
-
-def init_based_parameters() -> dict:
-    
-    return {
-            "network": "",
-            "case": "",
-            "planning_horizon": 0,
-            "tau_factor": 0,
-            "beta_factor": 0
-            }

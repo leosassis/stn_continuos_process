@@ -18,4 +18,4 @@ conda activate myenv
 # Run python script with the SLURM array task ID as argument
 python main.py $SLURM_ARRAY_TASK_ID
 
-# HOW TO RUN: sbatch --array=1-100 slurm.sh. This will run instances with IDS from 1 to 100 in parallel.
+# HOW TO RUN: sbatch --array=1-100 slurm/slurm.sh. This will run instances with IDS from 1 to 100 in parallel.
