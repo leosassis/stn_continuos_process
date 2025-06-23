@@ -116,33 +116,6 @@ def _constraint_ub_ys_unit_ppc(model: ConcreteModel, j: Any) -> Constraint:
         return Constraint.Skip   
     
 
-def _constraint_ub_ys_unit_ppc_new(model: ConcreteModel, j: Any) -> Constraint:
-    """
-    Based on the maximum number of startups in a unit, defines an upper bound associated with YS and Tau_Miin. 
-    
-    Args:
-        - model (ConcreteModel): a Pyomo model instance.
-        - j (Any): unit index (should be capable of executing task i).
-
-    Returns:
-        Constraint: a constraint bounding Tau_Min * YS in in a unit or Constraint.Skip if conditions are not met.
-    """
-    
-    if (
-        model.P_EST_Unit[j] <= len(model.S_Time)
-    ):
-        
-        return sum(
-            (model.P_Tau_Min[i,j] + 1) * model.V_Y_Start[i,j,n]
-            for i in model.S_I_Production_Tasks 
-            if (i,j) in model.P_Task_Unit_Network 
-            for n in model.S_Time 
-            if n >= model.P_EST_Unit[j]
-        ) <= model.P_UB_YS_Unit_PPC_New[j]
-    else:
-        return Constraint.Skip
-    
-    
 def _constraint_ub_x_task_ppc(model: ConcreteModel, i: Any, j: Any) -> Constraint:
     """
     Defines an upper bound for X[i,j,n]. 
@@ -342,46 +315,89 @@ def _constraint_clique_ys_group_ppc(model: ConcreteModel, k: Any, n: Any) -> Con
         return Constraint.Skip
  
     
-def load_constraints_set_to_zero_x_ys_est(model: ConcreteModel) -> None:
+def load_constraint_set_to_zero_x_est(model: ConcreteModel) -> None:
    """
-    Appends to the model constraints to set to 0 variables X and YS from 0 to est[i,j] - 1 periods.
+    Appends to the model a constraint to set to 0 variable X from 0 to est[i,j] - 1 periods.
     
     Args:
         model (ConcreteModel): a Pyomo model instance.
    """    
    
    model.C_Set_X_To_Zero_Based_On_Est = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_x_to_zero_based_on_est)
-   model.C_Set_YS_To_Zero_Based_On_Est = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_ys_to_zero_based_on_est)
     
+
+def load_constraint_set_to_zero_ys_est(model: ConcreteModel) -> None:
+   """
+    Appends to the model a constraint to set to 0 variable YS from 0 to est[i,j] - 1 periods.
+    
+    Args:
+        model (ConcreteModel): a Pyomo model instance.
+   """    
    
-def load_constraints_preprocessing(model: ConcreteModel) -> None:
+   model.C_Set_YS_To_Zero_Based_On_Est = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_set_ys_to_zero_based_on_est)
+
+
+def load_constraint_ub_ys_task(model: ConcreteModel) -> None:
+   """
+    Appends to the model a constraint to define an upper bound on YS for each task.
+    
+    Args:
+        model (ConcreteModel): a Pyomo model instance.
+   """    
+   
+   model.C_Upper_Bound_YS_Task_PPC = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ub_ys_task_ppc)
+
+
+def load_constraint_ub_ys_unit(model: ConcreteModel) -> None:
+   """
+    Appends to the model a constraint to define an upper bound on YS for each unit.
+    
+    Args:
+        model (ConcreteModel): a Pyomo model instance.
+   """    
+   
+   model.C_Upper_Bound_YS_Unit_OPT = Constraint(model.S_Units, rule = _constraint_ub_ys_unit_opt)
+   
+   
+def load_constraint_ub_x_task(model: ConcreteModel) -> None:
+   """
+    Appends to the model a constraint to define an upper bound on X for each task.
+    
+    Args:
+        model (ConcreteModel): a Pyomo model instance.
+   """    
+   
+   model.C_Upper_Bound_X_Task_OPT = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ub_x_task_opt)
+
+
+def load_constraint_ub_x_unit(model: ConcreteModel) -> None:
+   """
+    Appends to the model a constraint to define an upper bound on X for each unit.
+    
+    Args:
+        model (ConcreteModel): a Pyomo model instance.
+   """    
+   
+   model.C_Upper_Bound_X_Unit_OPT = Constraint(model.S_Units, rule = _constraint_ub_x_unit_opt)   
+   
+   
+def load_constraint_clique_X_group_k(model: ConcreteModel) -> None:
     """
-    Appends to the model constraints to bound variables X and YS considering bounds obtained via preprocessing.
+    Appends to the model a constraint to bound variable X when tasks in different units compete for material k.
     
     Args:
         model (ConcreteModel): a Pyomo model instance.
     """   
     
-    model.C_Upper_Bound_YS_Task_PPC = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ub_ys_task_ppc)
-    model.C_Upper_Bound_YS_Unit_PPC = Constraint(model.S_Units, rule = _constraint_ub_ys_unit_ppc)
-    model.C_Upper_Bound_YS_Unit_PPC_New = Constraint(model.S_Units, rule = _constraint_ub_ys_unit_ppc_new)    
-    model.C_Upper_Bound_X_Task_PPC = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ub_x_task_ppc)
-    model.C_Upper_Bound_X_Unit_PPC = Constraint(model.S_Units, rule = _constraint_ub_x_unit_ppc)    
-    model.C_Limit_Operations_Group_PPC = Constraint(model.S_Materials, model.S_Time, rule = _constraint_clique_x_group_ppc)
-    model.C_Limit_Startups_Group_PPC = Constraint(model.S_Materials, model.S_Time, rule = _constraint_clique_ys_group_ppc)
-        
-
-def load_constraints_preprocessing_optimization(model: ConcreteModel) -> None:
+    model.C_Limit_X_Group_PPC = Constraint(model.S_Materials, model.S_Time, rule = _constraint_clique_x_group_ppc)
+    
+    
+def load_constraint_clique_Y_group_k(model: ConcreteModel) -> None:
     """
-    Appends to the model constraints to bound variables X and YS considering bounds obtained via preprocessing and the solution of knapsack problems.
+    Appends to the model a constraint to bound variable YS when tasks in different units compete for material k.
     
     Args:
         model (ConcreteModel): a Pyomo model instance.
-    """    
+    """   
     
-    #model.C_Upper_Bound_YS_Task_PPC = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ub_ys_task_ppc)    
-    #model.C_Upper_Bound_YS_Unit_OPT = Constraint(model.S_Units, rule = _constraint_ub_ys_unit_opt)
-    #model.C_Upper_Bound_X_Task_OPT = Constraint(model.S_Tasks, model.S_Units, rule = _constraint_ub_x_task_opt)
-    #model.C_Upper_Bound_X_Unit_OPT = Constraint(model.S_Units, rule = _constraint_ub_x_unit_opt)        
-    model.C_Limit_Operations_Group_PPC = Constraint(model.S_Materials, model.S_Time, rule = _constraint_clique_x_group_ppc)
-    model.C_Limit_Startups_Group_PPC = Constraint(model.S_Materials, model.S_Time, rule = _constraint_clique_ys_group_ppc)
+    model.C_Limit_YS_Group_PPC = Constraint(model.S_Materials, model.S_Time, rule = _constraint_clique_ys_group_ppc)

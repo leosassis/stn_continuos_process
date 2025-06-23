@@ -1,7 +1,7 @@
 from pyomo.environ import *
 from numpy import floor
 from src.models.model_solve import define_solver
-from src.models.model_build import load_model_sets_parameters_variables
+from src.models.base_model_build import load_model_sets_parameters_variables
 from src.methods.est import compute_est_subsequent_tasks
 
 ADD_TIME_PERIOD = 1  # Used for computing the number of time periods

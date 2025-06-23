@@ -2,7 +2,7 @@ import pandas as pd
 import logging
 from itertools import product
 from src.models.model_solve import define_solver
-from src.models.formulation_build import create_model_f0_base_formulation, create_model_f1_basic_preprocessing_formulation, create_model_f2_basic_preprocessing_optimization_formulation
+from src.models.formulation_build import create_model_f0_base_formulation, create_model_f10_all_tightening_constraints
 from src.data.instance_generation import load_network, instance_factors_network
 from src.data.postprocessing import initialize_results_dict, create_dict_result
 from src.models.model_solve import solve_and_analyze_model 
@@ -53,9 +53,7 @@ def run_instance(network: str, case: str, planning_horizon: int, tau_factor: int
         if formulation_number == 0:      
             model_milp, formulation_name = create_model_f0_base_formulation(stn_data, planning_horizon)
         elif formulation_number == 1:
-            model_milp, formulation_name = create_model_f1_basic_preprocessing_formulation(stn_data, planning_horizon)
-        elif formulation_number == 2:
-            model_milp, formulation_name = create_model_f2_basic_preprocessing_optimization_formulation(stn_data, planning_horizon)
+            model_milp, formulation_name = create_model_f10_all_tightening_constraints(stn_data, planning_horizon)
         else:
             raise Exception(f"Fomrulation number {formulation_number} is not recognized.")
         results_milp, stats_milp, results_lp = solve_and_analyze_model(solver, model_milp, planning_horizon)
@@ -90,7 +88,7 @@ def main(taskID: int) -> None:
     network, case, planning_horizon, tau_factor, beta_factor = dct["network"], dct["case"], dct["planning_horizon"], dct["tau_factor"], dct["beta_factor"]
     
     #formulationNumber = taskID % 3
-    formulationNumber = 0
+    formulationNumber = 1
     
     result = run_instance(network, case, planning_horizon, tau_factor, beta_factor, formulationNumber)
     

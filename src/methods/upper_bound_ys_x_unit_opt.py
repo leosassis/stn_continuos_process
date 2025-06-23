@@ -1,9 +1,9 @@
 from pyomo.environ import *
-from src.models.constraints_est import load_constraints_set_to_zero_x_ys_est
-from src.models.parameters import create_basic_parameters, create_est_parameters
+from src.models.constraints_est import load_constraint_set_to_zero_x_est, load_constraint_set_to_zero_ys_est
+from src.models.parameters import create_parameters_tightening_constraints
 from src.visualization.plot_results import plot_gantt_chart
 from src.models.model_solve import solve_model, define_solver
-from src.models.model_build import load_model_sets_parameters_variables, load_basic_model_constraints_objective
+from src.models.base_model_build import load_model_sets_parameters_variables, load_basic_model_constraints_objective
 from src.methods.est import compute_est_subsequent_tasks
 
 def compute_upper_bound_x_unit(stn_data: dict, planning_horizon: int) -> None:
@@ -23,8 +23,9 @@ def compute_upper_bound_x_unit(stn_data: dict, planning_horizon: int) -> None:
     load_model_sets_parameters_variables(model_init_max_production_unit, stn_data, planning_horizon)
     compute_est_subsequent_tasks(model_init_max_production_unit, stn_data)   
     load_basic_model_constraints_objective(model_init_max_production_unit, stn_data, planning_horizon, 'bound_production_operations')    
-    create_est_parameters(model_init_max_production_unit, stn_data)
-    load_constraints_set_to_zero_x_ys_est(model_init_max_production_unit)
+    create_parameters_tightening_constraints(model_init_max_production_unit, stn_data, "")
+    load_constraint_set_to_zero_x_est(model_init_max_production_unit)
+    load_constraint_set_to_zero_ys_est(model_init_max_production_unit)
     
     solver = define_solver()
     solve_model(solver, model_init_max_production_unit)
@@ -56,8 +57,10 @@ def compute_upper_bound_y_unit(stn_data: dict, planning_horizon: int) -> None:
     load_model_sets_parameters_variables(model_init_max_startups_unit, stn_data, planning_horizon)
     compute_est_subsequent_tasks(model_init_max_startups_unit, stn_data)
     load_basic_model_constraints_objective(model_init_max_startups_unit, stn_data, planning_horizon, 'bound_startups')    
-    create_est_parameters(model_init_max_startups_unit, stn_data)
-    load_constraints_set_to_zero_x_ys_est(model_init_max_startups_unit)
+    create_parameters_tightening_constraints(model_init_max_startups_unit, stn_data, "")
+    load_constraint_set_to_zero_x_est(model_init_max_startups_unit)
+    load_constraint_set_to_zero_ys_est(model_init_max_startups_unit)
+    
     
     solver = define_solver()
     solve_model(solver, model_init_max_startups_unit)

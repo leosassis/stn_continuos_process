@@ -19,7 +19,6 @@ def load_model_sets_parameters_variables(model: ConcreteModel, stn_data: dict, p
         - None. modifies the model in-place.    
     """    
     
-    
     create_main_sets_parameters(model, stn_data, planning_horizon)
     create_variables(model)    
     create_basic_parameters(model, stn_data, planning_horizon)
@@ -39,7 +38,6 @@ def load_basic_model_constraints_objective(model: ConcreteModel, stn_data: dict,
     Returns:
         - None. modifies the model in-place.    
     """
-    
     
     if model_type == 'base_model':
         load_constraints_basic_model(model)
