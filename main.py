@@ -87,8 +87,8 @@ def main(taskID: int) -> None:
     with open(f"input_data/datasets/run_{runNumber:03}.json", "r") as f:
         dct = json.load(f)    
     
-    print(dct)
     network, case, planning_horizon, tau_factor, beta_factor = dct["network"], dct["case"], dct["planning_horizon"], dct["tau_factor"], dct["beta_factor"]
+    
     #formulationNumber = taskID % 3
     formulationNumber = 0
     
