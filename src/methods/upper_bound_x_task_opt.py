@@ -4,46 +4,9 @@ from src.models.model_solve import define_solver
 from src.models.base_model_build import load_model_sets_parameters_variables
 from src.methods.est import compute_est_subsequent_tasks
 
+
 ADD_TIME_PERIOD = 1  # Used for computing the number of time periods
 
-
-def compute_upper_bound_x_old(model: ConcreteModel, stn_data: dict) -> None:
-    """ 
-    Computes upper bounds on x variables based on its operational window and tau values.
-    
-    Args:
-        - model (ConcreteModel): Pyomo model instance.
-        - stn_data (dict): a dictionary containing the network data.
-    
-    Returns: none.
-    """
-    
-    est = stn_data['EST']
-    number_ys = {}
-    upper_bound_x_task = {}
-    number_remaining_periods_for_x = {}
-    
-    S_Time = model.S_Time
-    
-    for j, i in est:
-        
-        tau_max = model.P_Tau_Max[i,j]
-        tau_min = model.P_Tau_Min[i,j]
-        tau_end = model.P_Tau_End_Task[i]
-        max_time_points = max(S_Time) + 1 - est[j,i]
-        
-        number_ys[j,i] = floor((max_time_points)/(tau_max + tau_end))
-        upper_bound_x_task[j,i] = number_ys[j,i]*tau_max
-        number_remaining_periods_for_x[j,i] = max(0, max(S_Time) - est[j,i] - number_ys[j,i]*(tau_max + tau_end))    
-
-        # Try to fit a shorter task in the remaining time
-        for tau in range(int(tau_max) - 1, int(tau_min) - 1, - 1):
-            if tau <= number_remaining_periods_for_x[j,i]:
-                upper_bound_x_task[j,i] += tau
-                break        
-    
-    stn_data['UPPER_BOUND_X'] = upper_bound_x_task
-        
 
 def knapsack_constraint(model_max_production_time_points: ConcreteModel, number_time_points_for_x: int, tau_end: int) -> Constraint:
     """

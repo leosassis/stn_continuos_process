@@ -87,4 +87,3 @@ def compute_est_group_tasks(model: ConcreteModel, stn: dict):
             est_group[first_material_list] = dict(max_est_group)[first_material_list]
     
     stn['EST_GROUP'] = est_group 
-    print(f'EST GROUP: {stn['EST_GROUP']}')   
