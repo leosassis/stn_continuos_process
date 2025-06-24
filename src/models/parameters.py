@@ -57,7 +57,7 @@ def est_unit_initialization(model: ConcreteModel, j: Any) -> dict:
     est_unit = min(model.P_EST_Task[i,j] for i in model.S_I_Production_Tasks if (i,j) in model.P_Task_Unit_Network)
     return est_unit
 
-def upper_bound_x_initialization(upper_bound_x: dict) -> dict:
+def upper_bound_x_task_initialization(upper_bound_x: dict) -> dict:
     dict_upper_bound_x = {(i,j): upper_bound_x[(j,i)] for (j,i) in upper_bound_x}
     return dict_upper_bound_x
 
@@ -156,7 +156,7 @@ def create_parameters_tightening_constraints(model: ConcreteModel, stn_data: dic
     elif formulation_id == "UB_X_Task":
         upper_bound_x_task = stn_data['UPPER_BOUND_X_TASK']
         
-        model.P_UB_X_Task_OPT = Param(model.S_Tasks, model.S_Units, initialize = upper_bound_x_initialization(upper_bound_x_task))
+        model.P_UB_X_Task_OPT = Param(model.S_Tasks, model.S_Units, initialize = upper_bound_x_task_initialization(upper_bound_x_task))
     
     elif formulation_id == "UB_X_Unit":
         upper_bound_x_unit = stn_data['UPPER_BOUND_X_UNIT']
@@ -177,5 +177,5 @@ def create_parameters_tightening_constraints(model: ConcreteModel, stn_data: dic
         model.P_EST_Group = Param(model.S_Materials, initialize = est_group_initialization(est_group))              
         model.P_UB_YS_Task_PPC = Param(model.S_Tasks, model.S_Units, initialize = ub_ys_task_initialization(model))
         model.P_UB_YS_Unit_OPT = Param(model.S_Units, initialize = upper_bound_ys_unit_initialization(upper_bound_ys_unit))    
-        model.P_UB_X_Task_OPT = Param(model.S_Tasks, model.S_Units, initialize = upper_bound_x_initialization(upper_bound_x_task))
+        model.P_UB_X_Task_OPT = Param(model.S_Tasks, model.S_Units, initialize = upper_bound_x_task_initialization(upper_bound_x_task))
         model.P_UB_X_Unit_OPT = Param(model.S_Units, initialize = upper_bound_x_unit_initialization(upper_bound_x_unit))     
