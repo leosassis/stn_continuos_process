@@ -1,4 +1,5 @@
 {
+  "formulation": 0,
   "network": "network_1",
   "case": "fast_upstream_slow_downstream_uniform_stages",
   "planning_horizon": 25,
