@@ -1,7 +1,7 @@
 {
-  "formulation": 1,
+  "formulation": 0,
   "network": "network_1",
-  "case": "fast_upstream_slow_downstream_uniform_stages",
+  "demand_factor": 1,
   "planning_horizon": 25,
   "tau_factor": 1,
   "beta_factor": 1

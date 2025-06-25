@@ -1,12 +1,13 @@
-from input_data.networks import (define_stn_network_1, 
-                                define_stn_network_2, 
-                                define_stn_network_tasks_competing, 
-                                define_stn_network_upper_bound_YS, 
-                                define_stn_network_upper_bound_X, 
-                                define_stn_network_indirect_transitions)
+from input_data.networks import (define_stn_network_1,
+                                 define_stn_network_2, 
+                                 define_stn_network_3, 
+                                 define_stn_network_tasks_competing, 
+                                 define_stn_network_upper_bound_YS, 
+                                 define_stn_network_upper_bound_X, 
+                                 define_stn_network_indirect_transitions)
 
 
-def load_network(network_name: str, case: str, tau_factor: int, beta_factor: int) -> dict:
+def load_network(network_name: str, tau_factor: int, beta_factor: int, demand_factor: int, planning_horizon: int) -> dict:
     """ 
     Loads and returns a dictionary of network data.
     
@@ -21,17 +22,19 @@ def load_network(network_name: str, case: str, tau_factor: int, beta_factor: int
     """
     
     if network_name == "network_1":
-        return define_stn_network_1(case, tau_factor, beta_factor)
+        return define_stn_network_1(tau_factor, beta_factor, demand_factor, planning_horizon)
     elif network_name == "network_2":
-        return define_stn_network_2(case, tau_factor, beta_factor)
+        return define_stn_network_2(tau_factor, beta_factor, demand_factor, planning_horizon)
+    elif network_name == "network_3":
+        return define_stn_network_3(tau_factor, beta_factor, demand_factor, planning_horizon)
     elif network_name == "network_competing_tasks":
-        return define_stn_network_tasks_competing(case, tau_factor, beta_factor)
+        return define_stn_network_tasks_competing(tau_factor, beta_factor, demand_factor, planning_horizon)
     elif network_name == "network_upper_bound_YS":
-        return define_stn_network_upper_bound_YS(case, tau_factor, beta_factor)
+        return define_stn_network_upper_bound_YS(tau_factor, beta_factor, demand_factor, planning_horizon)
     elif network_name == "network_upper_bound_X":
-        return define_stn_network_upper_bound_X(case, tau_factor, beta_factor)
+        return define_stn_network_upper_bound_X(tau_factor, beta_factor, demand_factor, planning_horizon)
     elif network_name == "network_indirect_transitions":
-        return define_stn_network_indirect_transitions(case, tau_factor, beta_factor)
+        return define_stn_network_indirect_transitions(tau_factor, beta_factor, demand_factor, planning_horizon)
     else:
         raise ValueError(f"Unsupported network name: {network_name}") 
     
@@ -49,18 +52,12 @@ def instance_factors_network() -> tuple[list[str], list[str], list[int], int, in
             - maximum beta multiplier (int). 
     """
     
-    #NETWORKS = ["network_1", "network_2"]
-    #CASES = ["fast_upstream", "slow_upstream", "uniform"]
-    #PLANNING_HORIZON_ARRAY = [25, 35, 50]
-    #TAU_FACTOR_MAX = 3
-    #BETA_FACTOR_MAX = 3
-    
-    NETWORKS = ["network_1"]
-    CASES = ["fast_upstream_slow_downstream_uniform_stages"]
-    PLANNING_HORIZON_ARRAY = [25]
+    NETWORKS = ["network_1", "network_3"]
+    PLANNING_HORIZON_ARRAY = [25, 30, 35, 40]
     TAU_FACTOR_MAX = 2
     BETA_FACTOR_MAX = 2
     FORMULATIONS = 14
+    DEMAND_FACTOR_MAX = 3
     
         
-    return FORMULATIONS, NETWORKS, CASES, PLANNING_HORIZON_ARRAY, TAU_FACTOR_MAX, BETA_FACTOR_MAX 
+    return FORMULATIONS, NETWORKS, PLANNING_HORIZON_ARRAY, TAU_FACTOR_MAX, BETA_FACTOR_MAX, DEMAND_FACTOR_MAX 

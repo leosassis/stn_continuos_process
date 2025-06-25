@@ -1,30 +1,31 @@
 from pyomo.environ import *
 
 
-def initialize_results_dict(network: str, case: str, planning_horizon: int, tau_factor: int, beta_factor: int, formulation_name: str) -> dict[str, Any]:
+def initialize_results_dict(network: str, demand_factor: int, planning_horizon: int, tau_factor: int, beta_factor: int, formulation_name: str) -> dict[str, Any]:
     """
     Initializes a dictionary to store results from a single optimization instance.
 
     Args:
         - network (str): name of the network.
-        - case (str): network configuration (e.g., 'uniform', 'fast_upstream').
+        - demand_factor (int): factor for demand parameters.
         - planning_horizon (int): planning horizon.
-        - tau_factor (int): multiplicative factor for tau parameters.
-        - beta_factor (int): multiplicative factor for beta parameters.
+        - tau_factor (int): factor for tau parameters.
+        - beta_factor (int): factor for beta parameters.
         - formulation_name (str): name of the model formulation.
 
     Returns:
         dict[str, Any]: Initialized dictionary with placeholders for results.
     """
     
-    instance_name = f"{network}_{case}_{planning_horizon}_{tau_factor}_{beta_factor}"
+    instance_name = f"{network}_{demand_factor}_{planning_horizon}_{tau_factor}_{beta_factor}"
     
     return {
             "Instance": instance_name,
-            "Formulation Name": None,
+            "Formulation": None,
             "MILP Objective": None,
             "Upper Bound": None,
-            "MILP Time": None,
+            "Relative Gap": None,
+            "Time (s)": None,
             "MILP Status": None,
             "MILP Term. Condition": None,
             "LP Relaxation": None,
@@ -50,10 +51,11 @@ def create_dict_result(result: dict, model_analytics_milp: list, results_milp: A
     
     if results_milp.solver.termination_condition != TerminationCondition.infeasible:  
     
-        result["Formulation Name"] = formulation_name
+        result["Formulation"] = formulation_name
         result['MILP Objective'] = round(results_milp.problem.lower_bound, 2)
         result['Upper Bound'] = round(results_milp.problem.upper_bound, 2)
-        result['MILP Time'] = round(results_milp.solver.time, 2)
+        result['Relative Gap'] = round( abs((round(results_milp.problem.upper_bound, 2) - round(results_milp.problem.lower_bound, 2))) / abs(round(results_milp.problem.lower_bound, 2)) )
+        result['Time (s)'] = round(results_milp.solver.time, 2)
         result['MILP Status'] = str(results_milp.solver.status)
         result['MILP Term. Condition'] = str(results_milp.solver.termination_condition)
         result['LP Relaxation'] = round(results_lp.problem.lower_bound, 2)

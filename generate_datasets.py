@@ -21,7 +21,7 @@ def init_based_parameters() -> dict:
     return {
             "formulation": 0,
             "network": "",
-            "case": "",
+            "demand_factor": "",
             "planning_horizon": 0,
             "tau_factor": 0,
             "beta_factor": 0
@@ -29,18 +29,18 @@ def init_based_parameters() -> dict:
 
 
 # Step 1: Load varying parameters to create instances
-formulations, networks, cases, planning_horizons, tau_factor_max, beta_factor_max = instance_factors_network()
+formulations, networks, planning_horizons, tau_factor_max, beta_factor_max, demand_factor_max = instance_factors_network()
 
 
 # Step 2: Create a json file containing a dictionary with parameters for each instance
-for i, (formulation_num, net, case, horizon, tau, beta) in enumerate(product(range(formulations), networks, cases, planning_horizons, range(1, tau_factor_max), range(1, beta_factor_max)), start=1):
+for i, (formulation_num, net, horizon, tau, beta, demand) in enumerate(product(range(formulations), networks, planning_horizons, range(1, tau_factor_max), range(1, beta_factor_max), range(demand_factor_max)), start=1):
     
     params = init_based_parameters().copy()
     
     params.update({
         "formulation": formulation_num,
         "network": net,
-        "case": case,
+        "demand_factor": demand,
         "planning_horizon": horizon,
         "tau_factor": tau,
         "beta_factor": beta,

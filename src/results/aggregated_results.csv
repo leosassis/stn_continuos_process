@@ -1,0 +1,2 @@
+Instance,Formulation,MILP Objective,Upper Bound,Relative Gap,Time (s),MILP Status,MILP Term. Condition,LP Relaxation,Num. Binary Var.,Total Num. Var.,Num. Constraints
+network_1_0_25_1_1,F1_Base_Model,2000.0,2000.0,0,4.48,ok,optimal,2484.0,8918,11440,2886

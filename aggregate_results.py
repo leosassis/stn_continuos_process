@@ -7,6 +7,7 @@ import pandas as pd
 RESULTS_FOLDER = "src/results/"
 OUTPUT_FILE_CSV = "src/results/aggregated_results.csv"
 OUTPUT_FILE_JSON = "src/results/aggregated_results.jsonl"
+OUTPUT_FILE_XLSX = "src/results/aggregated_results.xlsx"
 
 # Initialize list of results
 records = []
@@ -49,5 +50,8 @@ for filename in os.listdir(RESULTS_FOLDER):
 # Step 2: Save to CSV
 df = pd.DataFrame(records)
 df.to_csv(OUTPUT_FILE_CSV, index=False)
+
+# Step 3: Save to Excel
+df.to_excel(OUTPUT_FILE_XLSX, index=False)
 
 print(f"✅ Aggregated {len(records)} entries into {RESULTS_FOLDER}")
