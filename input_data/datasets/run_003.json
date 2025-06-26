@@ -1,8 +1,8 @@
 {
   "formulation": 0,
   "network": "network_1",
-  "demand_factor": 2,
+  "demand_factor": 0,
   "planning_horizon": 25,
-  "tau_factor": 1,
+  "tau_factor": 2,
   "beta_factor": 1
 }

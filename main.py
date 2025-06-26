@@ -34,7 +34,7 @@ RESULTS_PATH = "src/results/model_results.xlsx"
 logging.basicConfig(level = logging.INFO, format = '%(asctime)s - %(levelname)s - %(message)s')
 
 
-def run_instance(network: str, demand_factor: int, planning_horizon: int, tau_factor: int, beta_factor: int, formulation_number: int) -> dict:
+def run_instance(network: str, demand_factor: int, planning_horizon: int, tau_factor: int, beta_factor: int, formulation_number: str, taskID: int) -> dict:
     """ 
     Builds, solves, and analyze one optimization instance.    
     
@@ -50,11 +50,11 @@ def run_instance(network: str, demand_factor: int, planning_horizon: int, tau_fa
     """    
     
     # Step 0: Initialize results dict
-    result = initialize_results_dict(network, demand_factor, planning_horizon, tau_factor, beta_factor, formulation_name = "")
+    result = initialize_results_dict(network, demand_factor, planning_horizon, tau_factor, beta_factor, "", taskID)
     
     try:
         
-        logging.info(f"Running instance: network = {network}, demand_factor = {demand_factor}, horizon = {planning_horizon}, tau_factor = {tau_factor}, beta_factor = {beta_factor}")
+        logging.info(f"Running instance: network = {network}, demand_factor = {demand_factor}, horizon = {planning_horizon}, tau_factor = {tau_factor}, beta_factor = {beta_factor}, task ID = {taskID}")
         
         # Step 1: Load network            
         stn_data = load_network(network, tau_factor, beta_factor, demand_factor, planning_horizon)
@@ -123,7 +123,7 @@ def main(taskID: int) -> None:
     
     formulation_number, network, demand_factor, planning_horizon, tau_factor, beta_factor = dct["formulation"], dct["network"], dct["demand_factor"], dct["planning_horizon"], dct["tau_factor"], dct["beta_factor"]
     
-    result = run_instance(network, demand_factor, planning_horizon, tau_factor, beta_factor, formulation_number)
+    result = run_instance(network, demand_factor, planning_horizon, tau_factor, beta_factor, formulation_number, taskID)
     
     with open(f"src/results/result_{taskID:03}.json", "w") as f:
         json.dump(result, f)

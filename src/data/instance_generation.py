@@ -53,11 +53,11 @@ def instance_factors_network() -> tuple[list[str], list[str], list[int], int, in
     """
     
     NETWORKS = ["network_1", "network_3"]
-    PLANNING_HORIZON_ARRAY = [25, 30, 35, 40]
-    TAU_FACTOR_MAX = 2
-    BETA_FACTOR_MAX = 2
+    PLANNING_HORIZON_ARRAY = [25, 30, 35]
+    TAU_FACTOR_MAX = 3
+    BETA_FACTOR_MAX = 3
     FORMULATIONS = 14
-    DEMAND_FACTOR_MAX = 3
+    DEMAND_FACTOR_MAX = 1
     
         
     return FORMULATIONS, NETWORKS, PLANNING_HORIZON_ARRAY, TAU_FACTOR_MAX, BETA_FACTOR_MAX, DEMAND_FACTOR_MAX 

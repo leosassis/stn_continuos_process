@@ -1,7 +1,7 @@
 from pyomo.environ import *
 
 
-def initialize_results_dict(network: str, demand_factor: int, planning_horizon: int, tau_factor: int, beta_factor: int, formulation_name: str) -> dict[str, Any]:
+def initialize_results_dict(network: str, demand_factor: int, planning_horizon: int, tau_factor: int, beta_factor: int, formulation_name: str, taskID: int) -> dict[str, Any]:
     """
     Initializes a dictionary to store results from a single optimization instance.
 
@@ -17,7 +17,7 @@ def initialize_results_dict(network: str, demand_factor: int, planning_horizon: 
         dict[str, Any]: Initialized dictionary with placeholders for results.
     """
     
-    instance_name = f"{network}_{demand_factor}_{planning_horizon}_{tau_factor}_{beta_factor}"
+    instance_name = f"{network}_{demand_factor}_{planning_horizon}_{tau_factor}_{beta_factor}_{taskID}"
     
     return {
             "Instance": instance_name,

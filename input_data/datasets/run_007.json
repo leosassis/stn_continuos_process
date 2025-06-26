@@ -2,7 +2,7 @@
   "formulation": 0,
   "network": "network_1",
   "demand_factor": 0,
-  "planning_horizon": 35,
-  "tau_factor": 1,
+  "planning_horizon": 30,
+  "tau_factor": 2,
   "beta_factor": 1
 }
