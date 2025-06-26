@@ -338,7 +338,7 @@ def define_stn_network_3(tau_factor: int, beta_factor: int, demand_factor: int, 
 # TEST NETWORKS                                                                                                                                                                                # 
 ################################################################################################################################################################################################
 
-def define_stn_network_tasks_competing(case: str, tau_factor: int, beta_factor: int, planning_horizon: int) -> dict:
+def define_stn_network_tasks_competing(tau_factor: int, beta_factor: int, demand_factor: int, planning_horizon: int) -> dict:
     
     stn = {
     # states
@@ -385,7 +385,7 @@ def define_stn_network_tasks_competing(case: str, tau_factor: int, beta_factor: 
     return stn
 
 
-def define_stn_network_upper_bound_YS(case: str, tau_factor: int, beta_factor: int, planning_horizon: int) -> dict:
+def define_stn_network_upper_bound_YS(tau_factor: int, beta_factor: int, demand_factor: int, planning_horizon: int) -> dict:
     
     stn = {
     # states
@@ -432,7 +432,7 @@ def define_stn_network_upper_bound_YS(case: str, tau_factor: int, beta_factor: i
     return stn
 
 
-def define_stn_network_upper_bound_X(case: str, tau_factor: int, beta_factor: int, planning_horizon: int) -> dict:
+def define_stn_network_upper_bound_X(tau_factor: int, beta_factor: int, demand_factor: int, planning_horizon: int) -> dict:
     
     stn = {
     # states
@@ -479,7 +479,7 @@ def define_stn_network_upper_bound_X(case: str, tau_factor: int, beta_factor: in
     return stn
 
 
-def define_stn_network_indirect_transitions(case: str, tau_factor: int, beta_factor: int, planning_horizon: int) -> dict:
+def define_stn_network_indirect_transitions(tau_factor: int, beta_factor: int, demand_factor: int, planning_horizon: int) -> dict:
     
     stn = {
     # states
