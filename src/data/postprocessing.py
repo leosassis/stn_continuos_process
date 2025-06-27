@@ -54,7 +54,7 @@ def create_dict_result(result: dict, model_analytics_milp: list, results_milp: A
         result["Formulation"] = formulation_name
         result['MILP Objective'] = round(results_milp.problem.lower_bound, 2)
         result['Upper Bound'] = round(results_milp.problem.upper_bound, 2)
-        result['Relative Gap'] = round( abs((round(results_milp.problem.upper_bound, 2) - round(results_milp.problem.lower_bound, 2))) / abs(round(results_milp.problem.lower_bound, 2)) )
+        result['Relative Gap'] = round( abs((round(results_milp.problem.upper_bound, 6) - round(results_milp.problem.lower_bound, 6))) / abs(round(results_milp.problem.lower_bound, 2)), 6)
         result['Time (s)'] = round(results_milp.solver.time, 2)
         result['MILP Status'] = str(results_milp.solver.status)
         result['MILP Term. Condition'] = str(results_milp.solver.termination_condition)
