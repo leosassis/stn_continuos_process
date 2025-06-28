@@ -1,8 +1,0 @@
-{
-  "formulation": 13,
-  "network": "network_1_nonuniform",
-  "demand_factor": 0,
-  "planning_horizon": 25,
-  "tau_factor": 1,
-  "beta_factor": 1
-}
