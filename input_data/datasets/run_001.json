@@ -1,6 +1,6 @@
 {
-  "formulation": 0,
-  "network": "network_1",
+  "formulation": 13,
+  "network": "network_1_nonuniform",
   "demand_factor": 0,
   "planning_horizon": 25,
   "tau_factor": 1,

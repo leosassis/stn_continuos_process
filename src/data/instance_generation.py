@@ -1,4 +1,5 @@
 from input_data.networks import (define_stn_network_1,
+                                 define_stn_network_1_nonuniform,
                                  define_stn_network_2, 
                                  define_stn_network_3, 
                                  define_stn_network_tasks_competing, 
@@ -23,6 +24,8 @@ def load_network(network_name: str, tau_factor: int, beta_factor: int, demand_fa
     
     if network_name == "network_1":
         return define_stn_network_1(tau_factor, beta_factor, demand_factor, planning_horizon)
+    elif network_name == "network_1_nonuniform":
+        return define_stn_network_1_nonuniform(tau_factor, beta_factor, demand_factor, planning_horizon)
     elif network_name == "network_2":
         return define_stn_network_2(tau_factor, beta_factor, demand_factor, planning_horizon)
     elif network_name == "network_3":

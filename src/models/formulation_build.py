@@ -296,7 +296,7 @@ def create_model_f11_ub_YS_task_unit(stn_data: dict, planning_horizon: int) -> t
     return model, formulation_name
 
 
-def create_model_f12_ub_X_task_Unit(stn_data: dict, planning_horizon: int) -> tuple[ConcreteModel, str]:
+def create_model_f12_ub_X_task_unit(stn_data: dict, planning_horizon: int) -> tuple[ConcreteModel, str]:
     """
     Creates the base MILP model plus the constraint that sets X to 0 from n = 0 to n = est - 1.
     
@@ -352,7 +352,7 @@ def create_model_f13_ub_X_YS_group_k(stn_data: dict, planning_horizon: int) -> t
     return model, formulation_name
 
 
-def create_model_f14_all_tightening_constraints(stn_data: dict, planning_horizon: int) -> tuple[ConcreteModel, str]:
+def create_model_f14_all(stn_data: dict, planning_horizon: int) -> tuple[ConcreteModel, str]:
     """"
     Creates the enhanced MILP model with EST calculations and additional constraints based on solving knapsack problems.
     

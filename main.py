@@ -13,9 +13,9 @@ from src.models.formulation_build import (create_model_f1_base_formulation,
                                           create_model_f9_ub_YS_group_k,
                                           create_model_f10_X_YS_zero_est,
                                           create_model_f11_ub_YS_task_unit,
-                                          create_model_f12_ub_X_task_Unit,
+                                          create_model_f12_ub_X_task_unit,
                                           create_model_f13_ub_X_YS_group_k,
-                                          create_model_f14_all_tightening_constraints)
+                                          create_model_f14_all)
 from src.data.instance_generation import load_network, instance_factors_network
 from src.data.postprocessing import initialize_results_dict, create_dict_result
 from src.models.model_solve import solve_and_analyze_model 
@@ -86,11 +86,11 @@ def run_instance(network: str, demand_factor: int, planning_horizon: int, tau_fa
         elif formulation_number == 10:
             model_milp, formulation_name = create_model_f11_ub_YS_task_unit(stn_data, planning_horizon)
         elif formulation_number == 11:
-            model_milp, formulation_name = create_model_f12_ub_X_task_Unit(stn_data, planning_horizon)
+            model_milp, formulation_name = create_model_f12_ub_X_task_unit(stn_data, planning_horizon)
         elif formulation_number == 12:
             model_milp, formulation_name = create_model_f13_ub_X_YS_group_k(stn_data, planning_horizon)
         elif formulation_number == 13:
-            model_milp, formulation_name = create_model_f14_all_tightening_constraints(stn_data, planning_horizon)
+            model_milp, formulation_name = create_model_f14_all(stn_data, planning_horizon)
         else:
             raise Exception(f"Fomrulation number {formulation_number} is not recognized.")
         
