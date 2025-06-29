@@ -64,7 +64,7 @@ for filename in os.listdir(RESULTS_FOLDER):
                 try:
                     data = json.loads(line)
                     if _is_valid_record(data):
-                        data["Instance"] = data["Instance"][:18]
+                        data["Instance"] = data["Instance"][:29]
                         valid_records.append(data)
                     else:
                         invalid_records.append(data)
