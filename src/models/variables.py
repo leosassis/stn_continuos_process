@@ -30,7 +30,10 @@ def create_variables(model: ConcreteModel) -> None:
     # Binary: V_X_Hat_Idle[j,n] is 1 if unit j is in idle mode at time point n.
     model.V_X_Hat_Idle = Var(model.S_Units, model.S_Time, bounds = (0, 1), domain = Binary)
     
+    # Continuous: V_U[u,n] is the consumption of utility u at time n.
+    model.V_U = Var(model.S_Utilities, model.S_Time, domain = NonNegativeReals)    
     
+
 def init_variables(model: ConcreteModel, planning_horizon: int) -> None:
     """
     Fix initial values for selected decision variables.
