@@ -165,6 +165,20 @@ def init_set_intermidiates(STATES):
     S_K_Intermediates = set([k for k in STATES if STATES[k]['isIntermed'] == True])
     return S_K_Intermediates
 
+def _init_set_utilities(UTILITIES):
+    utilities = set()
+    keys_utilities = UTILITIES.keys()
+    for utility in keys_utilities:
+        utilities.add(utility)
+    return utilities
+
+def _init_set_tasks_consuming_utilities(UTILITIES, TASKS_UTILITIES):
+    S_I_CONSUMING_U = {u: set() for u in UTILITIES}
+    for (i,u) in TASKS_UTILITIES:
+        S_I_CONSUMING_U[u].add(i)
+    return S_I_CONSUMING_U
+
+
 def create_main_sets_parameters(model, STN, H):
     
     STATES = STN['STATES']
@@ -172,6 +186,8 @@ def create_main_sets_parameters(model, STN, H):
     TS_ARCS = STN['TS_ARCS']
     UNIT_TASKS = STN['UNIT_TASKS']
     TASKS_TRANSITION_TASKS = STN['TASKS_TRANSITION_TASKS']
+    UTILITIES = STN['UTILITIES']
+    TASKS_UTILITIES = STN['TASKS_UTILITIES']
     
     model.S_Tasks = Set(initialize = init_set_all_tasks(UNIT_TASKS))
     model.S_Units = Set(initialize = init_set_all_units(UNIT_TASKS))
@@ -207,7 +223,9 @@ def create_main_sets_parameters(model, STN, H):
     model.P_Task_Production_Comsumption = Param(model.S_Tasks, model.S_Materials, initialize = init_task_prod_consump(ST_ARCS, TS_ARCS))
     model.P_Task_Transitions_Unit = Param(model.S_Units, model.S_Tasks, model.S_Tasks, initialize = init_task_transitions_unit(UNIT_TASKS, TASKS_TRANSITION_TASKS))      
 
-  
+    model.S_Utilities = Set(initialize = _init_set_utilities(UTILITIES))
+    model.S_I_Consuming_U = Set(model.S_Utilities, initialize = _init_set_tasks_consuming_utilities(UTILITIES, TASKS_UTILITIES))
+    
 """     print(f"S_Tasks: {model.S_Tasks.data()}")
     print(f"S_Units: {model.S_Units.data()}")
     print(f"S_Time: {model.S_Time.data()}")
@@ -235,6 +253,8 @@ def create_main_sets_parameters(model, STN, H):
     print(f"S_Raw_Materials: {model.S_Raw_Materials.data()}")
     print(f"S_Final_Products: {model.S_Final_Products.data()}") 
     print(f"S_Intermediates: {model.S_Intermediates.data()}")
+    print(f"S_Utilities: {model.S_Utilities.data()}") 
+    print(f"S_I_Consuming_U: {model.S_I_Consuming_U.data()}")
     
     model.P_Task_Unit_Network.pprint()
     model.P_Task_Transitions.pprint()
