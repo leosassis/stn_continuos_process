@@ -1,5 +1,6 @@
 from input_data.networks import (define_stn_network_1,
                                  define_stn_network_1_nonuniform,
+                                 define_stn_network_1_nonuniform_X_task,
                                  define_stn_network_2, 
                                  define_stn_network_3, 
                                  define_stn_network_tasks_competing, 
@@ -24,20 +25,31 @@ def load_network(network_name: str, tau_factor: int, beta_factor: int, demand_fa
     
     if network_name == "network_1":
         return define_stn_network_1(tau_factor, beta_factor, demand_factor, planning_horizon)
+    
     elif network_name == "network_1_nonuniform":
         return define_stn_network_1_nonuniform(tau_factor, beta_factor, demand_factor, planning_horizon)
+    
+    elif network_name == "network_1_x_task":
+        return define_stn_network_1_nonuniform_X_task(tau_factor, beta_factor, demand_factor, planning_horizon)
+    
     elif network_name == "network_2":
         return define_stn_network_2(tau_factor, beta_factor, demand_factor, planning_horizon)
+    
     elif network_name == "network_3":
         return define_stn_network_3(tau_factor, beta_factor, demand_factor, planning_horizon)
+    
     elif network_name == "network_competing_tasks":
         return define_stn_network_tasks_competing(tau_factor, beta_factor, demand_factor, planning_horizon)
+    
     elif network_name == "network_upper_bound_YS":
         return define_stn_network_upper_bound_YS(tau_factor, beta_factor, demand_factor, planning_horizon)
+    
     elif network_name == "network_upper_bound_X":
         return define_stn_network_upper_bound_X(tau_factor, beta_factor, demand_factor, planning_horizon)
+    
     elif network_name == "network_indirect_transitions":
         return define_stn_network_indirect_transitions(tau_factor, beta_factor, demand_factor, planning_horizon)
+    
     else:
         raise ValueError(f"Unsupported network name: {network_name}") 
     
@@ -55,10 +67,10 @@ def instance_factors_network() -> tuple[list[str], list[str], list[int], int, in
             - maximum beta multiplier (int). 
     """
     
-    NETWORKS = ["network_1_nonuniform"]
-    PLANNING_HORIZON_ARRAY = [25, 30, 35, 40, 45, 50]
-    TAU_FACTOR_MAX = 3
-    BETA_FACTOR_MAX = 3
+    NETWORKS = ["network_1_x_task"]
+    PLANNING_HORIZON_ARRAY = [25, 30, 35, 40, 45]
+    TAU_FACTOR_MAX = 4
+    BETA_FACTOR_MAX = 4
     FORMULATIONS = 14
     DEMAND_FACTOR_MAX = 1
     

@@ -201,6 +201,106 @@ def define_stn_network_1_nonuniform(tau_factor: int, beta_factor: int, demand_fa
     return stn
 
 
+def define_stn_network_1_nonuniform_X_task(tau_factor: int, beta_factor: int, demand_factor: int, planning_horizon: int) -> dict:
+    """
+    Create a process scheduling network (STN) based on the specified case.
+    
+    Args:
+        - case (str): defines which case to use for task/unit parameters (i.e., "fast_upstream", "slow_upstream", "uniform").
+        - tau_factor (int): factor used to scale tau parameters.
+        - beta_factor (int): factor used to scale beta parameters.
+
+    Returns:
+        dict: a dictionary defining the structure of the scheduling problem, including:
+              STATES, STATE-to-TASK arcs, TASK-to-STATE arcs, UNIT-TASK assignments, etc.
+    """
+    
+    stn = {
+        
+        # Define all states (raw materials, intermediates, and products)
+        'STATES': {
+            'RM'     : {'capacity': 10000, 'initial': 10000, 'price': 0, 'isRM': True, 'isIntermed': False, 'isProd': False, 'order': 1,},            
+            'IA1'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 2,},       
+            'IA2'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 3,},       
+            'IB1'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 5,},       
+            'IB2'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 6,},       
+            'IB3'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 7,},                   
+            'IB4'    : {'capacity': 10000, 'initial':   0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 8,},                   
+            'P1'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 9,},       
+            'P2'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 10,},       
+            'P3'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 11,},              
+            'P4'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 12,},       
+            'P5'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 13,},       
+            'P6'     : {'capacity': 10000, 'initial':   0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 14,},                      
+        },
+        
+        # Placeholder for shipment demands
+        'STATES_SHIPMENT': { 
+            ('P1', planning_horizon) : {'demand':10 * demand_factor},
+            ('P2', planning_horizon) : {'demand':10 * demand_factor},
+            ('P3', planning_horizon) : {'demand':10 * demand_factor},
+            ('P4', planning_horizon) : {'demand':10 * demand_factor},
+            ('P5', planning_horizon) : {'demand':10 * demand_factor},
+            ('P6', planning_horizon) : {'demand':10 * demand_factor},      
+        },
+        
+        # Define input arcs: which states feed which tasks (negative flow)
+        'ST_ARCS': {
+            ('RM', 'TA1')   : {'rho': -1.0, 'direction': -1},          
+            ('RM', 'TA2')   : {'rho': -1.0, 'direction': -1},           
+            ('IA1', 'TB1')  : {'rho': -1.0, 'direction': -1},
+            ('IA1', 'TB2')  : {'rho': -1.0, 'direction': -1},           
+            ('IA2', 'TB3')  : {'rho': -1.0, 'direction': -1},        
+            ('IA2', 'TB4')  : {'rho': -1.0, 'direction': -1},
+            ('IB1', 'TC1')  : {'rho': -1.0, 'direction': -1},
+            ('IB1', 'TC2')  : {'rho': -1.0, 'direction': -1},           
+            ('IB2', 'TC3')  : {'rho': -1.0, 'direction': -1},
+            ('IB3', 'TC4')  : {'rho': -1.0, 'direction': -1},            
+            ('IB4', 'TC5')  : {'rho': -1.0, 'direction': -1},
+            ('IB4', 'TC6')  : {'rho': -1.0, 'direction': -1},
+        },
+        
+        # Define output arcs: which tasks generate which states (positive flow)
+        'TS_ARCS': {
+            ('TA1', 'IA1')  : {'rho': 1.0, 'direction': 1},            
+            ('TA2', 'IA2')  : {'rho': 1.0, 'direction': 1},            
+            ('TB1', 'IB1')  : {'rho': 1.0, 'direction': 1},            
+            ('TB2', 'IB2')  : {'rho': 1.0, 'direction': 1},            
+            ('TB3', 'IB3')  : {'rho': 1.0, 'direction': 1},            
+            ('TB4', 'IB4')  : {'rho': 1.0, 'direction': 1},                       
+            ('TC1', 'P1')   : {'rho': 1.0, 'direction': 1},            
+            ('TC2', 'P2')   : {'rho': 1.0, 'direction': 1},            
+            ('TC3', 'P3')   : {'rho': 1.0, 'direction': 1},            
+            ('TC4', 'P4')   : {'rho': 1.0, 'direction': 1},            
+            ('TC5', 'P5')   : {'rho': 1.0, 'direction': 1},            
+            ('TC6', 'P6')   : {'rho': 1.0, 'direction': 1},
+        },
+        
+        # Optional mapping of startup/shutdown transitions between tasks
+        'TASKS_TRANSITION_TASKS': { 
+            # Example: ('TC3', 'ITC3')   : {'isSU': True, 'isSD': False, 'isDirect': False, 'direction': 1},
+            
+        },
+        
+        'UNIT_TASKS' : {
+            ('UA1', 'TA1'): {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA2', 'TA2'): {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 45, 'Bmax': 55, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA3', 'TB1'): {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 40, 'Bmax': 60, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA4', 'TB2'): {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA5', 'TB3'): {'tau_min': 8, 'tau_max': 10, 'tau': 1, 'Bmin': 60, 'Bmax': 65, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA5', 'TB4'): {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 30, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA6', 'TC1'): {'tau_min': int(ceil(7 / tau_factor)), 'tau_max': 7, 'tau': 1, 'Bmin': 5, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA6', 'TC2'): {'tau_min': int(ceil(5 / tau_factor)), 'tau_max': 5, 'tau': 1, 'Bmin': 5, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA7', 'TC3'): {'tau_min': int(ceil(7 / tau_factor)), 'tau_max': 7, 'tau': 1, 'Bmin': 5, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA7', 'TC4'): {'tau_min': int(ceil(5 / tau_factor)), 'tau_max': 5, 'tau': 1, 'Bmin': 5, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA8', 'TC5'): {'tau_min': 13, 'tau_max': 15, 'tau': 1, 'Bmin': 5, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA9', 'TC6'): {'tau_min': 13, 'tau_max': 15, 'tau': 1, 'Bmin': 5, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+        }      
+    } 
+        
+    return stn
+
+
 def define_stn_network_2(tau_factor: int, beta_factor: int, demand_factor: int, planning_horizon: int) -> dict:
     """
     Create a process scheduling network (STN) based on the specified case.
