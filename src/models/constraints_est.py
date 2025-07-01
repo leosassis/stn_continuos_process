@@ -313,7 +313,39 @@ def _constraint_clique_ys_group_ppc(model: ConcreteModel, k: Any, n: Any) -> Con
         ) <= len(model.S_I_Consuming_K[k]) - 1
     else:
         return Constraint.Skip
- 
+
+
+def _constraint_utilities_limit_X(model: ConcreteModel, u: Any, n: Any) -> Constraint:
+    
+    return sum(
+        model.V_X[i,j,n]
+        for i in model.S_I_Consuming_U[u]
+        for j in model.S_J_Executing_I[i] 
+        if (i,j) in model.P_Task_Unit_Network
+    ) <= floor( model.P_Utility_Max[u,n] / sum( ( model.P_Utility_Fixed[i,j,u] + model.P_Beta_Min[i,j] * model.P_Utility_Var[i,j,u] ) for i in model.S_I_Consuming_U[u] for j in model.S_J_Executing_I[i] if (i,j) in model.P_Task_Unit_Network) ) 
+
+
+def _constraint_utilities_limit_YS(model: ConcreteModel, u: Any, n: Any) -> Constraint:
+    
+    return sum(
+        model.V_Y_Start[i,j,n]
+        for i in model.S_I_Consuming_U[u]
+        for j in model.S_J_Executing_I[i] 
+        if (i,j) in model.P_Task_Unit_Network
+    ) <= floor( model.P_Utility_Max[u,n] / sum( model.P_Tau_Min[i,j] * ( model.P_Utility_Fixed[i,j,u] + model.P_Beta_Min[i,j] * model.P_Utility_Var[i,j,u] ) for i in model.S_I_Consuming_U[u] for j in model.S_J_Executing_I[i] if (i,j) in model.P_Task_Unit_Network) )
+
+
+def _constraint_utilities_limit_B(model: ConcreteModel, u: Any, i: Any, j: Any, n: Any) -> Constraint:
+    
+    if (
+        i in model.S_I_Consuming_U[u] and
+        j in model.S_J_Executing_I[i] and
+        (i,j) in model.P_Task_Unit_Network        
+    ):
+        return model.V_B[i,j,n] <= model.V_X[i,j,n] * min( model.P_Beta_Max[i,j], model.P_Beta_Max[i,j] * ( model.P_Utility_Max[u,n] / ( model.P_Utility_Fixed[i,j,u] + model.P_Beta_Min[i,j] * model.P_Utility_Var[i,j,u] ) ) )
+    else:
+        return Constraint.Skip
+    
     
 def load_constraint_set_to_zero_x_est(model: ConcreteModel) -> None:
    """
@@ -400,4 +432,37 @@ def load_constraint_clique_Y_group_k(model: ConcreteModel) -> None:
         model (ConcreteModel): a Pyomo model instance.
     """   
     
-    model.C_Limit_YS_Group_PPC = Constraint(model.S_Materials, model.S_Time, rule = _constraint_clique_ys_group_ppc)
+    model.C_Limit_YS_Group_PPC = Constraint(model.S_Materials, model.S_Time, rule = _constraint_clique_ys_group_ppc)   
+    
+    
+def load_constraint_utility_limity_x(model: ConcreteModel) -> None:
+   """
+    Appends to the model a constraint to limit X according to the availability of utilities.
+    
+    Args:
+        model (ConcreteModel): a Pyomo model instance.
+   """    
+   
+   model.C_Utility_Limit_X = Constraint(model.S_Utilities, model.S_Time, rule = _constraint_utilities_limit_X)   
+   
+   
+def load_constraint_utility_limity_ys(model: ConcreteModel) -> None:
+    """
+    Appends to the model a constraint to limit YS according to the availability of utilities.
+    
+    Args:
+        model (ConcreteModel): a Pyomo model instance.
+    """   
+    
+    model.C_Utility_Limit_YS = Constraint(model.S_Utilities, model.S_Time, rule = _constraint_utilities_limit_YS)
+    
+    
+def load_constraint_utility_limity_b(model: ConcreteModel) -> None:
+    """
+    Appends to the model a constraint to limit B according to the availability of utilities.
+    
+    Args:
+        model (ConcreteModel): a Pyomo model instance.
+    """   
+    
+    model.C_Utility_Limit_B = Constraint(model.S_Utilities, model.S_Tasks, model.S_Units, model.S_Time, rule = _constraint_utilities_limit_B)    

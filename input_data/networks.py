@@ -346,7 +346,7 @@ def define_stn_network_1_nonuniform_utilities(tau_factor: int, beta_factor: int,
         
         # Placeholder for utilities
         'UTILITIES': {
-            'O2'     : {'availability': 25,},
+            'O2'     : {'availability': 35,},
         },
         
         # Define input arcs: which states feed which tasks (negative flow)

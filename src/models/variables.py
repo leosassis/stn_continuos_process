@@ -62,4 +62,4 @@ def init_variables(model: ConcreteModel, planning_horizon: int) -> None:
     #[model.V_Y_Start[i,j,n].fix(0) for i in model.S_I_Production_Tasks for j in model.S_J_Executing_I[i] for n in model.S_Time if n > planning_horizon - model.P_Tau_Min[i,j]] 
     
     # Prevent production operations during the last tau periods related to transitions
-    #[model.V_X[i,j,n].fix(0) for i in (model.S_I_Shutdown_Tasks | model.S_I_Direct_Transition_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n >= planning_horizon - model.P_Tau[i,j]] 
+    #[model.V_X[i,j,n].fix(0) for i in (model.S_I_Shutdown_Tasks | model.S_I_Direct_Transition_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n >= planning_horizon - model.P_Tau[i,j]]  
