@@ -297,27 +297,6 @@ def unit_availability_eq21(model, j, n):
             #    model.V_X_Hat[i,j,n] 
             #    for i in (model.S_I_Production_Tasks_With_Transition)
             #    if i in model.S_I_In_J[j])
-
-
-def utilities_track_eq4(model, u, n):
-    if (
-        n < max(model.S_Time)
-    ):
-        return model.V_U[u,n+1] == sum(
-                                    model.P_Utility_Fixed[i,j,u] * model.V_X[i,j,n] + model.P_Utility_Var[i,j,u] * model.V_B[i,j,n]
-                                    for i in model.S_I_Consuming_U[u]
-                                    for j in model.S_J_Executing_I[i]
-                                    if (i,j) in model.P_Task_Unit_Network) 
-    else:
-        return Constraint.Skip
-
-def utilities_bound_eq4(model, u, n):
-    if (
-        n < max(model.S_Time)
-    ):
-        return model.V_U[u,n+1] <= model.P_Utility_Max[u,n] 
-    else:
-        return Constraint.Skip
             
     
 def load_constraints_basic_model(model: ConcreteModel) -> None:
@@ -344,9 +323,6 @@ def load_constraints_basic_model(model: ConcreteModel) -> None:
     # Clique constraint
     model.C_Unit_Availability_Eq21 = Constraint(model.S_Units, model.S_Time, rule = unit_availability_eq21)
     
-    # Utilities
-    model.C_Utilities_Track_Eq4 = Constraint(model.S_Utilities, model.S_Time, rule = utilities_track_eq4)
-    model.C_Utilities_Bound_Eq4 = Constraint(model.S_Utilities, model.S_Time, rule = utilities_bound_eq4)
 
 def load_constraints_basic_model_for_operations_x_y(model: ConcreteModel) -> None:
    

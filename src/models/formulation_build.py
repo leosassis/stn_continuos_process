@@ -8,10 +8,7 @@ from src.models.constraints_est import (load_constraint_set_to_zero_x_est,
                                         load_constraint_ub_x_task,
                                         load_constraint_ub_x_unit,
                                         load_constraint_clique_X_group_k,
-                                        load_constraint_clique_Y_group_k, 
-                                        load_constraint_utility_limity_x, 
-                                        load_constraint_utility_limity_ys, 
-                                        load_constraint_utility_limity_b) 
+                                        load_constraint_clique_Y_group_k) 
 from src.methods.est import compute_est_subsequent_tasks
 from src.methods.est_group import compute_est_group_tasks
 from src.methods.upper_bound_x_task_opt import compute_upper_bound_x_task
@@ -385,35 +382,7 @@ def create_model_f14_all(stn_data: dict, planning_horizon: int) -> tuple[Concret
     load_constraint_ub_x_unit(model)
     load_constraint_clique_X_group_k(model)
     load_constraint_clique_Y_group_k(model)
-    load_constraint_utility_limity_x(model) 
-    load_constraint_utility_limity_ys(model) 
-    load_constraint_utility_limity_b(model)
     
     formulation_name = "F14_All"
         
-    return model, formulation_name
-
-
-def create_model_f15_X_YS_B_utilities(stn_data: dict, planning_horizon: int) -> tuple[ConcreteModel, str]:
-    """
-    Creates the base MILP model plus the constraints to bound X, YS and B regarding the use of utilities.
-    
-    Args:
-        - stn_data (dict): a dictionary with the state-task network instance data.
-        - planning_horizon (int): planning horizon.
-
-    Returns:
-        - ConcreteModel: returns a Pyomo model.
-    """
-    
-    model = ConcreteModel()
-    
-    load_model_sets_parameters_variables(model, stn_data, planning_horizon)
-    load_basic_model_constraints_objective(model, stn_data, planning_horizon, 'base_model')
-    load_constraint_utility_limity_x(model) 
-    load_constraint_utility_limity_ys(model) 
-    load_constraint_utility_limity_b(model)
-    
-    formulation_name = "F15_X_YS_B_UTIL"
-    
     return model, formulation_name

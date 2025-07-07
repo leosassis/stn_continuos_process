@@ -94,18 +94,6 @@ def ub_x_unit_initialization(model: ConcreteModel) -> dict:
     dict_x_unit = {j: floor( ( max( model.P_Tau_Max[i,j] for i in model.S_I_In_J[j] ) * ( max(model.S_Time) + 1 - model.P_EST_Unit[j] ) ) / ( max( model.P_Tau_Max[i,j] for i in model.S_I_In_J[j] ) + model.P_Tau_End_Unit[j] ) ) for j in model.P_EST_Unit}
     return dict_x_unit
 
-def _init_fixed_utility(model, tasks_utilities):
-    fixed_utility = {(i,j,u): tasks_utilities[(i,u)]['futil'] for (i,u) in tasks_utilities for (i,j) in model.P_Task_Unit_Network if (i,u) in tasks_utilities if (i,j) in model.P_Task_Unit_Network} 
-    return fixed_utility
-
-def _init_variable_utility(model, tasks_utilities):
-    var_utility = {(i,j,u): tasks_utilities[(i,u)]['vutil'] for (i,u) in tasks_utilities for (i,j) in model.P_Task_Unit_Network if (i,u) in tasks_utilities if (i,j) in model.P_Task_Unit_Network} 
-    return var_utility
-
-def _init_max_utility(model, utilities):
-    var_utility = {(u,n): utilities[(u)]['availability'] for u in utilities for n in model.S_Time} 
-    return var_utility
-
 
 def create_basic_parameters(model: ConcreteModel, stn_data: dict, planning_horizon: int) -> None:
     """
@@ -122,8 +110,6 @@ def create_basic_parameters(model: ConcreteModel, stn_data: dict, planning_horiz
     st_arcs = stn_data['ST_ARCS']
     ts_arcs = stn_data['TS_ARCS']
     unit_tasks = stn_data['UNIT_TASKS']
-    utilities = stn_data['UTILITIES']
-    tasks_utilities = stn_data['TASKS_UTILITIES']
         
     model.P_Tau = Param(model.S_Tasks, model.S_Units, initialize = init_parameter_tau(unit_tasks))
     model.P_Init_Inventory_Material = Param(model.S_Materials, initialize = init_initial_inventory(states))
@@ -141,9 +127,6 @@ def create_basic_parameters(model: ConcreteModel, stn_data: dict, planning_horiz
     model.P_Product_Production = Param(model.S_Materials, mutable = True, initialize = 0) 
     model.P_Tau_End_Task = Param(model.S_Tasks, default = 1)
     model.P_Tau_End_Unit = Param(model.S_Units, default = 1)
-    model.P_Utility_Fixed = Param(model.S_Tasks, model.S_Units, model.S_Utilities, initialize =  _init_fixed_utility(model, tasks_utilities))
-    model.P_Utility_Var = Param(model.S_Tasks, model.S_Units, model.S_Utilities, initialize =  _init_variable_utility(model, tasks_utilities))
-    model.P_Utility_Max = Param(model.S_Utilities, model.S_Time, initialize = _init_max_utility(model, utilities))    
     
 
 def create_parameters_tightening_constraints(model: ConcreteModel, stn_data: dict, formulation_id: str) -> None:
