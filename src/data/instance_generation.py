@@ -1,8 +1,9 @@
 from input_data.networks import (define_stn_network_1,
-                                 define_stn_network_1_nonuniform,
-                                 define_stn_network_1_nonuniform_X_task,
-                                 define_stn_network_2, 
-                                 define_stn_network_3, 
+                                 define_stn_network_2,
+                                 define_stn_network_3,
+                                 define_stn_network_4, 
+                                 define_stn_network_5,
+                                 define_stn_network_6,
                                  define_stn_network_tasks_competing, 
                                  define_stn_network_upper_bound_YS, 
                                  define_stn_network_upper_bound_X, 
@@ -23,20 +24,28 @@ def load_network(network_name: str, tau_factor: int, beta_factor: int, demand_fa
         dict: a dictionary containing the network data. 
     """
     
+    # Create network_1 where tasks/units have the same tau/beta in a stage
     if network_name == "network_1":
         return define_stn_network_1(tau_factor, beta_factor, demand_factor, planning_horizon)
     
-    elif network_name == "network_1_nonuniform":
-        return define_stn_network_1_nonuniform(tau_factor, beta_factor, demand_factor, planning_horizon)
-    
-    elif network_name == "network_1_x_task":
-        return define_stn_network_1_nonuniform_X_task(tau_factor, beta_factor, demand_factor, planning_horizon)
-    
+    # Create network_2 where tasks/units are different at each stage and tasks TB1 and TB3 have to wait for materials to accumulate before they can start.
     elif network_name == "network_2":
         return define_stn_network_2(tau_factor, beta_factor, demand_factor, planning_horizon)
     
+    # Create network_3 where tasks/units are different at each stage, tasks TB1 and TB3 have to wait for materials to accumulate, TC% and TC^ are used to test bounds for X.
     elif network_name == "network_3":
         return define_stn_network_3(tau_factor, beta_factor, demand_factor, planning_horizon)
+    
+    elif network_name == "network_4":
+        return define_stn_network_4(tau_factor, beta_factor, demand_factor, planning_horizon)
+    
+    # Same as network_3 plus transitions in some of the tasks. 
+    elif network_name == "network_5":
+        return define_stn_network_5(tau_factor, beta_factor, demand_factor, planning_horizon)
+    
+    # Create network_6 where each stage has 1 unit with 3 tasks each. 
+    elif network_name == "network_6":
+        return define_stn_network_6(tau_factor, beta_factor, demand_factor, planning_horizon)
     
     elif network_name == "network_competing_tasks":
         return define_stn_network_tasks_competing(tau_factor, beta_factor, demand_factor, planning_horizon)
