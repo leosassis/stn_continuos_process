@@ -28,19 +28,19 @@ def load_network(network_name: str, tau_factor: int, beta_factor: int, demand_fa
     if network_name == "network_1":
         return define_stn_network_1(tau_factor, beta_factor, demand_factor, planning_horizon)
     
-    # Create network_2 where tasks/units are different at each stage and tasks TB1 and TB3 have to wait for materials to accumulate before they can start.
+    # Create network_2 where tasks/units are different at each stage and tasks TB1 and TB3 have to wait for materials to accumulate before they can start
     elif network_name == "network_2":
         return define_stn_network_2(tau_factor, beta_factor, demand_factor, planning_horizon)
     
-    # Create network_3 where tasks/units are different at each stage, tasks TB1 and TB3 have to wait for materials to accumulate, TC% and TC^ are used to test bounds for X.
+    # Create network_3 where tasks/units are different at each stage, tasks TB1 and TB3 have to wait for materials to accumulate, TC% and TC^ are used to test bounds for X
     elif network_name == "network_3":
         return define_stn_network_3(tau_factor, beta_factor, demand_factor, planning_horizon)
     
-    # Create network_4 where tasks/units are different at each stage, tasks TB1 and TB3 have to wait for materials to accumulate, TC5 and TC6 are used to test bounds for X and there is one more stage.
+    # Create network_4 where tasks/units are different at each stage, tasks TB1 and TB3 have to wait for materials to accumulate, TC5 and TC6 are used to test bounds for X and there is one more stage
     elif network_name == "network_4":
         return define_stn_network_4(tau_factor, beta_factor, demand_factor, planning_horizon)
     
-    # Same as network_3 plus transitions in some of the tasks. 
+    # Create network_5. Same as network_3 plus transitions in some of the tasks. 
     elif network_name == "network_5":
         return define_stn_network_5(tau_factor, beta_factor, demand_factor, planning_horizon)
     
