@@ -1,7 +1,7 @@
 from pyomo.environ import *
 
 
-def initialize_results_dict(network: str, demand_factor: int, planning_horizon: int, tau_factor: int, beta_factor: int, formulation_name: str, taskID: int) -> dict[str, Any]:
+def initialize_results_dict(network: str, demand_factor: int, planning_horizon: int, tau_factor: int, beta_factor: int, formulation_name: str, taskID: int, mip_gap_multiplier: int) -> dict[str, Any]:
     """
     Initializes a dictionary to store results from a single optimization instance.
 
@@ -17,7 +17,7 @@ def initialize_results_dict(network: str, demand_factor: int, planning_horizon: 
         dict[str, Any]: Initialized dictionary with placeholders for results.
     """
     
-    instance_name = f"{network}_{demand_factor}_{planning_horizon}_{tau_factor}_{beta_factor}_{taskID}"
+    instance_name = f"{network}_{demand_factor}_{planning_horizon}_{tau_factor}_{beta_factor}_{mip_gap_multiplier}_{taskID}"
     
     return {
             "Instance": instance_name,
@@ -28,13 +28,14 @@ def initialize_results_dict(network: str, demand_factor: int, planning_horizon: 
             "Time (s)": None,
             "MILP Status": None,
             "MILP Term. Condition": None,
+            "MIP Gap Mult.": None,
             "LP Relaxation": None,
             "Num. Binary Var.": None,
             "Total Num. Var.": None,
             "Num. Constraints": None,}
     
     
-def create_dict_result(result: dict, model_analytics_milp: list, results_milp: Any, results_lp: ConcreteModel, formulation_name: str) -> dict[str, Any]:
+def create_dict_result(result: dict, model_analytics_milp: list, results_milp: Any, results_lp: ConcreteModel, formulation_name: str, mip_gap_multiplier: int) -> dict[str, Any]:
     """
     Updates the result dictionary with actual values from MILP and LP results if results are feasible.
 
@@ -58,6 +59,7 @@ def create_dict_result(result: dict, model_analytics_milp: list, results_milp: A
         result['Time (s)'] = round(results_milp.solver.time, 2)
         result['MILP Status'] = str(results_milp.solver.status)
         result['MILP Term. Condition'] = str(results_milp.solver.termination_condition)
+        result['MIP Gap Mult.'] = mip_gap_multiplier
         result['LP Relaxation'] = round(results_lp.problem.lower_bound, 2)
         result['Num. Binary Var.'] = model_analytics_milp[1]
         result['Total Num. Var.'] = model_analytics_milp[0]

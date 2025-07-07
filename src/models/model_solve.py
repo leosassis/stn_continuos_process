@@ -18,19 +18,20 @@ def define_solver() -> Any:
     return SolverFactory('gurobi')
 
 
-def set_solver_options_milp(solver: Any) -> None: 
+def set_solver_options_milp(solver: Any, mip_gap_multiplier) -> None: 
     """ 
     Sets solver options for MILP optimization.
     
     Args:
         - solver (Any): Pyomo solver instance (e.g., Gurobi).
+        - mip_gap_multiplier (int): multiplier to increase the mip gap.
     
     Returns:
         - none.
     """  
     
-    #solver.options['MIPGap'] = 0.001  # Set MIP gap
-    solver.options['TimeLimit'] = 3 * 3600  # Set time limit
+    solver.options['MIPGap'] = mip_gap_multiplier * 0.0001  # Set MIP gap
+    solver.options['TimeLimit'] = 24 * 3600  # Set time limit
 
 
 def activate_model_lp_relaxation(model: ConcreteModel) -> None:    
@@ -72,7 +73,7 @@ def solve_model(solver: Any, model: ConcreteModel) -> SolverResults:
     return results    
 
 
-def solve_and_analyze_model(solver: Any, model_milp: ConcreteModel, planning_horizon: int) -> tuple[SolverResults, dict, SolverResults]:
+def solve_and_analyze_model(solver: Any, model_milp: ConcreteModel, planning_horizon: int, mip_gap_multiplier: int) -> tuple[SolverResults, dict, SolverResults]:
     """
     Solves the MILP model, analyzes it, and solves its LP relaxation.
     There is also the possibility to print Gantt charts.
@@ -81,6 +82,7 @@ def solve_and_analyze_model(solver: Any, model_milp: ConcreteModel, planning_hor
         - solver (Any): a Pyomo solver instance.
         - model_milp (ConcreteModel): the MILP Pyomo model to be solved.
         - planning_horizon (int): size of the planning horizon.
+        - mip_gap_multiplier (int): multiplier to increase the mip gap.
 
     Returns:
         Tuple[
@@ -91,7 +93,7 @@ def solve_and_analyze_model(solver: Any, model_milp: ConcreteModel, planning_hor
     """
     
     
-    set_solver_options_milp(solver)
+    set_solver_options_milp(solver, mip_gap_multiplier)
     
     results_milp: SolverResults = solve_model(solver, model_milp)   
     model_analytics_milp = compute_num_variables_constraints(model_milp)

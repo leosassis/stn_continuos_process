@@ -34,7 +34,7 @@ RESULTS_PATH = "src/results/model_results.xlsx"
 logging.basicConfig(level = logging.INFO, format = '%(asctime)s - %(levelname)s - %(message)s')
 
 
-def run_instance(network: str, demand_factor: int, planning_horizon: int, tau_factor: int, beta_factor: int, formulation_number: str, taskID: int) -> dict:
+def run_instance(network: str, demand_factor: int, planning_horizon: int, tau_factor: int, beta_factor: int, formulation_number: str, taskID: int, mip_gap_multiplier: int) -> dict:
     """ 
     Builds, solves, and analyze one optimization instance.    
     
@@ -44,13 +44,16 @@ def run_instance(network: str, demand_factor: int, planning_horizon: int, tau_fa
         - planning_horizon (int): size of the planning horizon. 
         - tau_factor (int): factor to multiply tau parameters when creating instances.
         - beta_factor (int): factor to multiply beta parameters when creating instances.
+        - formulation_number (str): name of the formulation.
+        - taskID (int): id that identifies the data set.
+        - mip_gap_multiplier (int): multiplier to increase the mip gap.
     
     Returns:
         - dict: a dictionary of results for excel logging.
     """    
     
     # Step 0: Initialize results dict
-    result = initialize_results_dict(network, demand_factor, planning_horizon, tau_factor, beta_factor, "", taskID)
+    result = initialize_results_dict(network, demand_factor, planning_horizon, tau_factor, beta_factor, "", taskID, mip_gap_multiplier)
     
     try:
         
@@ -94,10 +97,10 @@ def run_instance(network: str, demand_factor: int, planning_horizon: int, tau_fa
         else:
             raise Exception(f"Fomrulation number {formulation_number} is not recognized.")
         
-        results_milp, stats_milp, results_lp = solve_and_analyze_model(solver, model_milp, planning_horizon)
+        results_milp, stats_milp, results_lp = solve_and_analyze_model(solver, model_milp, planning_horizon, mip_gap_multiplier)
         
         # Step 4: Create result dictionary
-        result = create_dict_result(result, stats_milp, results_milp, results_lp, formulation_name)
+        result = create_dict_result(result, stats_milp, results_milp, results_lp, formulation_name, mip_gap_multiplier)
         
         logging.info(
             f"Models were solved. Formulation: {formulation_name}. MILP Objective: {round(results_milp.problem.lower_bound, 2)}." 
@@ -106,7 +109,7 @@ def run_instance(network: str, demand_factor: int, planning_horizon: int, tau_fa
     except Exception as e:
         
         logging.error(
-            f"Error while solving instance {network}, demand_factor = {demand_factor}, horizon = {planning_horizon}, tau_factor = {tau_factor}, beta_factor = {beta_factor}, formulation = {formulation_name}"
+            f"Error while solving instance {network}, demand_factor = {demand_factor}, horizon = {planning_horizon}, tau_factor = {tau_factor}, beta_factor = {beta_factor}, formulation = {formulation_name}, mip_gap_multiplier = {mip_gap_multiplier}"
         )
         logging.exception(e)
         
@@ -121,9 +124,9 @@ def main(taskID: int) -> None:
     with open(f"input_data/datasets/run_{taskID:03}.json", "r") as f:
         dct = json.load(f)    
     
-    formulation_number, network, demand_factor, planning_horizon, tau_factor, beta_factor = dct["formulation"], dct["network"], dct["demand_factor"], dct["planning_horizon"], dct["tau_factor"], dct["beta_factor"]
+    formulation_number, network, demand_factor, planning_horizon, tau_factor, beta_factor, mip_gap_multiplier = dct["formulation"], dct["network"], dct["demand_factor"], dct["planning_horizon"], dct["tau_factor"], dct["beta_factor"], dct["mip_gap"]
     
-    result = run_instance(network, demand_factor, planning_horizon, tau_factor, beta_factor, formulation_number, taskID)
+    result = run_instance(network, demand_factor, planning_horizon, tau_factor, beta_factor, formulation_number, taskID, mip_gap_multiplier)
     
     with open(f"src/results/result_{taskID:03}.json", "w") as f:
         json.dump(result, f)
