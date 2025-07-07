@@ -36,12 +36,12 @@ def define_stn_network_1(tau_factor: int, beta_factor: int, demand_factor: int, 
         
         # Placeholder for shipment demands
         'STATES_SHIPMENT': { 
-            ('P1', planning_horizon) : {'demand':10 * demand_factor},
-            #('P2', planning_horizon) : {'demand':10 * demand_factor},
-            #('P3', planning_horizon) : {'demand':10 * demand_factor},
-            #('P4', planning_horizon) : {'demand':10 * demand_factor},
-            #('P5', planning_horizon) : {'demand':10 * demand_factor},
-            #('P6', planning_horizon) : {'demand':10 * demand_factor},      
+            ('P1', planning_horizon) : {'demand': 25 * demand_factor},
+            #('P2', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P3', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P4', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P5', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P6', planning_horizon) : {'demand': 10 * demand_factor},      
         },
         
         # Define input arcs: which states feed which tasks (negative flow)
@@ -83,18 +83,18 @@ def define_stn_network_1(tau_factor: int, beta_factor: int, demand_factor: int, 
         },
         
         'UNIT_TASKS' : {
-            ('UA1', 'TA1'): {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA2', 'TA2'): {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA3', 'TB1'): {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA4', 'TB2'): {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TB3'): {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TB4'): {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA6', 'TC1'): {'tau_min': int(ceil(5 / tau_factor)), 'tau_max': int(ceil(7 * tau_factor)), 'tau': 1, 'Bmin': 5 * beta_factor, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA6', 'TC2'): {'tau_min': int(ceil(5 / tau_factor)), 'tau_max': int(ceil(7 * tau_factor)), 'tau': 1, 'Bmin': 5 * beta_factor, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC3'): {'tau_min': int(ceil(5 / tau_factor)), 'tau_max': int(ceil(7 * tau_factor)), 'tau': 1, 'Bmin': 5 * beta_factor, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC4'): {'tau_min': int(ceil(5 / tau_factor)), 'tau_max': int(ceil(7 * tau_factor)), 'tau': 1, 'Bmin': 5 * beta_factor, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA8', 'TC5'): {'tau_min': int(ceil(5 / tau_factor)), 'tau_max': int(ceil(7 * tau_factor)), 'tau': 1, 'Bmin': 5 * beta_factor, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA8', 'TC6'): {'tau_min': int(ceil(5 / tau_factor)), 'tau_max': int(ceil(7 * tau_factor)), 'tau': 1, 'Bmin': 5 * beta_factor, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA1', 'TA1'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 40 * beta_factor, 'Bmax': 40, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA2', 'TA2'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 40 * beta_factor, 'Bmax': 40, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA3', 'TB1'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 25 * beta_factor, 'Bmax': 25, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA4', 'TB2'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 25 * beta_factor, 'Bmax': 25, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA5', 'TB3'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 25 * beta_factor, 'Bmax': 25, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA5', 'TB4'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 25 * beta_factor, 'Bmax': 25, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA6', 'TC1'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA6', 'TC2'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA7', 'TC3'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA7', 'TC4'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA8', 'TC5'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA8', 'TC6'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
         }      
     } 
         
@@ -136,12 +136,12 @@ def define_stn_network_2(tau_factor: int, beta_factor: int, demand_factor: int, 
         
         # Placeholder for shipment demands
         'STATES_SHIPMENT': { 
-            ('P1', planning_horizon) : {'demand':10 * demand_factor},
-            #('P2', planning_horizon) : {'demand':10 * demand_factor},
-            #('P3', planning_horizon) : {'demand':10 * demand_factor},
-            #('P4', planning_horizon) : {'demand':10 * demand_factor},
-            #('P5', planning_horizon) : {'demand':10 * demand_factor},
-            #('P6', planning_horizon) : {'demand':10 * demand_factor},      
+            ('P1', planning_horizon) : {'demand': 25 * demand_factor},
+            #('P2', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P3', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P4', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P5', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P6', planning_horizon) : {'demand': 10 * demand_factor},      
         },
         
         # Define input arcs: which states feed which tasks (negative flow)
@@ -183,19 +183,19 @@ def define_stn_network_2(tau_factor: int, beta_factor: int, demand_factor: int, 
         },
         
         'UNIT_TASKS' : {
-            ('UA1', 'TA1'): {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA2', 'TA2'): {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA3', 'TB1'): {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 40, 'Bmax': 60, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA4', 'TB2'): {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TB3'): {'tau_min': 8, 'tau_max': 10, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TB4'): {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA6', 'TC1'): {'tau_min': int(ceil(5 / tau_factor)), 'tau_max': int(ceil(7 * tau_factor)), 'tau': 1, 'Bmin': 5 * beta_factor, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA6', 'TC2'): {'tau_min': int(ceil(3 / tau_factor)), 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 5 * beta_factor, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC3'): {'tau_min': int(ceil(5 / tau_factor)), 'tau_max': int(ceil(7 * tau_factor)), 'tau': 1, 'Bmin': 5 * beta_factor, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC4'): {'tau_min': int(ceil(3 / tau_factor)), 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 5 * beta_factor, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA8', 'TC5'): {'tau_min': int(ceil(5 / tau_factor)), 'tau_max': int(ceil(7 * tau_factor)), 'tau': 1, 'Bmin': 5 * beta_factor, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA8', 'TC6'): {'tau_min': int(ceil(3 / tau_factor)), 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 5 * beta_factor, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-        }      
+            ('UA1', 'TA1'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 40 * beta_factor, 'Bmax': 40, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA2', 'TA2'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 40 * beta_factor, 'Bmax': 40, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
+            ('UA3', 'TB1'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 65 * beta_factor, 'Bmax': 65, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA4', 'TB2'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 25 * beta_factor, 'Bmax': 25, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
+            ('UA5', 'TB3'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 55 * beta_factor, 'Bmax': 55, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA5', 'TB4'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 25 * beta_factor, 'Bmax': 25, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
+            ('UA6', 'TC1'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA6', 'TC2'): {'tau_min': 3, 'tau_max': int(ceil(3 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
+            ('UA7', 'TC3'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA7', 'TC4'): {'tau_min': 3, 'tau_max': int(ceil(3 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
+            ('UA8', 'TC5'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA8', 'TC6'): {'tau_min': 3, 'tau_max': int(ceil(3 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+        }       
     } 
         
     return stn
@@ -236,12 +236,12 @@ def define_stn_network_3(tau_factor: int, beta_factor: int, demand_factor: int, 
         
         # Placeholder for shipment demands
         'STATES_SHIPMENT': { 
-            ('P1', planning_horizon) : {'demand':10 * demand_factor},
-            ('P2', planning_horizon) : {'demand':10 * demand_factor},
-            ('P3', planning_horizon) : {'demand':10 * demand_factor},
-            ('P4', planning_horizon) : {'demand':10 * demand_factor},
-            ('P5', planning_horizon) : {'demand':10 * demand_factor},
-            ('P6', planning_horizon) : {'demand':10 * demand_factor},      
+            ('P1', planning_horizon) : {'demand': 25 * demand_factor},
+            #('P2', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P3', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P4', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P5', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P6', planning_horizon) : {'demand': 10 * demand_factor},      
         },
         
         # Define input arcs: which states feed which tasks (negative flow)
@@ -283,19 +283,19 @@ def define_stn_network_3(tau_factor: int, beta_factor: int, demand_factor: int, 
         },
         
         'UNIT_TASKS' : {
-            ('UA1', 'TA1'): {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA2', 'TA2'): {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 45, 'Bmax': 55, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA3', 'TB1'): {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 40, 'Bmax': 60, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA4', 'TB2'): {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TB3'): {'tau_min': 8, 'tau_max': 10, 'tau': 1, 'Bmin': 60, 'Bmax': 65, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TB4'): {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 30, 'Bmax': 35, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA6', 'TC1'): {'tau_min': int(ceil(7 / tau_factor)), 'tau_max': 7, 'tau': 1, 'Bmin': 5, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA6', 'TC2'): {'tau_min': int(ceil(5 / tau_factor)), 'tau_max': 5, 'tau': 1, 'Bmin': 5, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC3'): {'tau_min': int(ceil(7 / tau_factor)), 'tau_max': 7, 'tau': 1, 'Bmin': 5, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC4'): {'tau_min': int(ceil(5 / tau_factor)), 'tau_max': 5, 'tau': 1, 'Bmin': 5, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA8', 'TC5'): {'tau_min': 13, 'tau_max': 15, 'tau': 1, 'Bmin': 5, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA9', 'TC6'): {'tau_min': 13, 'tau_max': 15, 'tau': 1, 'Bmin': 5, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-        }      
+            ('UA1', 'TA1'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 40 * beta_factor, 'Bmax': 40, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA2', 'TA2'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 40 * beta_factor, 'Bmax': 40, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
+            ('UA3', 'TB1'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 65 * beta_factor, 'Bmax': 65, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA4', 'TB2'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 25 * beta_factor, 'Bmax': 25, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
+            ('UA5', 'TB3'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 55 * beta_factor, 'Bmax': 55, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA5', 'TB4'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 25 * beta_factor, 'Bmax': 25, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
+            ('UA6', 'TC1'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA6', 'TC2'): {'tau_min': 3, 'tau_max': int(ceil(3 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
+            ('UA7', 'TC3'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA7', 'TC4'): {'tau_min': 3, 'tau_max': int(ceil(3 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
+            ('UA8', 'TC5'): {'tau_min': 7, 'tau_max': int(ceil(7 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA9', 'TC6'): {'tau_min': 7, 'tau_max': int(ceil(7 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+        }  
     } 
         
     return stn
@@ -340,14 +340,14 @@ def define_stn_network_4(tau_factor: int, beta_factor: int, demand_factor: int, 
         
         # Placeholder for shipment demands
         'STATES_SHIPMENT': { 
-            ('P1', planning_horizon) : {'demand':10 * demand_factor},
-            #('P2', planning_horizon) : {'demand':10 * demand_factor},
-            #('P3', planning_horizon) : {'demand':10 * demand_factor},
-            #('P4', planning_horizon) : {'demand':10 * demand_factor},
-            #('P5', planning_horizon) : {'demand':10 * demand_factor},
-            #('P6', planning_horizon) : {'demand':10 * demand_factor},       
-            #('P7', planning_horizon) : {'demand':10 * demand_factor},       
-            #('P8', planning_horizon) : {'demand':10 * demand_factor},       
+            ('P1', planning_horizon) : {'demand': 25 * demand_factor},
+            #('P2', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P3', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P4', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P5', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P6', planning_horizon) : {'demand': 10 * demand_factor},       
+            #('P7', planning_horizon) : {'demand': 10 * demand_factor},       
+            #('P8', planning_horizon) : {'demand': 10 * demand_factor},       
         },
         
         # Define input arcs: which states feed which tasks (negative flow)
@@ -397,22 +397,22 @@ def define_stn_network_4(tau_factor: int, beta_factor: int, demand_factor: int, 
         },
         
         'UNIT_TASKS' : {
-            ('UA1', 'TA1'): {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 50, 'Bmax': 60, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA2', 'TA2'): {'tau_min': 8, 'tau_max': 10, 'tau': 1, 'Bmin': 30, 'Bmax': 45, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
-            ('UA3', 'TB1'): {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 20, 'Bmax': 25, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA4', 'TB2'): {'tau_min': 7, 'tau_max': 9, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
-            ('UA5', 'TB3'): {'tau_min': 5, 'tau_max': 7, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA5', 'TB4'): {'tau_min': 4, 'tau_max': 8, 'tau': 1, 'Bmin': 20, 'Bmax': 25, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
-            ('UA6', 'TC1'): {'tau_min': int(ceil(4 / tau_factor)), 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 5 * beta_factor, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA6', 'TC2'): {'tau_min': int(ceil(4 / tau_factor)), 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 5 * beta_factor, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
-            ('UA7', 'TC3'): {'tau_min': int(ceil(5 / tau_factor)), 'tau_max': int(ceil(7 * tau_factor)), 'tau': 1, 'Bmin': 5 * beta_factor, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA7', 'TC4'): {'tau_min': int(ceil(5 / tau_factor)), 'tau_max': int(ceil(7 * tau_factor)), 'tau': 1, 'Bmin': 5 * beta_factor, 'Bmax': 6 * beta_factor, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
-            ('UA8', 'TC5'): {'tau_min': int(ceil(4 / tau_factor)), 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 30, 'Bmax': 40, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UA9', 'TC6'): {'tau_min': int(ceil(4 / tau_factor)), 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 5, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
-            ('UC10', 'TD1')  : {'tau_min': int(ceil(4 / tau_factor)), 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 5, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UC10', 'TD2') : {'tau_min': int(ceil(4 / tau_factor)), 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 5, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UC11', 'TD3') : {'tau_min': int(ceil(4 / tau_factor)), 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 5, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-            ('UC11', 'TD4')  : {'tau_min': int(ceil(4 / tau_factor)), 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 5, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA1', 'TA1'):  {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 60 * beta_factor, 'Bmax': 60, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA2', 'TA2'):  {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 60 * beta_factor, 'Bmax': 60, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
+            ('UA3', 'TB1'):  {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 95 * beta_factor, 'Bmax': 95, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA4', 'TB2'):  {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 45 * beta_factor, 'Bmax': 45, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
+            ('UA5', 'TB3'):  {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 80 * beta_factor, 'Bmax': 80, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA5', 'TB4'):  {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 45 * beta_factor, 'Bmax': 45, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
+            ('UA6', 'TC1'):  {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 20 * beta_factor, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA6', 'TC2'):  {'tau_min': 3, 'tau_max': int(ceil(3 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
+            ('UA7', 'TC3'):  {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 20 * beta_factor, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA7', 'TC4'):  {'tau_min': 3, 'tau_max': int(ceil(3 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},            
+            ('UA8', 'TC5'):  {'tau_min': 7, 'tau_max': int(ceil(7 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UA9', 'TC6'):  {'tau_min': 7, 'tau_max': int(ceil(7 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UC10', 'TD1'): {'tau_min': 3, 'tau_max': int(ceil(3 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UC10', 'TD2'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UC11', 'TD3'): {'tau_min': 3, 'tau_max': int(ceil(3 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+            ('UC11', 'TD4'): {'tau_min': 5, 'tau_max': int(ceil(5 * tau_factor)), 'tau': 1, 'Bmin': 6 * beta_factor, 'Bmax': 6, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
             
         }
     }
