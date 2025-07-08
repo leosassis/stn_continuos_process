@@ -7,7 +7,8 @@ from input_data.networks import (define_stn_network_1,
                                  define_stn_network_tasks_competing, 
                                  define_stn_network_upper_bound_YS, 
                                  define_stn_network_upper_bound_X, 
-                                 define_stn_network_indirect_transitions)
+                                 define_stn_network_indirect_transitions, 
+                                 define_stn_network_all_transitions)
 
 
 def load_network(network_name: str, tau_factor: int, beta_factor: int, demand_factor: int, planning_horizon: int) -> dict:
@@ -59,6 +60,9 @@ def load_network(network_name: str, tau_factor: int, beta_factor: int, demand_fa
     
     elif network_name == "network_indirect_transitions":
         return define_stn_network_indirect_transitions(tau_factor, beta_factor, demand_factor, planning_horizon)
+    
+    elif network_name == "network_all_transitions":
+        return define_stn_network_all_transitions(tau_factor, beta_factor, demand_factor, planning_horizon)
     
     else:
         raise ValueError(f"Unsupported network name: {network_name}") 

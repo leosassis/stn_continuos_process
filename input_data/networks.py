@@ -777,8 +777,8 @@ def define_stn_network_upper_bound_X(tau_factor: int, beta_factor: int, demand_f
     
     # unit data indexed by (unit, task)
     'UNIT_TASKS': {
-        ('U0', 'T0') : {'tau_min': 3, 'tau_max': 6, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 30, 'direction': 1,},
-        ('U1', 'T1') : {'tau_min': 9, 'tau_max': 11, 'tau': 1, 'Bmin': 45, 'Bmax': 50, 'Cost': 4, 'vCost': 1, 'sCost': 30, 'direction': 1,},              
+        ('U0', 'T0') : {'tau_min': 4, 'tau_max': 11, 'tau': 1, 'Bmin': 25, 'Bmax': 30, 'Cost': 4, 'vCost': 1, 'sCost': 30, 'direction': 1,},
+        ('U1', 'T1') : {'tau_min': 4, 'tau_max': 11, 'tau': 1, 'Bmin': 45, 'Bmax': 50, 'Cost': 4, 'vCost': 1, 'sCost': 30, 'direction': 1,},              
         ('U1', 'T2') : {'tau_min': 2, 'tau_max': 4, 'tau': 1, 'Bmin': 30, 'Bmax': 40, 'Cost': 4, 'vCost': 1, 'sCost': 30, 'direction': 1,},       
     },
 }
@@ -834,6 +834,87 @@ def define_stn_network_indirect_transitions(tau_factor: int, beta_factor: int, d
         ('UC3', 'TC1')  : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 6, 'Bmax': 8, 'Cost': 4, 'vCost': 1, 'sCost': 31.5, 'direction': 1,},
         ('UC3', 'ITC1') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 4, 'Bmax': 4, 'Cost': 6, 'vCost': 1, 'sCost': 0, 'direction': 1,},
         ('UC3', 'TC1I') : {'tau_min': 0, 'tau_max': 0, 'tau': 1, 'Bmin': 2, 'Bmax': 2, 'Cost': 3, 'vCost': 1, 'sCost': 0, 'direction': -1,},
+    },
+}
+    
+    return stn
+
+
+def define_stn_network_all_transitions(tau_factor: int, beta_factor: int, demand_factor: int, planning_horizon: int) -> dict:
+    
+    stn = {
+    # states
+    'STATES': {
+        'RM'     : {'capacity': 10000, 'initial': 10000, 'price': 0, 'isRM': True, 'isIntermed': False, 'isProd': False, 'order': 1,},
+        'IA1'    : {'capacity': 10000, 'initial': 0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 2,},                
+        'P1'     : {'capacity': 10000, 'initial': 0, 'price': 100, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 3,},       
+        'P2'     : {'capacity': 10000, 'initial': 0, 'price': 100, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 4,},               
+    },
+
+    'STATES_SHIPMENT': {
+        ('P1', 35) : {'demand':25},
+        ('P2', 40) : {'demand':25},       
+    },
+    
+    # state-to-task arcs indexed by (state, task)
+    'ST_ARCS': {
+        ('RM', 'TA1')  : {'rho': -1.0, 'direction': -1},
+        ('RM', 'ITA1') : {'rho': -1.0, 'direction': -1},
+        ('RM', 'TA1I') : {'rho': -1.0, 'direction': -1},        
+        ('IA1', 'TC1')  : {'rho': -1.0, 'direction': -1},
+        ('IA1', 'ITC1') : {'rho': -1.0, 'direction': -1},
+        ('IA1', 'TC1I') : {'rho': -1.0, 'direction': -1},            
+        ('IA1', 'TC2')  : {'rho': -1.0, 'direction': -1},
+        ('IA1', 'ITC2') : {'rho': -1.0, 'direction': -1},
+        ('IA1', 'TC2I') : {'rho': -1.0, 'direction': -1},    
+        ('IA1', 'DTC1TC2') : {'rho': -1.0, 'direction': -1},
+        ('IA1', 'DTC2TC1') : {'rho': -1.0, 'direction': -1},
+    },
+    
+    # task-to-state arcs indexed by (task, state)
+    'TS_ARCS': {
+        ('TA1', 'IA1')  : {'rho': 1.0, 'direction': 1},
+        ('ITA1', 'IA1') : {'rho': 1.0, 'direction': 1},
+        ('TA1I', 'IA1') : {'rho': 1.0, 'direction': 1},            
+        ('TC1', 'P1')  : {'rho': 1.0, 'direction': 1},
+        ('ITC1', 'P1') : {'rho': 1.0, 'direction': 1},
+        ('TC1I', 'P1') : {'rho': 1.0, 'direction': 1},            
+        ('TC2', 'P2')  : {'rho': 1.0, 'direction': 1},
+        ('ITC2', 'P2') : {'rho': 1.0, 'direction': 1},
+        ('TC2I', 'P2') : {'rho': 1.0, 'direction': 1},    
+        ('DTC1TC2', 'P2') : {'rho': 1.0, 'direction': 1},
+        ('DTC2TC1', 'P1') : {'rho': 1.0, 'direction': 1},       
+    },
+    
+    # Tasks and their corresponding transition. 
+    # Transition-To-Task = 1. Task-To-Transition = -1.
+    # Equivalent to parameter ipits(i, ii) in the GAMS code.
+    'TASKS_TRANSITION_TASKS': { 
+        ('TA1', 'ITA1') : {'isSU': True, 'isSD': False, 'isDirect': False, 'direction': 1},
+        ('TA1', 'TA1I') : {'isSU': False, 'isSD': True, 'isDirect': False, 'direction': -1},            
+        ('TC1', 'ITC1')   : {'isSU': True, 'isSD': False, 'isDirect': False, 'direction': 1},
+        ('TC1', 'TC1I')   : {'isSU': False, 'isSD': True, 'isDirect': False, 'direction': -1},
+        ('TC2', 'ITC2')   : {'isSU': True, 'isSD': False, 'isDirect': False, 'direction': 1},
+        ('TC2', 'TC2I')   : {'isSU': False, 'isSD': True, 'isDirect': False, 'direction': -1},            
+        ('TC1', 'DTC2TC1')   : {'isSU': False, 'isSD': False, 'isDirect': True, 'direction': 1},
+        ('TC1', 'DTC1TC2')   : {'isSU': False, 'isSD': False, 'isDirect': True, 'direction': -1},            
+        ('TC2', 'DTC1TC2')   : {'isSU': False, 'isSD': False, 'isDirect': True, 'direction': 1},
+        ('TC2', 'DTC2TC1')   : {'isSU': False, 'isSD': False, 'isDirect': True, 'direction': -1},
+    },
+    
+    # unit data indexed by (unit, task)
+    'UNIT_TASKS': {
+        ('UA1', 'TA1')  : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 3, 'Bmax': 3, 'Cost': 4, 'vCost': 1, 'sCost': 31.5, 'direction': 1,},
+        ('UA1', 'ITA1') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 4, 'Bmax': 4, 'Cost': 6, 'vCost': 1, 'sCost': 0, 'direction': 1,},
+        ('UA1', 'TA1I') : {'tau_min': 0, 'tau_max': 0, 'tau': 1, 'Bmin': 3, 'Bmax': 2, 'Cost': 3, 'vCost': 1, 'sCost': 0, 'direction': -1,},            
+        ('UC2', 'TC1')  : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 3, 'Bmax': 3, 'Cost': 4, 'vCost': 1, 'sCost': 31.5, 'direction': 1,},
+        ('UC2', 'ITC1') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 4, 'Bmax': 4, 'Cost': 6, 'vCost': 1, 'sCost': 0, 'direction': 1,},
+        ('UC2', 'TC1I') : {'tau_min': 0, 'tau_max': 0, 'tau': 1, 'Bmin': 2, 'Bmax': 2, 'Cost': 3, 'vCost': 1, 'sCost': 0, 'direction': -1,},            
+        ('UC2', 'TC2')  : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 3, 'Bmax': 3, 'Cost': 4, 'vCost': 1, 'sCost': 31.5, 'direction': 1,},
+        ('UC2', 'ITC2') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 4, 'Bmax': 4, 'Cost': 6, 'vCost': 1, 'sCost': 0, 'direction': 1,},
+        ('UC2', 'TC2I') : {'tau_min': 0, 'tau_max': 0, 'tau': 1, 'Bmin': 2, 'Bmax': 2, 'Cost': 3, 'vCost': 1, 'sCost': 0, 'direction': -1,},            
+        ('UC2', 'DTC1TC2') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 6, 'Bmax': 6, 'Cost': 6, 'vCost': 1, 'sCost': 0, 'direction': 1,},
+        ('UC2', 'DTC2TC1') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 6, 'Bmax': 6, 'Cost': 6, 'vCost': 1, 'sCost': 0, 'direction': 1,}, 
     },
 }
     

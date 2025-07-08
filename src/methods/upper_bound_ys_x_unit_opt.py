@@ -32,12 +32,12 @@ def compute_upper_bound_x_unit(stn_data: dict, planning_horizon: int) -> None:
     upper_bound_x_unit = {}
     
     for j in model_init_max_production_unit.S_Units:
-        #if len(model_init_max_production_unit.S_I_In_J[j]) >= 2:
         upper_bound_x_unit[j] = sum(model_init_max_production_unit.V_X[i,j,n].value for i in model_init_max_production_unit.S_I_Production_Tasks for n in model_init_max_production_unit.S_Time if (i,j) in model_init_max_production_unit.P_Task_Unit_Network)
+        print(f'Unit: {j}, Used Time Points = {upper_bound_x_unit[j]}')
     
     stn_data['UPPER_BOUND_X_UNIT'] = upper_bound_x_unit          
     
-    #plot_gantt_chart(planning_horizon, model_init_max_production_unit, "X")
+    plot_gantt_chart(planning_horizon, model_init_max_production_unit, "X")
 
 
 def compute_upper_bound_y_unit(stn_data: dict, planning_horizon: int) -> None:
@@ -67,9 +67,9 @@ def compute_upper_bound_y_unit(stn_data: dict, planning_horizon: int) -> None:
     upper_bound_y_unit = {}
     
     for j in model_init_max_startups_unit.S_Units:
-        #if len(model_init_max_startups_unit.S_I_In_J[j]) >= 2:
         upper_bound_y_unit[j] = sum(model_init_max_startups_unit.V_Y_Start[i,j,n].value for i in model_init_max_startups_unit.S_I_Production_Tasks for n in model_init_max_startups_unit.S_Time if (i,j) in model_init_max_startups_unit.P_Task_Unit_Network)
+        print(f'Unit: {j}, Number of Startups = {upper_bound_y_unit[j]}')
     
     stn_data['UPPER_BOUND_Y_UNIT'] = upper_bound_y_unit       
     
-    #plot_gantt_chart(planning_horizon, model_init_max_startups_unit, "Y")  
+    plot_gantt_chart(planning_horizon, model_init_max_startups_unit, "Y")  

@@ -3,6 +3,7 @@ from numpy import floor
 from src.models.model_solve import define_solver
 from src.models.base_model_build import load_model_sets_parameters_variables
 from src.methods.est import compute_est_subsequent_tasks
+from src.models.variables import RUNS_NEED_TO_FINISH_FLAG
 
 
 ADD_TIME_PERIOD = 1  # Used for computing the number of time periods
@@ -56,6 +57,8 @@ def compute_upper_bound_x_task(stn_data: dict, planning_horizon: int) -> None:
     est = stn_data['EST']
     num_periods = max(model_init_max_production_task.S_Time)    
     upper_bound_x_task = {}
+    number_runs = {}
+    remaining_time_points = {}
     
     for (j,i) in est:
         
@@ -64,18 +67,44 @@ def compute_upper_bound_x_task(stn_data: dict, planning_horizon: int) -> None:
         tau_end = model_init_max_production_task.P_Tau_End_Task[i]
         number_time_points_for_x = num_periods + ADD_TIME_PERIOD - est[j,i]
         
-        model_max_production_time_points = ConcreteModel()        
+        if (
+            i in model_init_max_production_task.S_I_Production_Tasks and 
+            j in model_init_max_production_task.S_J_Units_Without_Transition_Tasks and
+            RUNS_NEED_TO_FINISH_FLAG == True
+        ):
         
-        model_max_production_time_points.S_Run_Lenghts = RangeSet(tau_min, tau_max)
-        model_max_production_time_points.V_Number_Runs = Var(model_max_production_time_points.S_Run_Lenghts, domain = NonNegativeIntegers)
-        model_max_production_time_points.C_Knapsack_Constraint = Constraint(rule = knapsack_constraint(model_max_production_time_points, number_time_points_for_x, tau_end))
-        model_max_production_time_points.C_Objective = Objective(expr = define_objective(model_max_production_time_points), sense = maximize)
+            model_max_production_time_points = ConcreteModel()        
+            
+            model_max_production_time_points.S_Run_Lenghts = RangeSet(tau_min, tau_max)
+            model_max_production_time_points.V_Number_Runs = Var(model_max_production_time_points.S_Run_Lenghts, domain = NonNegativeIntegers)
+            model_max_production_time_points.C_Knapsack_Constraint = Constraint(rule = knapsack_constraint(model_max_production_time_points, number_time_points_for_x, tau_end))
+            model_max_production_time_points.C_Objective = Objective(expr = define_objective(model_max_production_time_points), sense = maximize)
+            
+            solver = define_solver()
+            solver.solve(model_max_production_time_points, tee = False)
+            
+            upper_bound_x_task[j,i] = sum(run_length * model_max_production_time_points.V_Number_Runs[run_length].value for run_length in model_max_production_time_points.S_Run_Lenghts)
+            number_runs[j,i] = sum(model_max_production_time_points.V_Number_Runs[run_length].value for run_length in model_max_production_time_points.S_Run_Lenghts)
+            remaining_time_points[j,i] = number_time_points_for_x - upper_bound_x_task[j,i] - number_runs[j,i]
+            
+            print(f'Unit: {j}, Task: {i}, Available Time Points = {number_time_points_for_x}, Used Time Points = {upper_bound_x_task[j,i]}, Number of Complete Runs = {number_runs[j,i]}, Remaining Time Points = {remaining_time_points[j,i]}')
+            model_max_production_time_points.V_Number_Runs.display() 
+            
+        elif (
+            i in model_init_max_production_task.S_I_Production_Tasks and 
+            j in model_init_max_production_task.S_J_Units_Without_Transition_Tasks and
+            RUNS_NEED_TO_FINISH_FLAG == False
+        ):
+            upper_bound_x_task[j,i] = number_time_points_for_x - floor(number_time_points_for_x / (tau_max + tau_end))
+            number_runs[j,i] = floor(number_time_points_for_x / (tau_max + tau_end))
+            remaining_time_points[j,i] = number_time_points_for_x - upper_bound_x_task[j,i] - number_runs[j,i]
+            print(f'Unit: {j}, Task: {i}, Available Time Points = {number_time_points_for_x}, Used Time Points = {upper_bound_x_task[j,i]}, Number of Complete Runs = {number_runs[j,i]}, Remaining Time Points = {remaining_time_points[j,i]}')
+            
+        # TODO: add condition for tasks and units with indirect transition
         
-        solver = define_solver()
-        solver.solve(model_max_production_time_points, tee = False)
+        # TODO: add condition for tasks and units with direct transition
         
-        upper_bound_x_task[j,i] = sum(run_length * model_max_production_time_points.V_Number_Runs[run_length].value for run_length in model_max_production_time_points.S_Run_Lenghts)
-        model_max_production_time_points.V_Number_Runs.display() 
-                
+        # TODO: add condition for tasks and units with direct/indirect transition
+                        
     stn_data['UPPER_BOUND_X_TASK'] = upper_bound_x_task   
     

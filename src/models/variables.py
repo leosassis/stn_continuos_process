@@ -1,6 +1,9 @@
 from pyomo.environ import *
 
 
+RUNS_NEED_TO_FINISH_FLAG = True
+
+
 def create_variables(model: ConcreteModel) -> None:
     """ 
     Creates model variables.
@@ -45,7 +48,8 @@ def init_variables(model: ConcreteModel, planning_horizon: int) -> None:
     #[model.V_X_Hat[i,j,n].fix(0) for i in model.S_Tasks for j in model.S_Units for n in model.S_Time if n < planning_horizon] 
     
     # The last time point n is reserved for Y_End = 1.
-    [model.V_X[i,j,n].fix(0) for i in (model.S_Tasks - model.S_I_Shutdown_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n >= planning_horizon - model.P_Tau[i,j] + 1] 
+    if RUNS_NEED_TO_FINISH_FLAG:
+        [model.V_X[i,j,n].fix(0) for i in (model.S_Tasks - model.S_I_Shutdown_Tasks) for j in model.S_J_Executing_I[i] for n in model.S_Time if n >= planning_horizon - model.P_Tau[i,j] + 1] 
         
     # OPTIONAL INITIALIZATION LOGIC (Uncomment as needed):    
         
