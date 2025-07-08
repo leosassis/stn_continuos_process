@@ -456,12 +456,12 @@ def define_stn_network_5(tau_factor: int, beta_factor: int, demand_factor: int, 
         
         # Placeholder for shipment demands
         'STATES_SHIPMENT': { 
-            ('P1', planning_horizon) : {'demand':10 * demand_factor},
-            ('P2', planning_horizon) : {'demand':10 * demand_factor},
-            ('P3', planning_horizon) : {'demand':10 * demand_factor},
-            ('P4', planning_horizon) : {'demand':10 * demand_factor},
-            ('P5', planning_horizon) : {'demand':10 * demand_factor},
-            ('P6', planning_horizon) : {'demand':10 * demand_factor},      
+            ('P1', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P2', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P3', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P4', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P5', planning_horizon) : {'demand': 10 * demand_factor},
+            #('P6', planning_horizon) : {'demand': 10 * demand_factor},      
         },
         
         # Define input arcs: which states feed which tasks (negative flow)
@@ -560,9 +560,9 @@ def define_stn_network_6(tau_factor: int, beta_factor: int, demand_factor: int, 
         },
 
         'STATES_SHIPMENT': { 
-            ('P1', planning_horizon) : {'demand':10 * demand_factor},        
-            #('P2', planning_horizon) : {'demand':10 * beta_factor},
-            #('P3', planning_horizon) : {'demand':10 * beta_factor},
+            ('P1', planning_horizon) : {'demand': 10 * demand_factor},        
+            #('P2', planning_horizon) : {'demand': 10 * beta_factor},
+            #('P3', planning_horizon) : {'demand': 10 * beta_factor},
         },
         
         # state-to-task arcs indexed by (state, task)
