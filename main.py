@@ -3,20 +3,18 @@ import logging
 from itertools import product
 from src.models.model_solve import define_solver
 from src.models.formulation_build import (create_model_f1_base_formulation, 
-                                          create_model_f2_X_zero_est, 
-                                          create_model_f3_YS_zero_est,
-                                          create_model_f4_ub_YS_task,
-                                          create_model_f5_ub_YS_unit,
-                                          create_model_f6_ub_X_task,
-                                          create_model_f7_ub_X_unit,
-                                          create_model_f8_ub_X_group_k,
-                                          create_model_f9_ub_YS_group_k,
-                                          create_model_f10_X_YS_zero_est,
-                                          create_model_f11_ub_YS_task_unit,
-                                          create_model_f12_ub_X_task_unit,
-                                          create_model_f13_ub_X_YS_group_k,
-                                          create_model_f14_all)
-from src.data.instance_generation import load_network, instance_factors_network
+                                          create_model_f2_X_YS_zero_est, 
+                                          create_model_f3_ub_YS_task,
+                                          create_model_f4_ub_YS_unit,
+                                          create_model_f5_ub_X_task,
+                                          create_model_f6_ub_X_unit,
+                                          create_model_f7_ub_X_group_k,
+                                          create_model_f8_ub_YS_group_k,
+                                          create_model_f9_ub_YS_task_unit,
+                                          create_model_f10_ub_X_task_unit,
+                                          create_model_f11_ub_X_YS_group_k,
+                                          create_model_f12_all)
+from src.data.instance_generation import load_network
 from src.data.postprocessing import initialize_results_dict, create_dict_result
 from src.models.model_solve import solve_and_analyze_model 
 import sys
@@ -69,31 +67,27 @@ def run_instance(network: str, demand_factor: int, planning_horizon: int, tau_fa
         if formulation_number == 0:      
             model_milp, formulation_name = create_model_f1_base_formulation(stn_data, planning_horizon)
         elif formulation_number == 1:
-            model_milp, formulation_name = create_model_f2_X_zero_est(stn_data, planning_horizon)
+            model_milp, formulation_name = create_model_f2_X_YS_zero_est(stn_data, planning_horizon)
         elif formulation_number == 2:
-            model_milp, formulation_name = create_model_f3_YS_zero_est(stn_data, planning_horizon)
+            model_milp, formulation_name = create_model_f3_ub_YS_task(stn_data, planning_horizon)
         elif formulation_number == 3:
-            model_milp, formulation_name = create_model_f4_ub_YS_task(stn_data, planning_horizon)
+            model_milp, formulation_name = create_model_f4_ub_YS_unit(stn_data, planning_horizon)
         elif formulation_number == 4:
-            model_milp, formulation_name = create_model_f5_ub_YS_unit(stn_data, planning_horizon)
+            model_milp, formulation_name = create_model_f5_ub_X_task(stn_data, planning_horizon)
         elif formulation_number == 5:
-            model_milp, formulation_name = create_model_f6_ub_X_task(stn_data, planning_horizon)
+            model_milp, formulation_name = create_model_f6_ub_X_unit(stn_data, planning_horizon)
         elif formulation_number == 6:
-            model_milp, formulation_name = create_model_f7_ub_X_unit(stn_data, planning_horizon)
+            model_milp, formulation_name = create_model_f7_ub_X_group_k(stn_data, planning_horizon)
         elif formulation_number == 7:
-            model_milp, formulation_name = create_model_f8_ub_X_group_k(stn_data, planning_horizon)
+            model_milp, formulation_name = create_model_f8_ub_YS_group_k(stn_data, planning_horizon)
         elif formulation_number == 8:
-            model_milp, formulation_name = create_model_f9_ub_YS_group_k(stn_data, planning_horizon)
+            model_milp, formulation_name = create_model_f9_ub_YS_task_unit(stn_data, planning_horizon)
         elif formulation_number == 9:
-            model_milp, formulation_name = create_model_f10_X_YS_zero_est(stn_data, planning_horizon)
+            model_milp, formulation_name = create_model_f10_ub_X_task_unit(stn_data, planning_horizon)
         elif formulation_number == 10:
-            model_milp, formulation_name = create_model_f11_ub_YS_task_unit(stn_data, planning_horizon)
+            model_milp, formulation_name = create_model_f11_ub_X_YS_group_k(stn_data, planning_horizon)
         elif formulation_number == 11:
-            model_milp, formulation_name = create_model_f12_ub_X_task_unit(stn_data, planning_horizon)
-        elif formulation_number == 12:
-            model_milp, formulation_name = create_model_f13_ub_X_YS_group_k(stn_data, planning_horizon)
-        elif formulation_number == 13:
-            model_milp, formulation_name = create_model_f14_all(stn_data, planning_horizon)
+            model_milp, formulation_name = create_model_f12_all(stn_data, planning_horizon)
         else:
             raise Exception(f"Fomrulation number {formulation_number} is not recognized.")
         
