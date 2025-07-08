@@ -48,5 +48,5 @@ for i, (formulation_num, net, horizon, tau, beta, demand, gap) in enumerate(prod
         "mip_gap": gap,
     })
     
-    with open(f'{DATA_FOLDER}/run_{i:03}.json', 'w') as f:
+    with open(f'{DATA_FOLDER}/run_{i:05}.json', 'w') as f:
         json.dump(params, f, indent=2)

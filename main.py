@@ -115,14 +115,14 @@ def main(taskID: int) -> None:
     Main function to run multiple instances of the optimization problem.
     """
     
-    with open(f"input_data/datasets/run_{taskID:03}.json", "r") as f:
+    with open(f"input_data/datasets/run_{taskID:05}.json", "r") as f:
         dct = json.load(f)    
     
     formulation_number, network, demand_factor, planning_horizon, tau_factor, beta_factor, mip_gap_multiplier = dct["formulation"], dct["network"], dct["demand_factor"], dct["planning_horizon"], dct["tau_factor"], dct["beta_factor"], dct["mip_gap"]
     
     result = run_instance(network, demand_factor, planning_horizon, tau_factor, beta_factor, formulation_number, taskID, mip_gap_multiplier)
     
-    with open(f"src/results/result_{taskID:03}.json", "w") as f:
+    with open(f"src/results/result_{taskID:05}.json", "w") as f:
         json.dump(result, f)
                                 
     
