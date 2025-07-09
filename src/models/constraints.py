@@ -96,28 +96,27 @@ def track_indirect_transitions_unit_eq12(model, i, j, n):
         i in model.S_I_Production_Tasks_With_Indirect_Transition and 
         j in model.S_J_Executing_I[i]
     ):
-        return 0 == (            
-                                        #(model.V_X_Hat[i,j,n-1] if n >= 1 else 0)             
-                                      + (model.V_X[i,j,n-1] if n >= 1 else 0)                                         
-                                      + sum(
-                                          model.V_X[ii,j,n-model.P_Tau[ii,j]] 
-                                          for ii in model.S_I_Startup_Tasks
-                                          if (j,i,ii) in model.P_Task_Transitions_Unit 
-                                          if model.P_Task_Transitions_Unit[j,i,ii] == 1
-                                          if n - model.P_Tau[ii,j] >= 0) 
-                                      - model.V_X[i,j,n]                                
-                                      - sum(
-                                          model.V_X[ii,j,n] 
-                                          for ii in model.S_I_Shutdown_Tasks
-                                          if (j,i,ii) in model.P_Task_Transitions_Unit 
-                                          if model.P_Task_Transitions_Unit[j,i,ii] == -1))                                          
+        return 0 == (                                            
+                    + (model.V_X[i,j,n-1] if n >= 1 else 0)                                         
+                    + sum(
+                        model.V_X[ii,j,n-model.P_Tau[ii,j]] 
+                        for ii in model.S_I_Startup_Tasks
+                        if (j,i,ii) in model.P_Task_Transitions_Unit 
+                        if model.P_Task_Transitions_Unit[j,i,ii] == 1
+                        if n - model.P_Tau[ii,j] >= 0) 
+                    - model.V_X[i,j,n]                                
+                    - sum(
+                        model.V_X[ii,j,n] 
+                        for ii in model.S_I_Shutdown_Tasks
+                        if (j,i,ii) in model.P_Task_Transitions_Unit 
+                        if model.P_Task_Transitions_Unit[j,i,ii] == -1))                                          
     else:
         return Constraint.Skip
 
     
 def track_idle_unit_eq13(model, j, n):
     """ 
-    Model the relationship between startup, shutdown and idle model. Basically, if a shutdown happens, the unit goes to idle mode and it leaves it if there is a startup.
+    Model the relationship between startup, shutdown and idle mode. Basically, if a shutdown happens, the unit goes to idle mode and it leaves it if there is a startup.
     It tracks the idle mode between consecutive time points (model.V_X_Hat_Idle[j,n] and model.V_X_Hat_Idle[j,n-1]); it tracks if a unit has a shutdown or a startup.
     
     Input: set units with startup and shutdown and set of time points.
@@ -153,21 +152,20 @@ def track_direct_transitions_eq14(model, i, j, n):
         i in model.S_I_Production_Tasks_With_Direct_Transition and 
         j in model.S_J_Executing_I[i]        
     ):
-        return model.V_X_Hat[i,j,n] == (            
-                                        (model.V_X_Hat[i,j,n-1] if n >= 1 else 0)             
-                                      + (model.V_X[i,j,n-1] if n >= 1 else 0)
-                                      + sum(
-                                          model.V_X[ii,j,n-model.P_Tau[ii,j]] 
-                                          for ii in model.S_I_Direct_Transition_Tasks 
-                                          if (j,i,ii) in model.P_Task_Transitions_Unit 
-                                          if model.P_Task_Transitions_Unit[j,i,ii] == 1
-                                          if n - model.P_Tau[ii,j] >= 0)
-                                      - model.V_X[i,j,n]
-                                      - sum(
-                                          model.V_X[ii,j,n] 
-                                          for ii in model.S_I_Direct_Transition_Tasks
-                                          if (j,i,ii) in model.P_Task_Transitions_Unit 
-                                          if model.P_Task_Transitions_Unit[j,i,ii] == -1))
+        return 0 == (            
+                      (model.V_X[i,j,n-1] if n >= 1 else 0)
+                    + sum(
+                        model.V_X[ii,j,n-model.P_Tau[ii,j]] 
+                        for ii in model.S_I_Direct_Transition_Tasks 
+                        if (j,i,ii) in model.P_Task_Transitions_Unit 
+                        if model.P_Task_Transitions_Unit[j,i,ii] == 1
+                        if n - model.P_Tau[ii,j] >= 0)
+                    - model.V_X[i,j,n]
+                    - sum(
+                        model.V_X[ii,j,n] 
+                        for ii in model.S_I_Direct_Transition_Tasks
+                        if (j,i,ii) in model.P_Task_Transitions_Unit 
+                        if model.P_Task_Transitions_Unit[j,i,ii] == -1))
     else:
         return Constraint.Skip
     
@@ -177,32 +175,31 @@ def track_direct_indirect_transitions_eq15(model, i, j, n):
         i in model.S_I_Production_Tasks_With_Transition and
         j in model.S_J_Executing_I[i]          
     ):
-        return model.V_X_Hat[i,j,n] == (
-                                        (model.V_X_Hat[i,j,n-1] if n >= 1 else 0)
-                                      + (model.V_X[i,j,n-1] if n >= 1 else 0)
-                                      + sum(
-                                          model.V_X[ii,j,n-model.P_Tau[ii,j]] 
-                                          for ii in model.S_I_Startup_Tasks
-                                          if (j,i,ii) in model.P_Task_Transitions_Unit 
-                                          if model.P_Task_Transitions_Unit[j,i,ii] == 1
-                                          if n >= model.P_Tau[ii,j])
-                                      + sum(
-                                          model.V_X[ii,j,n-model.P_Tau[ii,j]] 
-                                          for ii in model.S_I_Direct_Transition_Tasks
-                                          if (j,i,ii) in model.P_Task_Transitions_Unit 
-                                          if model.P_Task_Transitions_Unit[j,i,ii] == 1
-                                          if n >= model.P_Tau[ii,j])                                      
-                                      - model.V_X[i,j,n]
-                                      - sum(
-                                          model.V_X[ii,j,n] 
-                                          for ii in model.S_I_Shutdown_Tasks
-                                          if (j,i,ii) in model.P_Task_Transitions_Unit 
-                                          if model.P_Task_Transitions_Unit[j,i,ii] == -1)
-                                      - sum(
-                                          model.V_X[ii,j,n] 
-                                          for ii in model.S_I_Direct_Transition_Tasks
-                                          if (j,i,ii) in model.P_Task_Transitions_Unit 
-                                          if model.P_Task_Transitions_Unit[j,i,ii] == -1))                                         
+        return 0 == (
+                      (model.V_X[i,j,n-1] if n >= 1 else 0)
+                    + sum(
+                        model.V_X[ii,j,n-model.P_Tau[ii,j]] 
+                        for ii in model.S_I_Startup_Tasks
+                        if (j,i,ii) in model.P_Task_Transitions_Unit 
+                        if model.P_Task_Transitions_Unit[j,i,ii] == 1
+                        if n >= model.P_Tau[ii,j])
+                    + sum(
+                        model.V_X[ii,j,n-model.P_Tau[ii,j]] 
+                        for ii in model.S_I_Direct_Transition_Tasks
+                        if (j,i,ii) in model.P_Task_Transitions_Unit 
+                        if model.P_Task_Transitions_Unit[j,i,ii] == 1
+                        if n >= model.P_Tau[ii,j])                                      
+                    - model.V_X[i,j,n]
+                    - sum(
+                        model.V_X[ii,j,n] 
+                        for ii in model.S_I_Shutdown_Tasks
+                        if (j,i,ii) in model.P_Task_Transitions_Unit 
+                        if model.P_Task_Transitions_Unit[j,i,ii] == -1)
+                    - sum(
+                        model.V_X[ii,j,n] 
+                        for ii in model.S_I_Direct_Transition_Tasks
+                        if (j,i,ii) in model.P_Task_Transitions_Unit 
+                        if model.P_Task_Transitions_Unit[j,i,ii] == -1))                                         
     else:
         return Constraint.Skip
 
@@ -290,7 +287,7 @@ def track_start_production_task_after_transition_eq20(model, i, j, n):
     ):
         return model.V_X[i,j,n] >= sum(
                                     model.V_X[ii,j,n-model.P_Tau[ii,j]] 
-                                    for ii in model.S_I_All_Transition_Tasks # TO DO: replace by S_I_All_Transition_Tasks
+                                    for ii in model.S_I_All_Transition_Tasks 
                                     if (i,ii) in model.P_Task_Transitions 
                                     if model.P_Task_Transitions_Unit[j,i,ii] == 1
                                     if n-model.P_Tau[ii,j] >= 0)
@@ -334,14 +331,8 @@ def load_constraints_basic_model(model: ConcreteModel) -> None:
     model.C_Min_Lenght_Run_Eq18 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = min_lenght_run_eq18)
     model.C_Max_Lenght_Run_Eq19 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19)
     
-    # Indirect transition constraints - models the transitions between tasks with an idle mode
-    #model.C_Track_Indirect_Transitions_Eq12 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_indirect_transitions_unit_eq12)
+    # Direct and indirect transition constraints
     model.C_Track_Idle_Unit_Eq13 = Constraint(model.S_Units, model.S_Time, rule = track_idle_unit_eq13)
-        
-    # Direct transition constraints - models the transitions between tasks without an idle mode
-    #model.C_Track_Direct_Transitions_Eq14 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_direct_transitions_eq14)
-    
-    # Direct and Indirect transition constraints - models the transitions between tasks in a unit with direct and indirect transitions
     model.C_Track_Indirect_Direct_Eq15 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_direct_indirect_transitions_eq15)
     model.C_Track_Start_Production_Task_After_Transition_Eq20 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_production_task_after_transition_eq20)
     
