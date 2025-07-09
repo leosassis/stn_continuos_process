@@ -34,11 +34,13 @@ def plot_gantt_chart(planning_horizon: int, model: ConcreteModel, var: str) -> N
             
             elif var == "Y":                
                 for t in model.S_Time:
-                    if model.V_Y_Start[i,j,t]() > 0.0001:
+                    val_YS = model.V_Y_Start[i, j, t]()
+                    val_YE = model.V_Y_End[i,j,t]()
+                    if val_YS is not None and val_YS > 0.0001:
                         plt.plot([t+gap, t + model.P_Tau[i,j]-gap], [idx,idx],'g', lw=20, solid_capstyle='butt')
                         txt = "{0:.2f}".format(model.V_Y_Start[i,j,t]())
                         plt.text(t + model.P_Tau[i,j]/2, idx, txt, color='white', weight='bold', ha='center', va='center')
-                    if model.V_Y_End[i,j,t]() > 0.0001:
+                    if val_YE is not None and val_YE > 0.0001:
                         plt.plot([t+gap, t + model.P_Tau[i,j]-gap], [idx,idx],'r', lw=20, solid_capstyle='butt')
                         txt = "{0:.2f}".format(model.V_Y_End[i,j,t]())
                         plt.text(t + model.P_Tau[i,j]/2, idx, txt, color='white', weight='bold', ha='center', va='center')  
