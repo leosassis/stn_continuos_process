@@ -13,7 +13,8 @@ from src.models.formulation_build import (create_model_f1_base_formulation,
                                           create_model_f9_ub_YS_task_unit,
                                           create_model_f10_ub_X_task_unit,
                                           create_model_f11_ub_X_YS_group_k,
-                                          create_model_f12_all)
+                                          create_model_f12_all, 
+                                          create_model_f0_test)
 from src.data.instance_generation import load_network
 from src.data.postprocessing import initialize_results_dict, create_dict_result
 from src.models.model_solve import solve_and_analyze_model 
@@ -88,6 +89,8 @@ def run_instance(network: str, demand_factor: int, planning_horizon: int, tau_fa
             model_milp, formulation_name = create_model_f11_ub_X_YS_group_k(stn_data, planning_horizon)
         elif formulation_number == 11:
             model_milp, formulation_name = create_model_f12_all(stn_data, planning_horizon)
+        elif formulation_number == 12:
+            model_milp, formulation_name = create_model_f0_test(stn_data, planning_horizon)        
         else:
             raise Exception(f"Fomrulation number {formulation_number} is not recognized.")
         

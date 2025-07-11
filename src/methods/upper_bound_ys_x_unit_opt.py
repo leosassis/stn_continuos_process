@@ -22,7 +22,7 @@ def compute_upper_bound_x_unit(stn_data: dict, planning_horizon: int) -> None:
     
     load_model_sets_parameters_variables(model_init_max_production_unit, stn_data, planning_horizon)
     compute_est_subsequent_tasks(model_init_max_production_unit, stn_data)   
-    load_basic_model_constraints_objective(model_init_max_production_unit, stn_data, planning_horizon, 'bound_production_operations')    
+    load_basic_model_constraints_objective(model_init_max_production_unit, stn_data, planning_horizon, 'bound_production_operations_x_unit')    
     create_parameters_tightening_constraints(model_init_max_production_unit, stn_data, "")
     load_constraint_set_to_zero_x_est(model_init_max_production_unit)
     load_constraint_set_to_zero_ys_est(model_init_max_production_unit)
@@ -35,9 +35,8 @@ def compute_upper_bound_x_unit(stn_data: dict, planning_horizon: int) -> None:
         upper_bound_x_unit[j] = sum(model_init_max_production_unit.V_X[i,j,n].value for i in model_init_max_production_unit.S_I_Production_Tasks for n in model_init_max_production_unit.S_Time if (i,j) in model_init_max_production_unit.P_Task_Unit_Network)
         print(f'Unit: {j}, Used Time Points = {upper_bound_x_unit[j]}')
     
-    stn_data['UPPER_BOUND_X_UNIT'] = upper_bound_x_unit          
-    
-    #plot_gantt_chart(planning_horizon, model_init_max_production_unit, "X")
+    stn_data['UPPER_BOUND_X_UNIT'] = upper_bound_x_unit    
+    plot_gantt_chart(planning_horizon, model_init_max_production_unit, "X")
 
 
 def compute_upper_bound_y_unit(stn_data: dict, planning_horizon: int) -> None:
@@ -56,7 +55,7 @@ def compute_upper_bound_y_unit(stn_data: dict, planning_horizon: int) -> None:
         
     load_model_sets_parameters_variables(model_init_max_startups_unit, stn_data, planning_horizon)
     compute_est_subsequent_tasks(model_init_max_startups_unit, stn_data)
-    load_basic_model_constraints_objective(model_init_max_startups_unit, stn_data, planning_horizon, 'bound_startups')    
+    load_basic_model_constraints_objective(model_init_max_startups_unit, stn_data, planning_horizon, 'bound_startups_ys_unit')    
     create_parameters_tightening_constraints(model_init_max_startups_unit, stn_data, "")
     load_constraint_set_to_zero_x_est(model_init_max_startups_unit)
     load_constraint_set_to_zero_ys_est(model_init_max_startups_unit)
@@ -70,6 +69,5 @@ def compute_upper_bound_y_unit(stn_data: dict, planning_horizon: int) -> None:
         upper_bound_y_unit[j] = sum(model_init_max_startups_unit.V_Y_Start[i,j,n].value for i in model_init_max_startups_unit.S_I_Production_Tasks for n in model_init_max_startups_unit.S_Time if (i,j) in model_init_max_startups_unit.P_Task_Unit_Network)
         print(f'Unit: {j}, Number of Startups = {upper_bound_y_unit[j]}')
     
-    stn_data['UPPER_BOUND_Y_UNIT'] = upper_bound_y_unit       
-    
-    #plot_gantt_chart(planning_horizon, model_init_max_startups_unit, "Y")  
+    stn_data['UPPER_BOUND_Y_UNIT'] = upper_bound_y_unit           
+    plot_gantt_chart(planning_horizon, model_init_max_startups_unit, "Y")  

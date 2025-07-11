@@ -320,27 +320,27 @@ def unit_availability_eq21(model, j, n):
     
 def load_constraints_basic_model(model: ConcreteModel) -> None:
     
-    # Base constraints
+    # Base constraints - material balance
     model.C_Unit_Capacity_LB_Eq2 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = unit_capacity_lb_eq2)
     model.C_Unit_Capacity_UB_Eq2 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = unit_capacity_ub_eq2)
     model.C_Material_Mass_Balance_Eq3 = Constraint(model.S_Materials, model.S_Time, rule = material_mass_balance_eq3)
     model.C_Material_Capacity_Eq4 = Constraint(model.S_Materials, model.S_Time, rule = material_capacity_eq4)
+    
+    # Base constraints - logic
     model.C_Track_Start_End_Run_Task_Eq16 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq16)
     model.C_Track_Start_End_Run_Task_Eq17 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq17)
     model.C_Track_Start_End_Run_Unit_Eq17 = Constraint(model.S_Units, model.S_Time, rule = track_start_end_run_unit_eq22)
     model.C_Min_Lenght_Run_Eq18 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = min_lenght_run_eq18)
     model.C_Max_Lenght_Run_Eq19 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19)
+    model.C_Unit_Availability_Eq21 = Constraint(model.S_Units, model.S_Time, rule = unit_availability_eq21)
     
     # Direct and indirect transition constraints
     model.C_Track_Idle_Unit_Eq13 = Constraint(model.S_Units, model.S_Time, rule = track_idle_unit_eq13)
     model.C_Track_Indirect_Direct_Eq15 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_direct_indirect_transitions_eq15)
     model.C_Track_Start_Production_Task_After_Transition_Eq20 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_production_task_after_transition_eq20)
-    
-    # Clique constraint
-    model.C_Unit_Availability_Eq21 = Constraint(model.S_Units, model.S_Time, rule = unit_availability_eq21)
-    
+        
 
-def load_constraints_basic_model_for_operations_x_y(model: ConcreteModel) -> None:
+def load_constraints_basic_model_for_operations_x_y_unit(model: ConcreteModel) -> None:
    
     model.C_Track_Start_End_Run_Task_Eq16 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq16)
     model.C_Track_Start_End_Run_Task_Eq17 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq17)
@@ -348,4 +348,16 @@ def load_constraints_basic_model_for_operations_x_y(model: ConcreteModel) -> Non
     model.C_Min_Lenght_Run_Eq18 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = min_lenght_run_eq18)
     model.C_Max_Lenght_Run_Eq19 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19)
     model.C_Unit_Availability_Eq21 = Constraint(model.S_Units, model.S_Time, rule = unit_availability_eq21)
-       
+    model.C_Track_Idle_Unit_Eq13 = Constraint(model.S_Units, model.S_Time, rule = track_idle_unit_eq13)
+    model.C_Track_Indirect_Direct_Eq15 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_direct_indirect_transitions_eq15)
+    model.C_Track_Start_Production_Task_After_Transition_Eq20 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_production_task_after_transition_eq20)
+    
+    
+def load_constraints_basic_model_for_operations_x_y_task(model: ConcreteModel) -> None:
+   
+    model.C_Track_Start_End_Run_Task_Eq16 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq16)
+    model.C_Track_Start_End_Run_Task_Eq17 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq17)
+    model.C_Min_Lenght_Run_Eq18 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = min_lenght_run_eq18)
+    model.C_Max_Lenght_Run_Eq19 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = max_lenght_run_eq19)
+    model.C_Track_Indirect_Direct_Eq15 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_direct_indirect_transitions_eq15)
+    model.C_Track_Start_Production_Task_After_Transition_Eq20 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_production_task_after_transition_eq20)

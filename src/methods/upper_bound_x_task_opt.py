@@ -6,7 +6,7 @@ from src.methods.est import compute_est_subsequent_tasks
 from src.models.variables import RUNS_NEED_TO_FINISH_FLAG
 
 
-ADD_TIME_PERIOD = 1  # Used for computing the number of time periods
+ADD_TIME_POINT = 1  # Used for computing the number of time periods
 
 
 def knapsack_constraint(model_max_production_time_points: ConcreteModel, number_time_points_for_x: int, tau_end: int) -> Constraint:
@@ -65,7 +65,7 @@ def compute_upper_bound_x_task(stn_data: dict, planning_horizon: int) -> None:
         tau_max = model_init_max_production_task.P_Tau_Max[i,j]
         tau_min = model_init_max_production_task.P_Tau_Min[i,j]
         tau_end = model_init_max_production_task.P_Tau_End_Task[i]
-        number_time_points_for_x = num_periods + ADD_TIME_PERIOD - est[j,i]
+        number_time_points_for_x = num_periods + ADD_TIME_POINT - est[j,i]
         
         if (
             i in model_init_max_production_task.S_I_Production_Tasks and 
@@ -100,11 +100,4 @@ def compute_upper_bound_x_task(stn_data: dict, planning_horizon: int) -> None:
             remaining_time_points[j,i] = number_time_points_for_x - upper_bound_x_task[j,i] - number_runs[j,i]
             print(f'Unit: {j}, Task: {i}, Available Time Points = {number_time_points_for_x}, Used Time Points = {upper_bound_x_task[j,i]}, Number of Complete Runs = {number_runs[j,i]}, Remaining Time Points = {remaining_time_points[j,i]}')
             
-        # TODO: add condition for tasks and units with indirect transition
-        
-        # TODO: add condition for tasks and units with direct transition
-        
-        # TODO: add condition for tasks and units with direct/indirect transition
-                        
-    stn_data['UPPER_BOUND_X_TASK'] = upper_bound_x_task   
-    
+    stn_data['UPPER_BOUND_X_TASK'] = upper_bound_x_task

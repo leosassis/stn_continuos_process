@@ -787,8 +787,8 @@ def define_stn_network_upper_bound_X(tau_factor: int, beta_factor: int, demand_f
     'STATES': {
         'RM'     : {'capacity': 10000, 'initial': 10000, 'price':  0, 'isRM': True, 'isIntermed': False, 'isProd': False, 'order': 1,},
         'I1'     : {'capacity': 10000, 'initial': 0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 2,},                
-        'P1'     : {'capacity': 10000, 'initial': 0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 3,},       
-        'P2'     : {'capacity': 10000, 'initial': 0, 'price': 10, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 4,},       
+        'P1'     : {'capacity': 10000, 'initial': 0, 'price': 100, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 3,},       
+        'P2'     : {'capacity': 10000, 'initial': 0, 'price': 100, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 4,},       
     },
 
     'STATES_SHIPMENT': {
@@ -946,16 +946,16 @@ def define_stn_network_all_transitions(tau_factor: int, beta_factor: int, demand
     # unit data indexed by (unit, task)
     'UNIT_TASKS': {
         ('UA1', 'TA1')  : {'tau_min': 5, 'tau_max': 8, 'tau': 1, 'Bmin': 30, 'Bmax': 50, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-        ('UA1', 'ITA1') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 4, 'Bmax': 4, 'Cost': 6, 'vCost': 1, 'sCost': 0, 'direction': 1,},
-        ('UA1', 'TA1I') : {'tau_min': 0, 'tau_max': 0, 'tau': 1, 'Bmin': 3, 'Bmax': 3, 'Cost': 3, 'vCost': 1, 'sCost': 0, 'direction': -1,},  
+        ('UA1', 'ITA1') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 4, 'Bmax': 4, 'Cost': 6, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+        ('UA1', 'TA1I') : {'tau_min': 0, 'tau_max': 0, 'tau': 1, 'Bmin': 3, 'Bmax': 3, 'Cost': 3, 'vCost': 1, 'sCost': 25, 'direction': -1,},  
         ('UC2', 'TC1')  : {'tau_min': 3, 'tau_max': 5, 'tau': 1, 'Bmin': 15, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-        ('UC2', 'ITC1') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 4, 'Bmax': 4, 'Cost': 6, 'vCost': 1, 'sCost': 0, 'direction': 1,},
-        ('UC2', 'TC1I') : {'tau_min': 0, 'tau_max': 0, 'tau': 1, 'Bmin': 2, 'Bmax': 2, 'Cost': 3, 'vCost': 1, 'sCost': 0, 'direction': -1,},  
+        ('UC2', 'ITC1') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 4, 'Bmax': 4, 'Cost': 6, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+        ('UC2', 'TC1I') : {'tau_min': 0, 'tau_max': 0, 'tau': 1, 'Bmin': 2, 'Bmax': 2, 'Cost': 3, 'vCost': 1, 'sCost': 25, 'direction': -1,},  
         ('UC2', 'TC2')  : {'tau_min': 4, 'tau_max': 6, 'tau': 1, 'Bmin': 10, 'Bmax': 20, 'Cost': 4, 'vCost': 1, 'sCost': 25, 'direction': 1,},
-        ('UC2', 'ITC2') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 4, 'Bmax': 4, 'Cost': 6, 'vCost': 1, 'sCost': 0, 'direction': 1,},
-        ('UC2', 'TC2I') : {'tau_min': 0, 'tau_max': 0, 'tau': 1, 'Bmin': 2, 'Bmax': 2, 'Cost': 3, 'vCost': 1, 'sCost': 0, 'direction': -1,},  
-        ('UC2', 'DTC1TC2') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 6, 'Bmax': 6, 'Cost': 6, 'vCost': 1, 'sCost': 0, 'direction': 1,},
-        ('UC2', 'DTC2TC1') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 6, 'Bmax': 6, 'Cost': 6, 'vCost': 1, 'sCost': 0, 'direction': 1,}, 
+        ('UC2', 'ITC2') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 4, 'Bmax': 4, 'Cost': 6, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+        ('UC2', 'TC2I') : {'tau_min': 0, 'tau_max': 0, 'tau': 1, 'Bmin': 2, 'Bmax': 2, 'Cost': 3, 'vCost': 1, 'sCost': 25, 'direction': -1,},  
+        ('UC2', 'DTC1TC2') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 6, 'Bmax': 6, 'Cost': 6, 'vCost': 1, 'sCost': 25, 'direction': 1,},
+        ('UC2', 'DTC2TC1') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 6, 'Bmax': 6, 'Cost': 6, 'vCost': 1, 'sCost': 25, 'direction': 1,}, 
     },
 }
     

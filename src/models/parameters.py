@@ -1,4 +1,5 @@
 from pyomo.environ import *
+from src.models.variables import RUNS_NEED_TO_FINISH_FLAG
 
 
 def init_parameter_tau(UNIT_TASKS):
@@ -74,8 +75,12 @@ def est_group_initialization(est_group: dict) -> dict:
     return dict_est_group
 
 def ub_ys_task_initialization(model: ConcreteModel) -> dict:
-    dict_ys_task = {(i,j): floor( ( max(model.S_Time) + 1 - model.P_EST_Task[i,j] )  / ( model.P_Tau_Min[i,j] +  model.P_Tau_End_Task[i] ) ) for (i,j) in model.P_EST_Task}
-    return dict_ys_task   
+    
+    if RUNS_NEED_TO_FINISH_FLAG == True:
+        return {(i,j): floor( ( max(model.S_Time) + 1 - model.P_EST_Task[i,j] )  / ( model.P_Tau_Min[i,j] +  model.P_Tau_End_Task[i] ) ) for (i,j) in model.P_EST_Task}
+    
+    else:
+        return {(i,j): ceil( ( max(model.S_Time) + 1 - model.P_EST_Task[i,j] )  / ( model.P_Tau_Min[i,j] +  model.P_Tau_End_Task[i] ) ) for (i,j) in model.P_EST_Task}       
         
 def ub_ys_unit_initialization(model: ConcreteModel) -> dict:
     dict_ys_unit = {j: floor( ( max(model.S_Time) + 1 - model.P_EST_Unit[j] ) / ( min( model.P_Tau_Min[i,j] for i in model.S_I_In_J[j] ) + model.P_Tau_End_Unit[j] ) ) for j in model.P_EST_Unit}
@@ -179,3 +184,11 @@ def create_parameters_tightening_constraints(model: ConcreteModel, stn_data: dic
         model.P_UB_YS_Unit_OPT = Param(model.S_Units, initialize = upper_bound_ys_unit_initialization(upper_bound_ys_unit))    
         model.P_UB_X_Task_OPT = Param(model.S_Tasks, model.S_Units, initialize = upper_bound_x_task_initialization(upper_bound_x_task))
         model.P_UB_X_Unit_OPT = Param(model.S_Units, initialize = upper_bound_x_unit_initialization(upper_bound_x_unit))     
+        
+        model.P_EST_Task.pprint()
+        model.P_EST_Unit.pprint()
+        model.P_EST_Group.pprint()
+        model.P_UB_YS_Task_PPC.pprint()
+        model.P_UB_YS_Unit_OPT.pprint()
+        model.P_UB_X_Task_OPT.pprint()
+        model.P_UB_X_Unit_OPT.pprint()

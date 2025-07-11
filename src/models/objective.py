@@ -52,13 +52,15 @@ def _define_objective(model: ConcreteModel, stn_data: dict, model_type: str) -> 
    startups = sum(
       model.V_Y_Start[i,j,n] 
       for (i,j) in model.P_Task_Unit_Network
-      for n in model.S_Time
+      for n in model.S_Time 
+      #if i in model.S_I_Production_Tasks
    )
    
    production_operations = sum(
       model.V_X[i,j,n] 
       for (i,j) in model.P_Task_Unit_Network 
-      for n in model.S_Time      
+      for n in model.S_Time  
+      if i in model.S_I_Production_Tasks    
    )
       
    if model_type == 'base_model':
