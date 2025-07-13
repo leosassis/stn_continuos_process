@@ -36,7 +36,7 @@ def compute_upper_bound_x_unit(stn_data: dict, planning_horizon: int) -> None:
         print(f'Unit: {j}, Used Time Points = {upper_bound_x_unit[j]}')
     
     stn_data['UPPER_BOUND_X_UNIT'] = upper_bound_x_unit    
-    plot_gantt_chart(planning_horizon, model_init_max_production_unit, "X")
+    #plot_gantt_chart(planning_horizon, model_init_max_production_unit, "X")
 
 
 def compute_upper_bound_y_unit(stn_data: dict, planning_horizon: int) -> None:
@@ -70,4 +70,4 @@ def compute_upper_bound_y_unit(stn_data: dict, planning_horizon: int) -> None:
         print(f'Unit: {j}, Number of Startups = {upper_bound_y_unit[j]}')
     
     stn_data['UPPER_BOUND_Y_UNIT'] = upper_bound_y_unit           
-    plot_gantt_chart(planning_horizon, model_init_max_startups_unit, "Y")  
+    #plot_gantt_chart(planning_horizon, model_init_max_startups_unit, "Y")  

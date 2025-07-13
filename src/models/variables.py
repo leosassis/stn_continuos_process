@@ -1,7 +1,7 @@
 from pyomo.environ import *
 
 
-RUNS_NEED_TO_FINISH_FLAG = False
+RUNS_NEED_TO_FINISH_FLAG = True
 
 
 def create_variables(model: ConcreteModel) -> None:

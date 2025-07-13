@@ -64,7 +64,9 @@ for filename in os.listdir(RESULTS_FOLDER):
                 try:
                     data = json.loads(line)
                     if _is_valid_record(data):
-                        data["Instance"] = data["Instance"][:25]
+                        instance_name = data["Instance"]
+                        last_underscore_idx = instance_name.rfind('_')
+                        data["Instance"] = data["Instance"][:last_underscore_idx]
                         valid_records.append(data)
                     else:
                         invalid_records.append(data)
