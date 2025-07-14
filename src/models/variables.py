@@ -27,9 +27,6 @@ def create_variables(model: ConcreteModel) -> None:
     # Continuous: V_S[k,n] is the inventory of material k in time n.
     model.V_S = Var(model.S_Materials, model.S_Time, domain = NonNegativeReals)
 
-    # Binary: V_X_Hat[i,j,n] is 1 if unit j is in task mode i (ready to execute batch subtaks i_SB(i)) at time point n.
-    model.V_X_Hat = Var(model.S_Tasks, model.S_Units, model.S_Time, bounds = (0, 1), domain = Binary)
-
     # Binary: V_X_Hat_Idle[j,n] is 1 if unit j is in idle mode at time point n.
     model.V_X_Hat_Idle = Var(model.S_Units, model.S_Time, bounds = (0, 1), domain = Binary)
     

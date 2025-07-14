@@ -319,6 +319,12 @@ def unit_availability_eq21(model, j, n):
             
     
 def load_constraints_basic_model(model: ConcreteModel) -> None:
+    """ 
+    Load all constraints related to the basic model.
+    
+    Input: 
+        - model (ConcreteModel): a Pyomo model instance.
+    """
     
     # Base constraints - material balance
     model.C_Unit_Capacity_LB_Eq2 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = unit_capacity_lb_eq2)
@@ -341,7 +347,13 @@ def load_constraints_basic_model(model: ConcreteModel) -> None:
         
 
 def load_constraints_basic_model_for_operations_x_y_unit(model: ConcreteModel) -> None:
-   
+    """ 
+    Load the necessary constraints related to the basic model to solve the optimizations problems necessary to find bounds on X and YS in the units.
+    
+    Input: 
+        - model (ConcreteModel): a Pyomo model instance.
+    """
+    
     model.C_Track_Start_End_Run_Task_Eq16 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq16)
     model.C_Track_Start_End_Run_Task_Eq17 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq17)
     model.C_Track_Start_End_Run_Unit_Eq17 = Constraint(model.S_Units, model.S_Time, rule = track_start_end_run_unit_eq22)
@@ -354,7 +366,13 @@ def load_constraints_basic_model_for_operations_x_y_unit(model: ConcreteModel) -
     
     
 def load_constraints_basic_model_for_operations_x_y_task(model: ConcreteModel) -> None:
-   
+    """ 
+    Load the necessary constraints related to the basic model to solve the optimizations problems necessary to find bounds on X and YS for each task.
+    
+    Input: 
+        - model (ConcreteModel): a Pyomo model instance.
+    """
+    
     model.C_Track_Start_End_Run_Task_Eq16 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq16)
     model.C_Track_Start_End_Run_Task_Eq17 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = track_start_end_run_task_eq17)
     model.C_Min_Lenght_Run_Eq18 = Constraint(model.S_Tasks, model.S_Units, model.S_Time, rule = min_lenght_run_eq18)
