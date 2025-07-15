@@ -368,9 +368,9 @@ def create_model_f0_test(stn_data: dict, planning_horizon: int) -> tuple[Concret
     Returns:
         - ConcreteModel: returns a Pyomo model.
     """
-    
-    compute_upper_bound_x_unit(stn_data, planning_horizon)
-    compute_upper_bound_y_unit(stn_data, planning_horizon)        
+    compute_upper_bound_x_task(stn_data, planning_horizon)
+    #compute_upper_bound_x_unit(stn_data, planning_horizon)
+    #compute_upper_bound_y_unit(stn_data, planning_horizon)        
         
     model = ConcreteModel()
     
