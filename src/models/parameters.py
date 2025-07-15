@@ -1,6 +1,7 @@
 from pyomo.environ import *
 from src.models.variables import RUNS_NEED_TO_FINISH_FLAG
 
+ADD_TIME_POINT = 1  # Used for computing the number of time periods
 
 def init_parameter_tau(UNIT_TASKS):
     P_TAU = {(i,j): UNIT_TASKS[(j,i)]['tau'] for (j,i) in UNIT_TASKS}
@@ -76,11 +77,52 @@ def est_group_initialization(est_group: dict) -> dict:
 
 def ub_ys_task_initialization(model: ConcreteModel) -> dict:
     
-    if RUNS_NEED_TO_FINISH_FLAG == True:
-        return {(i,j): floor( ( max(model.S_Time) + 1 - model.P_EST_Task[i,j] )  / ( model.P_Tau_Min[i,j] +  model.P_Tau_End_Task[i] ) ) for (i,j) in model.P_EST_Task}
+    num_periods = max(model.S_Time)
+    upper_bound_ys_task = {}
     
-    else:
-        return {(i,j): ceil( ( max(model.S_Time) + 1 - model.P_EST_Task[i,j] )  / ( model.P_Tau_Min[i,j] +  model.P_Tau_End_Task[i] ) ) for (i,j) in model.P_EST_Task}       
+    for (i,j) in model.P_Task_Unit_Network:
+        
+        # Skip tasks that are not production tasks
+        if i not in model.S_I_Production_Tasks:
+            continue
+        
+        # Import tau_max, tau_min, tau_shutdown and number of time points
+        tau_min = model.P_Tau_Min[i,j]
+        tau_shutdown = model.P_Tau_End_Task[i]
+        tau_startup = 0
+        number_time_points = num_periods + ADD_TIME_POINT# - model.P_EST_Task[i,j]
+        
+        # Import tau for the production tasks with transitions
+        for ii in model.S_I_Startup_Tasks:
+            if (
+                i in model.S_I_Production_Tasks_With_Transition and 
+                (j,i,ii) in model.P_Task_Transitions_Unit
+            ):
+                tau_startup = model.P_Tau[ii,j]
+            
+        for ii in model.S_I_Shutdown_Tasks:
+            if (
+                i in model.S_I_Production_Tasks_With_Transition and
+                (j,i,ii) in model.P_Task_Transitions_Unit
+            ):
+                tau_shutdown = model.P_Tau[ii,j]
+        
+        if RUNS_NEED_TO_FINISH_FLAG == True:
+            upper_bound_ys_task[i,j] = floor( number_time_points  / ( tau_min +  tau_startup + tau_shutdown ) )
+    
+        else:
+            upper_bound_ys_task[i,j] = ceil( number_time_points  / ( tau_min +  tau_startup + tau_shutdown ) )
+        
+        print(f"Production task = {i}, Time Points = {number_time_points}, tau_startup = {tau_startup}, tau_shutdown = {tau_shutdown}, Upper Bound YS = {upper_bound_ys_task[i,j]}, Remaining Time Points = {number_time_points - upper_bound_ys_task[i,j] * ( tau_min +  tau_startup + tau_shutdown )}")
+    
+    """ if RUNS_NEED_TO_FINISH_FLAG == True:
+            return {(i,j): floor( ( max(model.S_Time) + 1 - model.P_EST_Task[i,j] )  / ( model.P_Tau_Min[i,j] +  model.P_Tau_End_Task[i] ) ) for (i,j) in model.P_EST_Task}
+    
+        else:
+            return {(i,j): ceil( ( max(model.S_Time) + 1 - model.P_EST_Task[i,j] )  / ( model.P_Tau_Min[i,j] +  model.P_Tau_End_Task[i] ) ) for (i,j) in model.P_EST_Task} """
+    
+    return upper_bound_ys_task        
+               
         
 def ub_ys_unit_initialization(model: ConcreteModel) -> dict:
     dict_ys_unit = {j: floor( ( max(model.S_Time) + 1 - model.P_EST_Unit[j] ) / ( min( model.P_Tau_Min[i,j] for i in model.S_I_In_J[j] ) + model.P_Tau_End_Unit[j] ) ) for j in model.P_EST_Unit}
