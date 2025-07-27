@@ -1,13 +1,13 @@
 from pyomo.environ import *
 
 
-def initialize_results_dict(network: str, demand_factor: int, planning_horizon: int, tau_factor: int, beta_factor: int, formulation_name: str, taskID: int, mip_gap_multiplier: int) -> dict[str, Any]:
+def initialize_results_dict(network: str, startup_cost_factor: int, planning_horizon: int, tau_factor: int, beta_factor: int, formulation_name: str, taskID: int, mip_gap_multiplier: int) -> dict[str, Any]:
     """
     Initializes a dictionary to store results from a single optimization instance.
 
     Args:
         - network (str): name of the network.
-        - demand_factor (int): factor for demand parameters.
+        - startup_cost_factor (int): factor for startup cost parameters.
         - planning_horizon (int): planning horizon.
         - tau_factor (int): factor for tau parameters.
         - beta_factor (int): factor for beta parameters.
@@ -17,7 +17,7 @@ def initialize_results_dict(network: str, demand_factor: int, planning_horizon: 
         dict[str, Any]: Initialized dictionary with placeholders for results.
     """
     
-    instance_name = f"{network}_{demand_factor}_{planning_horizon}_{tau_factor}_{beta_factor}_{mip_gap_multiplier}_{taskID}"
+    instance_name = f"{network}_{startup_cost_factor}_{planning_horizon}_{tau_factor}_{beta_factor}_{mip_gap_multiplier}_{taskID}"
     
     return {
             "Instance": instance_name,

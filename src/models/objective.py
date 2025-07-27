@@ -37,6 +37,13 @@ def _define_objective(model: ConcreteModel, stn_data: dict, model_type: str) -> 
       if k in model.S_Final_Products
    )
    
+   startups_cost = sum(
+      model.P_StartUp_Cost[j,i]*model.V_Y_Start[i,j,n] 
+      for (i,j) in model.P_Task_Unit_Network
+      for n in model.S_Time 
+      if i in model.S_I_Production_Tasks
+   )
+   
    makespan = sum(
       n * model.V_X[i,j,n] 
       for (i,j) in model.P_Task_Unit_Network 
@@ -65,7 +72,7 @@ def _define_objective(model: ConcreteModel, stn_data: dict, model_type: str) -> 
       
    if model_type == 'base_model':
    
-      return production_revenue - fix_operational_cost - variable_operational_cost
+      return production_revenue - fix_operational_cost - variable_operational_cost - startups_cost
    
    elif model_type == 'bound_production_operations':
    

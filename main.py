@@ -33,13 +33,13 @@ RESULTS_PATH = "src/results/model_results.xlsx"
 logging.basicConfig(level = logging.INFO, format = '%(asctime)s - %(levelname)s - %(message)s')
 
 
-def run_instance(network: str, demand_factor: int, planning_horizon: int, tau_factor: int, beta_factor: int, formulation_number: str, taskID: int, mip_gap_multiplier: int) -> dict:
+def run_instance(network: str, startup_cost_factor: int, planning_horizon: int, tau_factor: int, beta_factor: int, formulation_number: str, taskID: int, mip_gap_multiplier: int) -> dict:
     """ 
     Builds, solves, and analyze one optimization instance.    
     
     Args:
         - network (str): name of network to be optimized.
-        - demand_factor (int): factor to multiply demand parameters when creating instances.
+        - startup_cost_factor (int): factor to multiply the startup cost when creating instances.
         - planning_horizon (int): size of the planning horizon. 
         - tau_factor (int): factor to multiply tau parameters when creating instances.
         - beta_factor (int): factor to multiply beta parameters when creating instances.
@@ -52,14 +52,14 @@ def run_instance(network: str, demand_factor: int, planning_horizon: int, tau_fa
     """    
     
     # Step 0: Initialize results dict
-    result = initialize_results_dict(network, demand_factor, planning_horizon, tau_factor, beta_factor, "", taskID, mip_gap_multiplier)
+    result = initialize_results_dict(network, startup_cost_factor, planning_horizon, tau_factor, beta_factor, "", taskID, mip_gap_multiplier)
     
     try:
         
-        logging.info(f"Running instance: network = {network}, demand_factor = {demand_factor}, horizon = {planning_horizon}, tau_factor = {tau_factor}, beta_factor = {beta_factor}, task ID = {taskID}")
+        logging.info(f"Running instance: network = {network}, startup_cost_factor = {startup_cost_factor}, horizon = {planning_horizon}, tau_factor = {tau_factor}, beta_factor = {beta_factor}, task ID = {taskID}")
         
         # Step 1: Load network            
-        stn_data = load_network(network, tau_factor, beta_factor, demand_factor, planning_horizon)
+        stn_data = load_network(network, tau_factor, beta_factor, startup_cost_factor, planning_horizon)
         
         # Step 2: Define the solver
         solver = define_solver()
@@ -106,7 +106,7 @@ def run_instance(network: str, demand_factor: int, planning_horizon: int, tau_fa
     except Exception as e:
         
         logging.error(
-            f"Error while solving instance {network}, demand_factor = {demand_factor}, horizon = {planning_horizon}, tau_factor = {tau_factor}, beta_factor = {beta_factor}, formulation = {formulation_name}, mip_gap_multiplier = {mip_gap_multiplier}"
+            f"Error while solving instance {network}, startup_cost_factor = {startup_cost_factor}, horizon = {planning_horizon}, tau_factor = {tau_factor}, beta_factor = {beta_factor}, formulation = {formulation_name}, mip_gap_multiplier = {mip_gap_multiplier}"
         )
         logging.exception(e)
         
@@ -121,9 +121,9 @@ def main(taskID: int) -> None:
     with open(f"input_data/datasets/run_{taskID:05}.json", "r") as f:
         dct = json.load(f)    
     
-    formulation_number, network, demand_factor, planning_horizon, tau_factor, beta_factor, mip_gap_multiplier = dct["formulation"], dct["network"], dct["demand_factor"], dct["planning_horizon"], dct["tau_factor"], dct["beta_factor"], dct["mip_gap"]
+    formulation_number, network, startup_cost_factor, planning_horizon, tau_factor, beta_factor, mip_gap_multiplier = dct["formulation"], dct["network"], dct["startup_cost_factor"], dct["planning_horizon"], dct["tau_factor"], dct["beta_factor"], dct["mip_gap"]
     
-    result = run_instance(network, demand_factor, planning_horizon, tau_factor, beta_factor, formulation_number, taskID, mip_gap_multiplier)
+    result = run_instance(network, startup_cost_factor, planning_horizon, tau_factor, beta_factor, formulation_number, taskID, mip_gap_multiplier)
     
     with open(f"src/results/result_{taskID:05}.json", "w") as f:
         json.dump(result, f)

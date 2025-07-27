@@ -175,6 +175,8 @@ def create_basic_parameters(model: ConcreteModel, stn_data: dict, planning_horiz
     model.P_Tau_End_Task = Param(model.S_Tasks, default = 1)
     model.P_Tau_End_Unit = Param(model.S_Units, default = 1)
     
+    model.P_StartUp_Cost.pprint()
+    
 
 def create_parameters_tightening_constraints(model: ConcreteModel, stn_data: dict, formulation_id: str) -> None:
     """
