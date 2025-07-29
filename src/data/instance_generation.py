@@ -83,12 +83,12 @@ def instance_factors_network() -> tuple[list[str], list[str], list[int], int, in
     """
     
     NETWORKS = ["network_4"]
-    PLANNING_HORIZONS = [45, 50]
+    PLANNING_HORIZONS = [42, 45, 50, 55]
     TAU_FACTORS = [1.2, 1.4, 1.6]
     BETA_FACTORS = [0.5, 0.6, 0.7]
     FORMULATIONS = 12
-    DEMAND_FACTORS = [0, 5]
+    STARTUP_COST_FACTORS = [5]
     MIP_GAPS = [1, 5, 10]
     
         
-    return FORMULATIONS, NETWORKS, PLANNING_HORIZONS, TAU_FACTORS, BETA_FACTORS, DEMAND_FACTORS, MIP_GAPS 
+    return FORMULATIONS, NETWORKS, PLANNING_HORIZONS, TAU_FACTORS, BETA_FACTORS, STARTUP_COST_FACTORS, MIP_GAPS 
