@@ -82,13 +82,13 @@ def instance_factors_network() -> tuple[list[str], list[str], list[int], int, in
             - maximum beta multiplier (int). 
     """
     
-    NETWORKS = ["network_4"]
-    PLANNING_HORIZONS = [42, 45, 50, 55]
-    TAU_FACTORS = [1.2, 1.4, 1.6]
-    BETA_FACTORS = [0.5, 0.6, 0.7]
+    NETWORKS = ["network_4", "network_3"]
+    PLANNING_HORIZONS = [30, 40, 50, 60]
+    TAU_FACTORS = [1.2, 2.0]
+    BETA_FACTORS = [0.4, 0.8]
     FORMULATIONS = 12
-    STARTUP_COST_FACTORS = [5]
-    MIP_GAPS = [1, 5, 10]
+    STARTUP_COST_FACTORS = [1, 5]
+    MIP_GAPS = [10, 100]
     
         
     return FORMULATIONS, NETWORKS, PLANNING_HORIZONS, TAU_FACTORS, BETA_FACTORS, STARTUP_COST_FACTORS, MIP_GAPS 
