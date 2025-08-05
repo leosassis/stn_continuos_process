@@ -31,7 +31,7 @@ def set_solver_options_milp(solver: Any, mip_gap_multiplier) -> None:
     """  
     
     solver.options['MIPGap'] = mip_gap_multiplier * 0.0001  # Set MIP gap
-    solver.options['TimeLimit'] = 24 * 3600  # Set time limit
+    solver.options['TimeLimit'] = 15 * 3600  # Set time limit
 
 
 def activate_model_lp_relaxation(model: ConcreteModel) -> None:    
