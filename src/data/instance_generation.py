@@ -87,7 +87,7 @@ def instance_factors_network() -> tuple[list[str], list[str], list[int], int, in
     TAU_FACTORS = [1.2, 2.0]
     BETA_FACTORS = [0.4, 0.8]
     FORMULATIONS = 12
-    STARTUP_COST_FACTORS = [1, 5]
+    STARTUP_COST_FACTORS = [0]
     MIP_GAPS = [10, 100]
     
         
