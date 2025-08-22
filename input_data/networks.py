@@ -937,3 +937,105 @@ def define_stn_network_all_transitions(tau_factor: int, beta_factor: int, startu
 }
     
     return stn
+
+
+def define_stn_network_est_test(tau_factor: int, beta_factor: int, startup_cost_factor: int, planning_horizon: int) -> dict:
+    
+    stn = {
+    # states
+    'STATES': {
+        'RM'     : {'capacity': 10000, 'initial': 10000, 'price':  0, 'isRM': True, 'isIntermed': False, 'isProd': False, 'order': 1,},
+        'I1'     : {'capacity': 10000, 'initial': 150, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 2,},                
+        'P1'     : {'capacity': 10000, 'initial': 0, 'price': 1000, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 3,},       
+    },
+
+    'STATES_SHIPMENT': {
+        #('P1', 12) : {'demand':75},        
+        #('P2', 12) : {'demand':160},        
+    },
+    
+    # state-to-task arcs indexed by (state, task)
+    'ST_ARCS': {
+        ('RM', 'T1')  : {'rho': -1.0, 'direction': -1},
+        ('I1', 'T2')  : {'rho': -1.0, 'direction': -1},
+    },
+    
+    # task-to-state arcs indexed by (task, state)
+    'TS_ARCS': {
+        ('T1', 'I1')  : {'rho': 1.0, 'direction': 1},      
+        ('T2', 'P1')  : {'rho': 1.0, 'direction': 1},      
+    },
+    
+    # Tasks and their corresponding transition. 
+    # Transition-To-Task = 1. Task-To-Transition = -1.
+    # Equivalent to parameter ipits(i, ii) in the GAMS code.
+    'TASKS_TRANSITION_TASKS': {         
+    },
+    
+    # unit data indexed by (unit, task)
+    'UNIT_TASKS': {
+        ('U0', 'T1') : {'tau_min': 4, 'tau_max': 4, 'tau': 1, 'Bmin': 3, 'Bmax': 5, 'Cost': 0, 'vCost': 0, 'sCost': 0, 'direction': 1,},
+        ('U1', 'T2') : {'tau_min': 5, 'tau_max': 5, 'tau': 1, 'Bmin': 30, 'Bmax': 40, 'Cost': 0, 'vCost': 0, 'sCost': 0, 'direction': 1,},       
+    },
+}
+    
+    return stn
+
+
+def define_stn_network_est_indirect_transitions(tau_factor: int, beta_factor: int, startup_cost_factor: int, planning_horizon: int) -> dict:
+    
+    stn = {
+    # states
+    'STATES': {
+        'RM'     : {'capacity': 10000, 'initial': 10000, 'price':  0, 'isRM': True, 'isIntermed': False, 'isProd': False, 'order': 1,},
+        'I1'    : {'capacity': 10000, 'initial': 0, 'price': 0, 'isRM': False, 'isIntermed': True, 'isProd': False, 'order': 2,},                
+        'P1'     : {'capacity': 10000, 'initial': 0, 'price': 100, 'isRM': False, 'isIntermed': False, 'isProd': True, 'order': 3,},       
+    },
+
+    'STATES_SHIPMENT': {
+        #('P1', 8) : {'demand':10},        
+        #('P1', 10) : {'demand':25},        
+    },
+    
+    # state-to-task arcs indexed by (state, task)
+    'ST_ARCS': {
+        ('RM', 'T1') : {'rho': -1.0, 'direction': -1},
+        #('RM', 'IT1') : {'rho': -1.0, 'direction': -1},
+        #('RM', 'T1I') : {'rho': -1.0, 'direction': -1},
+        ('I1', 'T2')  : {'rho': -1.0, 'direction': -1},
+        ('I1', 'IT2') : {'rho': -1.0, 'direction': -1},
+        ('I1', 'T2I') : {'rho': -1.0, 'direction': -1},
+    },
+    
+    # task-to-state arcs indexed by (task, state)
+    'TS_ARCS': {
+        ('T1', 'I1')  : {'rho': 1.0, 'direction': 1},      
+        #('IT1', 'I1')  : {'rho': 1.0, 'direction': 1},      
+        #('T1I', 'I1')  : {'rho': 1.0, 'direction': 1},      
+        ('T2', 'P1')  : {'rho': 1.0, 'direction': 1},
+        ('IT2', 'P1') : {'rho': 1.0, 'direction': 1},
+        ('T2I', 'P1') : {'rho': 1.0, 'direction': 1},        
+    },
+    
+    # Tasks and their corresponding transition. 
+    # Transition-To-Task = 1. Task-To-Transition = -1.
+    # Equivalent to parameter ipits(i, ii) in the GAMS code.
+    'TASKS_TRANSITION_TASKS': { 
+        #('T1', 'IT1')   : {'isSU': True, 'isSD': False, 'isDirect': False, 'direction': 1},
+        #('T1', 'T1I')   : {'isSU': False, 'isSD': True, 'isDirect': False, 'direction': -1},
+        ('T2', 'IT2')   : {'isSU': True, 'isSD': False, 'isDirect': False, 'direction': 1},
+        ('T2', 'T2I')   : {'isSU': False, 'isSD': True, 'isDirect': False, 'direction': -1},
+    },
+    
+    # unit data indexed by (unit, task)
+    'UNIT_TASKS': {
+        ('U1', 'T1')  : {'tau_min': 6, 'tau_max': 6, 'tau': 1, 'Bmin': 15, 'Bmax': 15, 'Cost': 0, 'vCost': 0, 'sCost': 0, 'direction': 1,},           
+        #('U1', 'IT1') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 4, 'Bmax': 4, 'Cost': 0, 'vCost': 0, 'sCost': 0, 'direction': 1,},
+        #('U1', 'T1I') : {'tau_min': 0, 'tau_max': 0, 'tau': 1, 'Bmin': 2, 'Bmax': 2, 'Cost': 0, 'vCost': 0, 'sCost': 0, 'direction': -1,},
+        ('U2', 'T2')  : {'tau_min': 4, 'tau_max': 4, 'tau': 1, 'Bmin': 25, 'Bmax': 25, 'Cost': 0, 'vCost': 0, 'sCost': 0, 'direction': 1,},
+        ('U2', 'IT2') : {'tau_min': 0, 'tau_max': 0, 'tau': 2, 'Bmin': 4, 'Bmax': 4, 'Cost': 0, 'vCost': 0, 'sCost': 0, 'direction': 1,},
+        ('U2', 'T2I') : {'tau_min': 0, 'tau_max': 0, 'tau': 1, 'Bmin': 2, 'Bmax': 2, 'Cost': 0, 'vCost': 0, 'sCost': 0, 'direction': -1,},
+    },
+}
+    
+    return stn
