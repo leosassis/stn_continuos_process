@@ -38,7 +38,7 @@ def compute_total_production(model: ConcreteModel) -> float:
     return total_production
 
 
-def get_objective_value(model: ConcreteModel, STN: dict) -> float:
+def get_objective_value(model: ConcreteModel, STN: dict):
    """ 
    Gets the value of the objective function.
    """
@@ -46,14 +46,38 @@ def get_objective_value(model: ConcreteModel, STN: dict) -> float:
    UNIT_TASKS = STN['UNIT_TASKS']
    STATES = STN['STATES']
    
-   fix_operational_cost = sum(UNIT_TASKS[(j,i)]['Cost']*model.V_X[i,j,n].value for (i,j) in model.P_Task_Unit_Network for n in model.S_Time)
-   variable_operational_cost = sum(UNIT_TASKS[(j,i)]['vCost']*model.V_B[i,j,n].value for (i,j) in model.P_Task_Unit_Network for n in model.S_Time)
-   production_revenue = sum(STATES[k]['price']*model.V_B[i,j,n].value for k in model.S_Materials for i in model.S_I_Producing_K[k] for j in model.S_J_Executing_I[i] for n in model.S_Time if k in model.S_Final_Products)
-   makespan = sum(n*model.V_X[i,j,n].value for (i,j) in model.P_Task_Unit_Network for n in model.S_Time)
+   production_revenue = sum(
+      STATES[k]['price'] * model.V_B[i,j,n].value 
+      for k in model.S_Materials 
+      for i in model.S_I_Producing_K[k] 
+      for j in model.S_J_Executing_I[i] 
+      for n in model.S_Time 
+      if k in model.S_Final_Products
+   )
    
-   return production_revenue - fix_operational_cost - variable_operational_cost
-
-
+   fix_operational_cost = sum(
+      UNIT_TASKS[(j,i)]['Cost'] * model.V_X[i,j,n].value 
+      for (i,j) in model.P_Task_Unit_Network 
+      for n in model.S_Time
+   )
+   
+   variable_operational_cost = sum(
+      UNIT_TASKS[(j,i)]['vCost'] * model.V_B[i,j,n].value 
+      for (i,j) in model.P_Task_Unit_Network 
+      for n in model.S_Time
+   )
+   
+   startups_cost = sum(
+      model.P_StartUp_Cost[j,i]*model.V_Y_Start[i,j,n].value 
+      for (i,j) in model.P_Task_Unit_Network
+      for n in model.S_Time 
+      if i in model.S_I_Production_Tasks
+   )
+   
+   print(f"Production Revenue = {production_revenue}, Fix Operational Cost = {fix_operational_cost}, Variable Operational Cost = {variable_operational_cost}, Startup Cost = {startups_cost}")
+   print(f"Objective = {production_revenue - fix_operational_cost - variable_operational_cost - startups_cost}")
+   
+   
 def print_model_constraints(model: ConcreteModel) -> None:
     """ 
     Prints the model constraints.

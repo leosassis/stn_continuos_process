@@ -94,7 +94,7 @@ def run_instance(network: str, startup_cost_factor: int, planning_horizon: int, 
         else:
             raise Exception(f"Fomrulation number {formulation_number} is not recognized.")
         
-        results_milp, stats_milp, results_lp = solve_and_analyze_model(solver, model_milp, planning_horizon, mip_gap_multiplier)
+        results_milp, stats_milp, results_lp = solve_and_analyze_model(solver, model_milp, planning_horizon, mip_gap_multiplier, stn_data)
         
         # Step 4: Create result dictionary
         result = create_dict_result(result, stats_milp, results_milp, results_lp, formulation_name, mip_gap_multiplier)

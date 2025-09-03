@@ -2,7 +2,7 @@ from pyomo.environ import *
 from pyomo.opt import SolverResults
 from src.utils.utils import compute_num_variables_constraints
 from src.visualization.plot_results import plot_gantt_chart
-from src.utils.utils import print_model_constraints
+from src.utils.utils import print_model_constraints, get_objective_value
 
 def define_solver() -> Any:
     """ 
@@ -73,7 +73,7 @@ def solve_model(solver: Any, model: ConcreteModel) -> SolverResults:
     return results    
 
 
-def solve_and_analyze_model(solver: Any, model_milp: ConcreteModel, planning_horizon: int, mip_gap_multiplier: int) -> tuple[SolverResults, dict, SolverResults]:
+def solve_and_analyze_model(solver: Any, model_milp: ConcreteModel, planning_horizon: int, mip_gap_multiplier: int, stn_data: dict) -> tuple[SolverResults, dict, SolverResults]:
     """
     Solves the MILP model, analyzes it, and solves its LP relaxation.
     There is also the possibility to print Gantt charts.
@@ -83,6 +83,7 @@ def solve_and_analyze_model(solver: Any, model_milp: ConcreteModel, planning_hor
         - model_milp (ConcreteModel): the MILP Pyomo model to be solved.
         - planning_horizon (int): size of the planning horizon.
         - mip_gap_multiplier (int): multiplier to increase the mip gap.
+        - stn_data (dict): a dictionary with the state-task network instance data.
 
     Returns:
         Tuple[
@@ -97,15 +98,17 @@ def solve_and_analyze_model(solver: Any, model_milp: ConcreteModel, planning_hor
     
     results_milp: SolverResults = solve_model(solver, model_milp)   
     model_analytics_milp = compute_num_variables_constraints(model_milp)
-    #plot_gantt_chart(planning_horizon, model_milp, "X")
-    #plot_gantt_chart(planning_horizon, model_milp, "Y")
-    #plot_gantt_chart(planning_horizon, model_milp, "B")
+    plot_gantt_chart(planning_horizon, model_milp, "X")
+    plot_gantt_chart(planning_horizon, model_milp, "Y")
+    plot_gantt_chart(planning_horizon, model_milp, "B")
     #print_model_constraints(model_milp)
+    get_objective_value(model_milp, stn_data)
     
     activate_model_lp_relaxation(model_milp)
     results_lp: SolverResults = solve_model(solver, model_milp)
-    #plot_gantt_chart(planning_horizon, model_milp, "X")
-    #plot_gantt_chart(planning_horizon, model_milp, "Y")
-    #plot_gantt_chart(planning_horizon, model_milp, "B")
+    plot_gantt_chart(planning_horizon, model_milp, "X")
+    plot_gantt_chart(planning_horizon, model_milp, "Y")
+    plot_gantt_chart(planning_horizon, model_milp, "B")
+    get_objective_value(model_milp, stn_data)
     
     return results_milp, model_analytics_milp, results_lp
