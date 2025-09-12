@@ -19,15 +19,15 @@ def _materials_to_be_explored(stn_data: dict) -> list:
     return sorted(intermediate_materials.keys(), key=lambda k: intermediate_materials[k]['order'])
 
 
-def _get_production_relationship(model: ConcreteModel, i_producing: Any, j_producing: Any, ii_consuming: Any, jj_consuming: Any) -> int:
+def _get_production_relationship(model: ConcreteModel, i_producing: Any, j_producing: Any, ii_consuming: Any, jj_consuming: Any, intermedMaterial: Any) -> int:
     """ 
     Computes the production relationship between a consuming task ii_consuming and a producing task i_producing.
     """
     
-    numerator = model.P_Tau_Min[ii_consuming,jj_consuming] * model.P_Beta_Min[ii_consuming,jj_consuming]
-    denominator = model.P_Tau_Max[i_producing, j_producing] * model.P_Beta_Max[i_producing, j_producing]
+    numerator = abs(model.P_Rho_Minus[ii_consuming,intermedMaterial]) * model.P_Tau_Min[ii_consuming,jj_consuming] * model.P_Beta_Min[ii_consuming,jj_consuming]
+    denominator = model.P_Rho_Plus[i_producing,intermedMaterial] * model.P_Tau_Max[i_producing, j_producing] * model.P_Beta_Max[i_producing, j_producing]
     
-    return numerator/denominator
+    return (numerator - model.P_Init_Inventory_Material[intermedMaterial])/denominator
 
 
 def _get_number_periods(model: ConcreteModel, i_producing: Any, j_producing: Any, ii_consuming: Any, jj_consuming: Any, production_relationship: dict) -> int:
@@ -73,14 +73,21 @@ def compute_est_subsequent_tasks(model: ConcreteModel, stn_data: dict) -> None:
         first_material_list = materials_to_explore.pop(0)
                
         for i_producing, ii_consuming in product(model.S_I_Producing_K[first_material_list], model.S_I_Consuming_K[first_material_list]):
-                
+        
             j_producing = next(iter(model.S_J_Executing_I[i_producing]))
             jj_consuming = next(iter(model.S_J_Executing_I[ii_consuming]))
-            
-            key = (i_producing, j_producing, ii_consuming, jj_consuming)
                 
-            production_relationship[key] = _get_production_relationship(model, *key)
-            number_periods[key] = _get_number_periods(model, *key, production_relationship) 
-            est_task[jj_consuming, ii_consuming] = _get_est(model, *key, number_periods, est_task) 
-    
+            print(f"Pair of Tasks:{i_producing}-{ii_consuming}")
+        
+            if model.P_Init_Inventory_Material[first_material_list] >= abs(model.P_Rho_Minus[ii_consuming,first_material_list]) * model.P_Tau_Min[ii_consuming,jj_consuming] * model.P_Beta_Min[ii_consuming,jj_consuming]:
+                
+                est_task[jj_consuming, ii_consuming] = 0
+            
+            else:        
+                
+                key = (i_producing, j_producing, ii_consuming, jj_consuming)                    
+                production_relationship[key] = _get_production_relationship(model, *key, first_material_list)
+                number_periods[key] = _get_number_periods(model, *key, production_relationship) 
+                est_task[jj_consuming, ii_consuming] = _get_est(model, *key, number_periods, est_task)  
+        
     stn_data['EST'] = est_task

@@ -368,14 +368,12 @@ def create_model_f0_test(stn_data: dict, planning_horizon: int) -> tuple[Concret
     Returns:
         - ConcreteModel: returns a Pyomo model.
     """
-    compute_upper_bound_x_task(stn_data, planning_horizon)
-    #compute_upper_bound_x_unit(stn_data, planning_horizon)
-    #compute_upper_bound_y_unit(stn_data, planning_horizon)        
-        
+    
     model = ConcreteModel()
     
     load_model_sets_parameters_variables(model, stn_data, planning_horizon)
-    load_basic_model_constraints_objective(model, stn_data, planning_horizon, 'base_model')
+    #load_basic_model_constraints_objective(model, stn_data, planning_horizon, 'base_model')
+    compute_est_subsequent_tasks(model, stn_data)
     
     formulation_name = "F0_Test"
     
