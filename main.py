@@ -116,6 +116,10 @@ def run_instance(network: str, startup_cost_factor: int, planning_horizon: int, 
 def main(taskID: int) -> None:
     """ 
     Main function to run multiple instances of the optimization problem.
+    
+    To solve a problem instance, the user needs to type in the command line: python main.py ID, where ID is the last part of the instance file run_ID.json (e.g., python main.py 1). 
+    
+    The result will be stored in file result_00001.json
     """
     
     with open(f"input_data/datasets/run_{taskID:05}.json", "r") as f:
