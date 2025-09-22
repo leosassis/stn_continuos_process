@@ -18,7 +18,7 @@ def print_dict(dictionary: dict) -> None:
     pprint.pprint(dictionary)    
 
 
-def compute_product_production(model: ConcreteModel) -> float:
+def compute_product_production(model: ConcreteModel) -> None:
     """ 
     Computes and prints the production amount of each material k.
     """
@@ -38,7 +38,7 @@ def compute_total_production(model: ConcreteModel) -> float:
     return total_production
 
 
-def get_objective_value(model: ConcreteModel, STN: dict):
+def print_objective_value(model: ConcreteModel, STN: dict) -> None:
    """ 
    Gets the value of the objective function.
    """
@@ -87,7 +87,7 @@ def print_model_constraints(model: ConcreteModel) -> None:
         con.pprint()
         
         
-def compute_num_variables_constraints(model: ConcreteModel) -> int:
+def compute_num_variables_constraints(model: ConcreteModel) -> list[int]:
     """ 
     Computes the number of constraints and variables.
     """

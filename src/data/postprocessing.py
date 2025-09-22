@@ -12,6 +12,8 @@ def initialize_results_dict(network: str, startup_cost_factor: int, planning_hor
         - tau_factor (int): factor for tau parameters.
         - beta_factor (int): factor for beta parameters.
         - formulation_name (str): name of the model formulation.
+        - taskID (int): id that identifies the data set. It is the number at the end of each json file.
+        - mip_gap_multiplier (int): multiplier to increase the mip gap.
 
     Returns:
         dict[str, Any]: Initialized dictionary with placeholders for results.

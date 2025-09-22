@@ -355,26 +355,3 @@ def create_model_f12_all(stn_data: dict, planning_horizon: int) -> tuple[Concret
     formulation_name = "F12_All"
         
     return model, formulation_name
-
-
-def create_model_f0_test(stn_data: dict, planning_horizon: int) -> tuple[ConcreteModel, str]:
-    """
-    Creates the base MILP model plus the constraint that sets YS to 0 from n = 0 to n = est - 1.
-    
-    Args:
-        - stn_data (dict): a dictionary with the state-task network instance data.
-        - planning_horizon (int): planning horizon.
-
-    Returns:
-        - ConcreteModel: returns a Pyomo model.
-    """
-    
-    model = ConcreteModel()
-    
-    load_model_sets_parameters_variables(model, stn_data, planning_horizon)
-    #load_basic_model_constraints_objective(model, stn_data, planning_horizon, 'base_model')
-    compute_est_subsequent_tasks(model, stn_data)
-    
-    formulation_name = "F0_Test"
-    
-    return model, formulation_name

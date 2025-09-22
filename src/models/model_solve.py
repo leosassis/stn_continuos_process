@@ -2,7 +2,7 @@ from pyomo.environ import *
 from pyomo.opt import SolverResults
 from src.utils.utils import compute_num_variables_constraints
 from src.visualization.plot_results import plot_gantt_chart
-from src.utils.utils import print_model_constraints, get_objective_value
+from src.utils.utils import print_model_constraints, print_objective_value
 
 def define_solver() -> Any:
     """ 
@@ -102,13 +102,13 @@ def solve_and_analyze_model(solver: Any, model_milp: ConcreteModel, planning_hor
     plot_gantt_chart(planning_horizon, model_milp, "Y")
     plot_gantt_chart(planning_horizon, model_milp, "B")
     #print_model_constraints(model_milp)
-    get_objective_value(model_milp, stn_data)
+    print_objective_value(model_milp, stn_data)
     
     activate_model_lp_relaxation(model_milp)
     results_lp: SolverResults = solve_model(solver, model_milp)
     plot_gantt_chart(planning_horizon, model_milp, "X")
     plot_gantt_chart(planning_horizon, model_milp, "Y")
     plot_gantt_chart(planning_horizon, model_milp, "B")
-    get_objective_value(model_milp, stn_data)
+    print_objective_value(model_milp, stn_data)
     
     return results_milp, model_analytics_milp, results_lp
