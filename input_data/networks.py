@@ -1,6 +1,12 @@
 from numpy import floor, ceil
 
 
+################################################################################################################
+#This file constains different types of systems.                                                               #
+#Each one of them is defined in a function that returns a dictionary with the STN data.                        #
+################################################################################################################
+
+
 def define_stn_network_1(tau_factor: int, beta_factor: int, startup_cost_factor: int, planning_horizon: int) -> dict:
     """
     Create network_1 where tasks/units have the same tau/beta in a stage.
