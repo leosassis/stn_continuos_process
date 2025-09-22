@@ -1,6 +1,11 @@
 from pyomo.environ import *
 
 
+#######################################################
+#Constraints are numerated according to Wu's paper   #
+#######################################################
+
+
 def unit_capacity_lb_eq2(model: ConcreteModel, task, unit, time_point) -> Constraint:
     """
     Enforces a lower bound on the processing rate for a task-unit pair at a given time point.
@@ -92,6 +97,14 @@ def material_capacity_eq4(model, k, n):
 
 
 def track_indirect_transitions_unit_eq12(model, i, j, n):
+    """ 
+    Defines the relationship between task i and startup and shutdown operations.
+    
+    Input: set of tasks, units with indirect transitions and time points
+    
+    Output: constraints on the relationship between task i and startup and shutdown operations.
+    """
+    
     if (
         i in model.S_I_Production_Tasks_With_Indirect_Transition and 
         j in model.S_J_Executing_I[i]
@@ -119,9 +132,9 @@ def track_idle_unit_eq13(model, j, n):
     Model the relationship between startup, shutdown and idle mode. Basically, if a shutdown happens, the unit goes to idle mode and it leaves it if there is a startup.
     It tracks the idle mode between consecutive time points (model.V_X_Hat_Idle[j,n] and model.V_X_Hat_Idle[j,n-1]); it tracks if a unit has a shutdown or a startup.
     
-    Input: set units with startup and shutdown and set of time points.
+    Input: set units with startups and shutdowns and set of time points.
     
-    Output: constraints to model the relationship between startup, shutdown and idle model.
+    Output: constraints to model the relationship between startups, shutdowns and idle model.
     """
     
     if (
@@ -148,6 +161,14 @@ def track_idle_unit_eq13(model, j, n):
 
 
 def track_direct_transitions_eq14(model, i, j, n):
+    """ 
+    It defines the relationship between task i and direct transition operations.
+    
+    Input: set of tasks, units with only direct transitions and time points.
+    
+    Output: constraints to model the relationship between task i and direct transition operations.   
+    """
+    
     if (
         i in model.S_I_Production_Tasks_With_Direct_Transition and 
         j in model.S_J_Executing_I[i]        
@@ -171,6 +192,14 @@ def track_direct_transitions_eq14(model, i, j, n):
     
 
 def track_direct_indirect_transitions_eq15(model, i, j, n):
+    """ 
+    It defines the relationship between task i and startups, shutdowns, and direct transitions.
+    
+    Input: set of tasks, units with startups, shutdowns and direct transitions, and time points.
+    
+    Output: constraints to model the relationship between task i and its direct and indirect transition operations.     
+    """
+    
     if (
         i in model.S_I_Production_Tasks_With_Transition and
         j in model.S_J_Executing_I[i]          
@@ -281,6 +310,14 @@ def max_lenght_run_eq19(model, i, j, n):
 
 
 def track_start_production_task_after_transition_eq20(model, i, j, n):
+    """ 
+    After the execution of transition task ii, there needs to happen production task i.
+    
+    Input: set of tasks, units with transitions and time points.
+    
+    Output: constraints that links the execution of transition task ii to its associated production task i.
+    """
+    
     if (
         i in model.S_I_Production_Tasks_With_Transition and 
         j in model.S_J_Executing_I[i]
@@ -296,6 +333,13 @@ def track_start_production_task_after_transition_eq20(model, i, j, n):
 
 
 def unit_availability_eq21(model, j, n):
+    """ 
+    At most one task i can operate at time point n in unit j.
+    
+    Input: set of units and time points.
+    
+    Output: constraints that define the unit availability.
+    """
     
     if (
         j in model.S_J_Units_Without_Transition_Tasks

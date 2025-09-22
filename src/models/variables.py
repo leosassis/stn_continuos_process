@@ -1,6 +1,6 @@
 from pyomo.environ import *
 
-
+# This flag defines if a task must finish or not at the end of the planning horizon.
 RUNS_NEED_TO_FINISH_FLAG = True
 
 

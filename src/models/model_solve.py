@@ -76,7 +76,7 @@ def solve_model(solver: Any, model: ConcreteModel) -> SolverResults:
 def solve_and_analyze_model(solver: Any, model_milp: ConcreteModel, planning_horizon: int, mip_gap_multiplier: int, stn_data: dict) -> tuple[SolverResults, dict, SolverResults]:
     """
     Solves the MILP model, analyzes it, and solves its LP relaxation.
-    There is also the possibility to print Gantt charts.
+    There is also the possibility to print Gantt charts, model constraints and the value of the objective function.
 
     Args:
         - solver (Any): a Pyomo solver instance.
