@@ -58,8 +58,7 @@ def compute_upper_bound_y_unit(stn_data: dict, planning_horizon: int) -> None:
     load_basic_model_constraints_objective(model_init_max_startups_unit, stn_data, planning_horizon, 'bound_startups_ys_unit')    
     create_parameters_tightening_constraints(model_init_max_startups_unit, stn_data, "")
     load_constraint_set_to_zero_x_est(model_init_max_startups_unit)
-    load_constraint_set_to_zero_ys_est(model_init_max_startups_unit)
-    
+    load_constraint_set_to_zero_ys_est(model_init_max_startups_unit)    
     
     solver = define_solver()
     solve_model(solver, model_init_max_startups_unit)

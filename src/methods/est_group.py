@@ -6,7 +6,9 @@ from src.methods.est import _materials_to_be_explored, INITIAL_SHIFT, SHIFT_TO_E
 
 
 def _return_set_of_units_consuming_material(model: ConcreteModel, material: Any) -> int:
-    # Creates a set with all units executing the consuming tasks
+    """ 
+    Creates a set with all units executing the consuming tasks and returns its length.    
+    """
     
     set_consuming_units = set()
     
@@ -20,6 +22,9 @@ def _return_set_of_units_consuming_material(model: ConcreteModel, material: Any)
 
 
 def _compute_group_production_relationship(model: ConcreteModel, i_producing: Any, j_producing, material: Any) -> int:
+    """ 
+    Computes the production relationship between a consuming tasks and a producing task i_producing.
+    """
     
     numerator = sum(model.P_Tau_Min[ii_consuming,jj_consuming] * model.P_Beta_Min[ii_consuming,jj_consuming] for ii_consuming in model.S_I_Consuming_K[material] for jj_consuming in model.S_J_Executing_I[ii_consuming])
     denominator = model.P_Tau_Max[i_producing, j_producing] * model.P_Beta_Max[i_producing, j_producing]
@@ -28,6 +33,9 @@ def _compute_group_production_relationship(model: ConcreteModel, i_producing: An
         
         
 def _compute_group_number_periods(model: ConcreteModel, i_producing: Any, j_producing: Any, rel_group: int) -> int:
+    """ 
+    Computes the number of periods necessary for task i_producing to produce enough material to start runs of all consuming tasks.
+    """
     
     tau_max = model.P_Tau_Max[i_producing,j_producing]
     tau_end = model.P_Tau_End_Task[i_producing]
@@ -36,6 +44,9 @@ def _compute_group_number_periods(model: ConcreteModel, i_producing: Any, j_prod
 
 
 def _compute_est_group(model: ConcreteModel, est_task: dict, j_producing: Any, i_producing: Any, material, number_periods_group: int) -> dict:
+    """ 
+    Computes the est of each consuming task ii_consuming based on the est of the producing task i_producing, the production relationship and the number of periods.
+    """
     
     est_task_group = {}
    
@@ -51,7 +62,13 @@ def _compute_est_group(model: ConcreteModel, est_task: dict, j_producing: Any, i
     return est_task_group
 
 
-def compute_est_group_tasks(model: ConcreteModel, stn: dict):
+def compute_est_group_tasks(model: ConcreteModel, stn: dict) -> None:
+    """ 
+    Firt, it identifies groups of tasks consuming material k where all of them are in different units. 
+    Then, it computes the groups's est where tasks can operate simultaneously.
+    Finally, it stores the value in stn['EST_GROUP'].
+    
+    """
         
     unit_task = stn['UNIT_TASKS']
     states = stn['STATES']
