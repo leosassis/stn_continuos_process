@@ -4,7 +4,7 @@ import os
 from itertools import product
 
 
-# Path to folder containing results
+# Path to folder containing the json files with parameters for each instance
 DATA_FOLDER = "input_data/datasets"
 
 os.makedirs(DATA_FOLDER, exist_ok = True)
