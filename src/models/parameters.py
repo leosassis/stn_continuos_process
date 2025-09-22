@@ -76,6 +76,9 @@ def est_group_initialization(est_group: dict) -> dict:
     return dict_est_group
 
 def ub_ys_task_initialization(model: ConcreteModel) -> dict:
+    """ 
+    Populates parameter model.P_UB_YS_Task_PPC to bound YS in the cases where a task run must finish and not at the end of the planning horizon.
+    """
     
     num_periods = max(model.S_Time)
     upper_bound_ys_task = {}
